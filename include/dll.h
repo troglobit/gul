@@ -1,5 +1,5 @@
-#ifndef ORIGINAL_H
-#define ORIGINAL_H
+#ifndef __DLL_H__
+#define __DLL_H__
 
 /* Well, a "line" in this essence isn't really a line in the sense
  * that we're all perhaps used to, but the maximum size of a node ... :)
@@ -12,7 +12,13 @@ typedef struct dllSt{
    int           begin;
    int           end;
    char          line[MAX_LINE_LENGTH];
-}text;
+} dll_t;
+
+typedef struct _text
+{
+  dll_t  *stx;                 /* Start of TeXt and list. */
+  dll_t  *node;                /* Current, where the cursor is */
+} text_t;
 
 /* Proposed new text-type.
  * typdef struct dllSt{
@@ -24,4 +30,12 @@ typedef struct dllSt{
  * }text;
  */
 
-#endif /* ORIGINAL_H */
+#endif /* __DLL_H__ */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

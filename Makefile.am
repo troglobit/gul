@@ -1,5 +1,5 @@
 # Dive in and do what these dirs tell you.
-SUBDIRS    = src
+SUBDIRS    = man src
 
 # Stuff that would otherwise not be distributed.
 # .lsm:  Linux Software Map - http://lsm.execpc.com/lsm/
@@ -13,10 +13,3 @@ EXTRA_DIST = gul.lsm.in gul.spec.in \
 #  if you write a self-test script named `chk', uncomment the
 #  following and add `chk' to the EXTRA_DIST list
 #TESTS=chk
-
-#  build and install the .info pages
-info_TEXINFOS = gul.texinfo
-gul_TEXINFOS = gpl.texinfo
-
-#  install the man pages
-man_MANS=gul.1

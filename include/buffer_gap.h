@@ -1,38 +1,22 @@
 #include "config.h"
 
-#ifndef BUFFER_GAP_H
-#define BUFFER_GAP_H
+#ifndef __BUFFER_GAP_H__
+#define __BUFFER_GAP_H__
 
 #define GAP_SIZE 1024
 
 /* @buffer holds the file data
  * @gap is an empty void (cursor) that can be moved inside @buffer
+ * @point end pointer when marking
+ * @mark start pointer when marking, set with C-@ or C-<space>
  * @buffer_size == file size
  * @gap_size == how much more can be fed to @buffer before realloc.
  */
 typedef struct _text{
-  char *buffer, *gap;
+  char        *buffer;
+  char        *gap;
+  char        *point, *mark;
   unsigned int buffer_size, gap_size;
-}text;
+} text_t;
 
-/*
-int calculateXposition(text *thisp, int i);
-text *splitNode(mark_t *currentp);
-text *deleteRightNode(mark_t *currentp);
-void insertCommand(mark_t *currentp, int command);
-mark_t *backupBufferInfo(mark_t *currentp);
-void restoreBufferInfo(mark_t *backup_info, mark_t *currentp);
-int getNextNode(mark_t *currentp);
-int getPrevNode(mark_t *currentp);
-int movetoNextChar(mark_t *currentp);
-int movetoPrevChar(mark_t *currentp);
-int atSTX(mark_t *currentp);
-char getCurrentChar(mark_t *currentp);
-int getCurrentColumn(mark_t *currentp);
-int movetoEOL(mark_t *currentp);
-int movetoBOL(mark_t *currentp);
-int movetoSTX(mark_t *currentp);
-int movetoCol(mark_t *currentp, int col);
-*/
-
-#endif /* BUFFER_GAP_H */
+#endif /* __BUFFER_GAP_H__ */

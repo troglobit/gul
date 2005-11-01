@@ -1,12 +1,20 @@
-#ifndef IO_H
-#define IO_H
+#ifndef __IO_H__
+#define __IO_H__
 
 #include <stdio.h>
 #include "editor.h"
 
-mark_t *loadFile(char *fileName);
-int saveFile(mark_t *currentp, char *filename);
+buffer_t *loadFile(char *fileName);
+int saveFile(buffer_t *currentp, char *filename);
 void redirect(FILE *file_in, char *file_out);
 
 
-#endif /* IO_H */
+#endif /* __IO_H__ */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

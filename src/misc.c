@@ -112,3 +112,11 @@ int strLen(char *string, int maxLen, char endChar)
 
    return maxLen;
 }
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

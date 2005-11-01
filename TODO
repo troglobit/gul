@@ -1,50 +1,50 @@
-   * Outstanding items
+* Outstanding items
 
-   * The display-routines MUST be fixed. 
+* Bad stuff happen when the gap is exhausted.
+The current handling of when we run out of space in the gap
+is bad.  Nasty shit happen and we really don't care that
+mcuh currently.
 
-   As of now the file cannot be wider or longer than the screen. Any
-   editing outside of that is impossible. It is a scary hack right now...
+Do it right.
 
+* The display-routines MUST be fixed. 
+As of now the file cannot be wider or longer than the screen. Any
+editing outside of that is impossible. It is a scary hack right now...
 
-   * Freshen up the LaTeX documentation ...
+* Freshen up the LaTeX documentation ...
 
-   * Generalize event handling.
+* Generalize event handling.
+Replace keyboardPluginCheckForInput() with gul_event() or similar.
 
-   Replace keyboardPluginCheckForInput() with gul_event().
+* Make out how to deal with specific SIGNALS!
+What are we supposed to do with SIGINT or SIGHUP and others??
+What about other platforms?
 
-   * Make out how to deal with specific SIGNALS!
+* Create the newFile () functions
+... as of now only readFile () and saveFile () functions exist. We
+need more primitives! We also need to make out who owns what and
+belongs to whom? 
 
-   What are we supposed to do with SIGINT or SIGHUP and others??
-   What about other platforms?
+File I/O is supposed to be done by a ... you guessed it ... a plugin.
+Providing just as much needed by the current editor core. Remember
+that VMS has some kind of virtual pages that can be used here - in
+the VMS plugin that is.
 
-
-   * Create the newFile () functions
-    ... as of now only readFile () and saveFile () functions exist. We
-   need more primitives! We also need to make out who owns what and
-   belongs to whom? 
-
-   	File I/O is supposed to be done by a ... you guessed it ... a plugin.
-   	Providing just as much needed by the current editor core. Remember
-   	that VMS has some kind of virtual pages that can be used here - in
-   	the VMS plugin that is.
-
-   	How do we open a file?
-   		- read only, r/w?
-   		- binary/text?
-   	Make as much possible to open and edit binary files, investigate
-   	the possible loss of doing so - is it more complicated?
+How do we open a file?
+	- read only, r/w?
+	- binary/text?
+Make as much possible to open and edit binary files, investigate
+the possible loss of doing so - is it more complicated?
    	
+* Testing ... :P
+A lot of stupid combindations need to be tried out. E.g. vt100
+and yaei, slang and original, etc. Silly configure script options.
 
-   * Testing ... :P
-   	A lot of stupid combindations need to be tried out. E.g. vt100
-   	and yaei, slang and original, etc. Silly compile time options.
+* Internationalization (i18n) issues. 
 
-
-   * Internationalization (i18n) issues. 
-
-   		- Gettext for error and status messages.
-   		- Unicode support via a library. Look at both Raph Levien
-   		(www.levien.com) and that redhat dude's stuff. They have
-   		recently proposed an API merge to create a free stand-alone
-   		library. [Check for URL's!]
+** Gettext for error and status messages.
+** Unicode support via a library.
+Look at both Raph Levien (www.levien.com) and that redhat dude's
+stuff (Pango.org). They have recently proposed an API merge to create
+a free stand-alone library.
 

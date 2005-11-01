@@ -102,11 +102,25 @@ void keyboardPluginInit(void)
 void
 keyboardPluginFinish (void)
 {
-/* Dummy */
+  /* XXX - Need to clear up this because otherwise C-z and friends stop
+   * working after exiting from GUL
+   */
+}
+
+char *
+plugin_read_string (int x, int y)
+{
+  char *str = allocate (80, "readString");
+
+  echo ();
+  mvgetnstr (y, x, str, 80);
+  noecho ();
+
+  return str;
 }
 
 /**
- * gul_plugin_event - Check for a key command.
+ * plugin_read_key - Check for a key command.
  *
  * Checks for a key in the inbuffer, if
  * mo key available at that time returns
@@ -115,14 +129,16 @@ keyboardPluginFinish (void)
  * Non-blocking call.
  */
 
-keyevent gul_plugin_event(void)
+keyevent_t plugin_read_key(void)
 {
    int ch = getch();
-   keyevent input = {GUL_NO_EVENT, GUL_NO_DATA};
+   keyevent_t input = {GUL_NO_EVENT, GUL_NO_DATA};
 
    ch = (ch == ERR ? GUL_NO_EVENT : ch);
 
-   if (ch >= KEY_CODE_YES)
+   /* All control keys, except BS, HT, LF, CR */
+   if ((ch >= KEY_CODE_YES || ch < ' ')
+       && (ch != 8 && ch != 9 && ch != 10 && ch != 13))
    {
       input.event   = ch;
       input.keydata = GUL_NO_DATA;
@@ -135,6 +151,8 @@ keyevent gul_plugin_event(void)
 
    return input;
 }
+
+
 
 
 /* Ganska viktig ty görs inte den ena eller den andra så kajkar det ur
@@ -160,9 +178,10 @@ pluginFinish (void)
 
 #endif /* NCURSES_PLUGIN */
 
-/* Local Variables:
- * mode: C;
- * c-file-style: ellemtel;
- * indent-tabs-mode: nil;
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
  * End:
  */

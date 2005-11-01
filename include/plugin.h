@@ -8,8 +8,8 @@
  *
  * Translations made from my first plugin draft. /Crash
  */
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef __PLUGIN_H__
+#define __PLUGIN_H__
 
 #include "config.h"
 
@@ -66,10 +66,11 @@ void screenDebugDisplay(void);
 typedef struct keyevent_str {
         gulchar event;
         gulchar keydata;
-} keyevent;
+} keyevent_t;
 
-void keyboardInit(void);
-keyevent gul_event(void);
+void       keyboardInit (void);
+keyevent_t read_key     (void);
+char      *read_string  (int x, int y);
 
 
 
@@ -119,6 +120,15 @@ void screenPluginUpdate(void);
 /* Initierar tangentbordspluginet */
 
 /* Returnerar GUL_* när det finns ett event att hantera. */
-keyevent gul_plugin_event(void);
+keyevent_t  plugin_read_key    (void);
+char       *plugin_read_string (int x, int y);
 
-#endif /* PLUGIN_H */
+#endif /* __PLUGIN_H__ */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

@@ -207,18 +207,18 @@ static int gul_emulate_ncurses_getch (void)
 
 
 /*
- * gul_plugin_event():
+ * plugin_read_key():
  *
  * Checks for waiting input, does NOT wait for input!
  *
  * Returns: The char waiting or zero (0) if none exists.
  */
-keyevent
-gul_plugin_event (void)
+keyevent_t
+plugin_read_key (void)
 {
    int ch;
 
-   keyevent input = {GUL_NO_EVENT, GUL_NO_DATA};
+   keyevent_t input = {GUL_NO_EVENT, GUL_NO_DATA};
 
 #if 0
    if (!SLang_input_pending (0))
@@ -276,9 +276,10 @@ pluginFinish (void)
 
 #endif /* SLANG_PLUGIN */
 
-/* Local Variables:
- * mode: C;
- * c-file-style: ellemtel;
- * indent-tabs-mode: nil;
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
  * End:
  */

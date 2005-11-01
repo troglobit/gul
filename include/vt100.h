@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef VT100_H
-#define VT100_H
+#ifndef __VT100_H__
+#define __VT100_H__
 
 /*
                 Vt52    ANSI and Cursor Key modes
@@ -54,4 +54,12 @@ We will care for "Esc 0 a"
 #define GUL_F11            23
 #define GUL_F12            24
 
-#endif
+#endif  /* __VT100_H__ */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

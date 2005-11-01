@@ -10,3 +10,13 @@
  *
  */
 
+
+
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

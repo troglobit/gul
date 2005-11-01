@@ -36,6 +36,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* fstat, fileno etc. */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "editor.h"
 #include "buffer_gap.h"
 #include "memory.h"
@@ -51,47 +56,47 @@
 
 /*** Prototypes *********************************************************
  */
-static void backupBufferInfo    (text *thisp);
-static void restoreBufferInfo   (text *thisp);
-static int  movetoCol           (text *thisp, int col);
-static int  movetoEOL           (text *thisp);
-static int  movetoBOL           (text *thisp);
-static int  movetoSTX           (text *thisp);
-static int  movetoNextChar      (text *thisp);
-static int  movetoPrevChar      (text *thisp);
-static int  movetoNextLine      (text *thisp);
-static int  movetoPrevLine      (text *thisp);
-static char getCurrentChar      (text *thisp);
-static int  getCurrentColumn    (text *thisp);
-static int  atSTX               (text *thisp);
-static int  move_virtual_screen (mark_t *currentp, int offset);
+static char *backupBufferInfo    (text_t *thisp);
+static char *restoreBufferInfo   (text_t *thisp, char *);
+static int  movetoCol           (text_t *thisp, int col);
+static int  movetoEOL           (text_t *thisp);
+static int  movetoBOL           (text_t *thisp);
+static int  movetoSTX           (text_t *thisp);
+static int  movetoNextChar      (text_t *thisp);
+static int  movetoPrevChar      (text_t *thisp);
+static int  movetoNextLine      (text_t *thisp);
+static int  movetoPrevLine      (text_t *thisp);
+static char getCurrentChar      (text_t *thisp);
+static int  getCurrentColumn    (text_t *thisp);
+static int  atSTX               (text_t *thisp);
+static int  move_virtual_screen (buffer_t *currentp, int offset);
 
 
 /* Must be called after any movement {left,right,up,down}
  * XXX - Should perhaps be in display.c?
  */
-void adjust_virtual_screen (mark_t *currentp)
+void adjust_virtual_screen (buffer_t *currentp)
 {
 /* left */
-   while ((currentp->scr.x - currentp->scr.hpos) <= 0 && currentp->scr.hpos >= 5)
+   while ((currentp->screen.x - currentp->screen.hpos) <= 0 && currentp->screen.hpos >= 5)
    {
-      currentp->scr.hpos -= 5;
+      currentp->screen.hpos -= 5;
    }
 /* right */
-   while ((currentp->scr.x - currentp->scr.hpos) >= (currentp->scr.maxX - 1))
+   while ((currentp->screen.x - currentp->screen.hpos) >= (currentp->screen.maxX - 1))
    {
-      currentp->scr.hpos += 5;
+      currentp->screen.hpos += 5;
    }
 
 /* up */
-   while ((currentp->scr.y - currentp->scr.vpos) <= 0 && currentp->scr.vpos >= 5)
+   while ((currentp->screen.y - currentp->screen.vpos) <= 0 && currentp->screen.vpos >= 5)
    {
-      currentp->scr.vpos -= move_virtual_screen (currentp, -5);
+      currentp->screen.vpos -= move_virtual_screen (currentp, -5);
    }
 /* down */
-   while ((currentp->scr.y - currentp->scr.vpos) >= currentp->scr.maxY)
+   while ((currentp->screen.y - currentp->screen.vpos) >= currentp->screen.maxY)
    {
-      currentp->scr.vpos += move_virtual_screen (currentp, 5);
+      currentp->screen.vpos += move_virtual_screen (currentp, 5);
    }
 }
 
@@ -102,22 +107,22 @@ void adjust_virtual_screen (mark_t *currentp)
  * Moves the cursor left one character.
  */
 void
-left (mark_t *currentp)
+left (buffer_t *currentp)
 {
-   if (movetoPrevChar (currentp->stx))
+   if (movetoPrevChar (&currentp->core))
    {
 /* Failed to move */
    }
    else
    {
-      if (10 == getCurrentChar (currentp->stx))
+      if (10 == getCurrentChar (&currentp->core))
       {
-         currentp->scr.x= getCurrentColumn (currentp->stx);
-         currentp->scr.y--;
+         currentp->screen.x= getCurrentColumn (&currentp->core);
+         currentp->screen.y--;
       }
       else
       {
-         currentp->scr.x--;
+         currentp->screen.x--;
       }
    }
 
@@ -132,12 +137,12 @@ left (mark_t *currentp)
  * Moves the cursor right one character.
  */
 void
-right (mark_t *currentp)
+right (buffer_t *currentp)
 {
    char prevChar;
 
-   prevChar= getCurrentChar (currentp->stx);
-   if (movetoNextChar (currentp->stx))
+   prevChar= getCurrentChar (&currentp->core);
+   if (movetoNextChar (&currentp->core))
    {
 /* Failed to move */
    }
@@ -145,13 +150,13 @@ right (mark_t *currentp)
    {
       if (10 == prevChar)
       {
-         currentp->scr.hpos = 0;
-         currentp->scr.x= 0;
-         currentp->scr.y++;
+         currentp->screen.hpos = 0;
+         currentp->screen.x= 0;
+         currentp->screen.y++;
       }
       else
       {
-         currentp->scr.x++;
+         currentp->screen.x++;
       }
    }
 
@@ -166,14 +171,14 @@ right (mark_t *currentp)
  * Moves the cursor up one line.
  */
 void
-up (mark_t *currentp)
+up (buffer_t *currentp)
 {
-   if (movetoPrevLine (currentp->stx))
+   if (movetoPrevLine (&currentp->core))
       ;
    else
    {
-      currentp->scr.y--;
-      currentp->scr.x= movetoCol(currentp->stx, currentp->scr.x);
+      currentp->screen.y--;
+      currentp->screen.x= movetoCol(&currentp->core, currentp->screen.x);
    }
 
    adjust_virtual_screen (currentp);
@@ -186,14 +191,14 @@ up (mark_t *currentp)
  * Moves the cursor down one line.
  */
 void
-down (mark_t *currentp)
+down (buffer_t *currentp)
 {
-   if (movetoNextLine (currentp->stx))
+   if (movetoNextLine (&currentp->core))
       ;
    else
    {
-      currentp->scr.y++;
-      currentp->scr.x= movetoCol(currentp->stx, currentp->scr.x);
+      currentp->screen.y++;
+      currentp->screen.x= movetoCol(&currentp->core, currentp->screen.x);
    }
 
    adjust_virtual_screen (currentp);
@@ -201,70 +206,70 @@ down (mark_t *currentp)
 
 
 void
-end_of_line (mark_t *currentp)
+end_of_line (buffer_t *currentp)
 {
-   movetoEOL (currentp->stx);
-   currentp->scr.x = getCurrentColumn (currentp->stx);
+   movetoEOL (&currentp->core);
+   currentp->screen.x = getCurrentColumn (&currentp->core);
 
    adjust_virtual_screen (currentp);
 }
 
 void
-beginning_of_line (mark_t *currentp)
+beginning_of_line (buffer_t *currentp)
 {
-   movetoBOL (currentp->stx);
-   currentp->scr.x = 0;
+   movetoBOL (&currentp->core);
+   currentp->screen.x = 0;
 
    adjust_virtual_screen (currentp);
 }
 
 void
-page_up (mark_t *currentp)
+page_up (buffer_t *currentp)
 {
    int i;
-   int offset   = currentp->scr.maxY / 2; /* Move only half of screen */
+   int offset   = currentp->screen.maxY / 2; /* Move only half of screen */
 
    for (i = 0; i < offset; i++)
    {
-      if (movetoPrevLine (currentp->stx))
+      if (movetoPrevLine (&currentp->core))
       {
          break;
       }
       else
       {
-         currentp->scr.y--;
+         currentp->screen.y--;
       }
    }
 
-   currentp->scr.x= movetoCol(currentp->stx, currentp->scr.x);
+   currentp->screen.x= movetoCol(&currentp->core, currentp->screen.x);
    adjust_virtual_screen (currentp);
 }
 
 void
-page_down (mark_t *currentp)
+page_down (buffer_t *currentp)
 {
    int i;
-   int offset   = currentp->scr.maxY / 2; /* Move only half of screen */
+   int offset   = currentp->screen.maxY / 2; /* Move only half of screen */
 
    for (i = 0; i < offset; i++)
    {
-      if (movetoNextLine (currentp->stx))
+      if (movetoNextLine (&currentp->core))
       {
          break;
       }
       else
       {
-         currentp->scr.y++;
+         currentp->screen.y++;
       }
    }
 
-   currentp->scr.x= movetoCol(currentp->stx, currentp->scr.x);
+   currentp->screen.x= movetoCol(&currentp->core, currentp->screen.x);
    adjust_virtual_screen (currentp);
 }
 
 /* try moving the screen vertically by @offset */
 static int
-move_virtual_screen (mark_t *currentp, int offset)
+move_virtual_screen (buffer_t *currentp, int offset)
 {
    int counter = 0;
 
@@ -272,7 +277,7 @@ move_virtual_screen (mark_t *currentp, int offset)
    {
       while (0 != offset)
       {
-         if (movetoPrevLine (currentp->top))
+         if (movetoPrevLine (currentp->screen.top))
             return counter;
          else
             counter++;
@@ -284,7 +289,7 @@ move_virtual_screen (mark_t *currentp, int offset)
    {
       while (0 != offset)
       {
-         if (movetoNextLine (currentp->top))
+         if (movetoNextLine (currentp->screen.top))
             return counter;
          else
             counter++;
@@ -308,24 +313,24 @@ move_virtual_screen (mark_t *currentp, int offset)
  *
  */
 static void
-allocate_new_gap (mark_t *currentp)
+allocate_new_gap (buffer_t *currentp)
 {
-   int newsize    = currentp->stx->buffer_size + GAP_SIZE;
+   int newsize    = currentp->core.buffer_size + GAP_SIZE;
    char *newbuffer= allocate (newsize, "allocate_new_gap()");
 
-   char *first = currentp->stx->buffer;
-   int firstlen= currentp->stx->gap - currentp->stx->buffer;
-   char *second = &(currentp->stx->gap[currentp->stx->gap_size]);
-   int secondlen= currentp->stx->buffer + currentp->stx->buffer_size - second;
+   char *first = currentp->core.buffer;
+   int firstlen= currentp->core.gap - currentp->core.buffer;
+   char *second = &(currentp->core.gap[currentp->core.gap_size]);
+   int secondlen= currentp->core.buffer + currentp->core.buffer_size - second;
 
    memcpy (newbuffer, first, firstlen);
    memcpy (&(newbuffer[firstlen + GAP_SIZE]), second, secondlen);
 
-   free (currentp->stx->buffer);
-   currentp->stx->buffer= newbuffer;
-   currentp->stx->buffer_size= newsize;
-   currentp->stx->gap= newbuffer + firstlen + GAP_SIZE;
-   currentp->stx->gap_size= GAP_SIZE;
+   free (currentp->core.buffer);
+   currentp->core.buffer      = newbuffer;
+   currentp->core.buffer_size = newsize;
+   currentp->core.gap         = newbuffer + firstlen + GAP_SIZE;
+   currentp->core.gap_size    = GAP_SIZE;
 }
 
 
@@ -337,30 +342,30 @@ allocate_new_gap (mark_t *currentp)
  * Insert a charcter/command at the current cursor position.
  */
 void
-insert (mark_t *currentp, int thisCommand)
+insert (buffer_t *currentp, int thisCommand)
 {
-   if (0 == currentp->stx->gap_size)
+   if (0 == currentp->core.gap_size)
       allocate_new_gap (currentp);
 
-   currentp->stx->gap[0]= (char)thisCommand;
-   currentp->stx->gap++;
-   currentp->stx->gap_size--;
+   currentp->core.gap[0]= (char)thisCommand;
+   currentp->core.gap++;
+   currentp->core.gap_size--;
 
    currentp->dirty = 1;
 
    switch (thisCommand)
    {
       case 10:                  /* NL */
-         currentp->scr.x = 0;
-         currentp->scr.y++;
+         currentp->screen.x = 0;
+         currentp->screen.y++;
          break;
 
       case 9:                   /* HT, TAB */
-         currentp->scr.x +=8;
+         currentp->screen.x +=8;
          break;
 
       default:
-         currentp->scr.x++;
+         currentp->screen.x++;
          break;
    }
 
@@ -375,16 +380,16 @@ insert (mark_t *currentp, int thisCommand)
  * Delete the charcter/command at the current cursor position.
  */
 void
-delete (mark_t *currentp)
+delete (buffer_t *currentp)
 {
 /* Detect if gap at end of buffer */
-   if (GAP_AT_END (currentp->stx))
+   if (GAP_AT_END (&currentp->core))
    {
 /* Cursor at end of buffer, no delete */
    }
    else
    {
-      currentp->stx->gap_size++;
+      currentp->core.gap_size++;
       currentp->dirty = 1;
    }
 
@@ -392,26 +397,63 @@ delete (mark_t *currentp)
 }
 
 
+void set_mark (buffer_t *currentp)
+{
+   currentp->core.mark = currentp->core.gap;
+}
+
+void set_point (buffer_t *currentp)
+{
+   currentp->core.point = currentp->core.gap;
+}
+
+void cut (buffer_t *currentp)
+{
+   set_point (currentp);
+
+/* Do cutting of text here. */
+}
+
+void copy (buffer_t *currentp)
+{
+   set_point (currentp);
+}
+
+void paste (buffer_t *currentp)
+{
+/* here is where the actual copying of the
+ * previously marked text is done.
+ */
+   char *runner = currentp->core.mark;
+
+   while (runner < currentp->core.point)
+   {
+      insert (currentp, runner[0]);
+      runner ++;
+   }
+}
+
+
 /**
  * editorCharacterGenerator - Generate data to display engine
  * @currentp: Pointer to the current buffer.
  *
- * Generate a screenful of data from @currentp->top to be written to the
+ * Generate a screenful of data from @currentp->screen.top to be written to the
  * display.
  *
  * Returns: A dynamically allocated character array of data to be freed
  *          after usage.
  */
 char *
-editorCharacterGenerator (mark_t *currentp)
+editorCharacterGenerator (buffer_t *currentp)
 {
-   char curr;
-   char *genbuf= NULL;
-   int  i, j, v_pos, h_pos, h_pos_max = currentp->scr.hpos + currentp->scr.maxX;
-   int nofbytes=  (currentp->scr.maxX) * (currentp->scr.maxY);
-   text runner;    /* traverses the current virtual screen */
+   char   curr;
+   char  *genbuf= NULL;
+   int    i, j, v_pos, h_pos, h_pos_max = currentp->screen.hpos + currentp->screen.maxX;
+   int    nofbytes=  (currentp->screen.maxX) * (currentp->screen.maxY);
+   text_t runner;    /* traverses the current virtual screen */
 
-   memcpy (&runner, currentp->top, sizeof (text));
+   memcpy (&runner, currentp->screen.top, sizeof (text_t));
 
 /* We want an array of characters that is maxX * maxY large.
  * if we cannot get that much we want at least to have
@@ -419,11 +461,11 @@ editorCharacterGenerator (mark_t *currentp)
  */
    genbuf= allocate(nofbytes, "editorCharacterGenerator");
 
-   for (i = 0, v_pos = 0; v_pos < currentp->scr.maxY; v_pos ++)
+   for (i = 0, v_pos = 0; v_pos < currentp->screen.maxY; v_pos ++)
    {
 /* Adjust for horizontal starting position */
       h_pos = 0;
-      while (10 != getCurrentChar (&runner) && h_pos < currentp->scr.hpos)
+      while (10 != getCurrentChar (&runner) && h_pos < currentp->screen.hpos)
       {
          movetoNextChar (&runner);
          h_pos ++;
@@ -432,19 +474,19 @@ editorCharacterGenerator (mark_t *currentp)
       {
 /* End of buffer? */
          if (runner.gap ==
-             &(currentp->stx->buffer[currentp->stx->buffer_size]))
+             &(currentp->core.buffer[currentp->core.buffer_size]))
          {
 /* set exit condition for outer for() */
-            v_pos = currentp->scr.maxY;
+            v_pos = currentp->screen.maxY;
 
 /* break out of inner for() */
             break;
          }
 
 /* Inside the real gap? Skip the real gap! */
-         if (runner.gap == currentp->stx->gap)
+         if (runner.gap == currentp->core.gap)
          {
-            runner.gap += currentp->stx->gap_size;
+            runner.gap += currentp->core.gap_size;
          }
 
          curr = getCurrentChar (&runner);
@@ -474,72 +516,9 @@ editorCharacterGenerator (mark_t *currentp)
 /* Always terminate the buffer. */
    genbuf [i] = 0;
 
-#ifdef BIZARRE_OLD_STUFF
-/* horiz offset? */
-   if (currentp->scr.hpos)
-   {
-      h_pos = 0;
-      while (10 != getCurrentChar (&runner) && h_pos < currentp->scr.hpos)
-      {
-         movetoNextChar (&runner);
-         h_pos ++;
-      }
-   }
-
-   i= 0;
-   while (i < nofbytes)
-   {
-/* End of buffer? */
-      if (runner.gap ==
-          &(currentp->stx->buffer[currentp->stx->buffer_size]))
-         break;
-
-/* Inside the real gap? Skip the real gap! */
-      if (runner.gap == currentp->stx->gap)
-      {
-         runner.gap += currentp->stx->gap_size;
-      }
-
-      curr = getCurrentChar (&runner);
-/* Not in correct h_pos and not an EOL */
-      if (10 != curr && h_pos < currentp->scr.hpos)
-      {
-         h_pos ++;
-         movetoNextChar (&runner);
-      }
-      if (10 == curr && h_pos <= currentp->scr.hpos)
-      {
-         h_pos = 0;
-         genbuf[i++]= curr;
-
-         movetoNextChar (&runner);
-      }
-      else
-      {
-         if (h_pos < h_pos_max)
-         {
-            h_pos ++;
-            genbuf[i++]= curr;
-            movetoNextChar (&runner);
-         }
-         else
-         {
-            h_pos = 0;
-            genbuf[i++] = 10;   /* NL */
-            movetoNextLine (&runner);
-         }
-
-      }
-   }
-
-   genbuf[i]= '\0';
-#endif /* BIZARRE_OLD_STUFF */
-
    return genbuf;
 }
 
-/* XXX - This is the definition of *not* being reentrant. */
-static char *old_gap;
 
 /*
  * backupBufferInfo():
@@ -547,10 +526,10 @@ static char *old_gap;
  * Saves current setting of the gap for the below
  * function to be able to restore it later.
  */
-static void
-backupBufferInfo (text *thisp)
+static char *
+backupBufferInfo (text_t *thisp)
 {
-   old_gap = thisp->gap;
+   return thisp->gap;
 }
 
 
@@ -558,12 +537,17 @@ backupBufferInfo (text *thisp)
  * restoreBufferInfo():
  *
  * Recalls old setting of the gap.
+ * Returns: Gap pos. priot to running this func.
  */
-static void
-restoreBufferInfo (text *thisp)
+static char *
+restoreBufferInfo (text_t *thisp, char *backup_gap)
 {
-   memmove (old_gap, thisp->gap, thisp->gap_size);
-   thisp->gap= old_gap;
+  char *gap_bis = thisp->gap;
+
+   memmove (backup_gap, thisp->gap, thisp->gap_size);
+   thisp->gap= backup_gap;
+
+   return gap_bis;
 }
 
 
@@ -574,7 +558,7 @@ restoreBufferInfo (text *thisp)
  * ... eh ... symmetry? *Dylan*
  */
 static void
-freeBufferInfo (mark_t *backup_info)
+freeBufferInfo (buffer_t *backup_info)
 {
 }
 
@@ -591,7 +575,7 @@ freeBufferInfo (mark_t *backup_info)
  *          1 otherwise.
  */
 static int
-movetoNextChar (text *thisp)
+movetoNextChar (text_t *thisp)
 {
    if (GAP_AT_END (thisp))
       return 1;
@@ -615,7 +599,7 @@ movetoNextChar (text *thisp)
  *          1 otherwise.
  */
 static int
-movetoPrevChar (text *thisp)
+movetoPrevChar (text_t *thisp)
 {
    if (GAP_AT_START (thisp))
       return 1;
@@ -628,14 +612,14 @@ movetoPrevChar (text *thisp)
 
 
 static int
-movetoNextLine (text *thisp)
+movetoNextLine (text_t *thisp)
 {
-   backupBufferInfo (thisp);
+   char *backup = backupBufferInfo (thisp);
 
    movetoEOL (thisp);
    if (movetoNextChar (thisp))
    {
-      restoreBufferInfo (thisp);
+     restoreBufferInfo (thisp, backup);
       return 1;
    }
 
@@ -644,15 +628,15 @@ movetoNextLine (text *thisp)
 
 
 static int
-movetoPrevLine (text *thisp)
+movetoPrevLine (text_t *thisp)
 {
-   backupBufferInfo (thisp);
+   char *backup = backupBufferInfo (thisp);
 
 /* movetoBOL() should never (!) fail ... */
    movetoBOL (thisp);
    if(movetoPrevChar (thisp))
    {
-      restoreBufferInfo (thisp);
+     restoreBufferInfo (thisp, backup);
       return 1;
    }
 
@@ -672,7 +656,7 @@ movetoPrevLine (text *thisp)
  * Returns: True or false depending on the success of the operation.
  */
 static int
-atSTX (text *thisp)
+atSTX (text_t *thisp)
 {
    return GAP_AT_START (thisp);
 }
@@ -687,7 +671,7 @@ atSTX (text *thisp)
  * Returns: The character just outside the gap to the right.
  */
 static char
-getCurrentChar (text *thisp)
+getCurrentChar (text_t *thisp)
 {
    return thisp->gap[thisp->gap_size];
 }
@@ -703,12 +687,12 @@ getCurrentChar (text *thisp)
  * Returns: The character position.
  */
 static int
-getCurrentColumn (text *thisp)
+getCurrentColumn (text_t *thisp)
 {
    char curr;
    int counter = 0;
 
-   backupBufferInfo(thisp);
+   char *backup = backupBufferInfo(thisp);
 
    while (!movetoPrevChar(thisp))
    {
@@ -727,7 +711,7 @@ getCurrentColumn (text *thisp)
       counter++;
    }
 
-   restoreBufferInfo(thisp);
+   restoreBufferInfo(thisp, backup);
 
    return counter;
 }
@@ -746,7 +730,7 @@ getCurrentColumn (text *thisp)
  *          1 otherwise.
  */
 static int
-movetoEOL (text *thisp)
+movetoEOL (text_t *thisp)
 {
    while (10 != getCurrentChar (thisp))
       if (movetoNextChar (thisp))
@@ -771,7 +755,7 @@ movetoEOL (text *thisp)
  *          1 otherwise.
  */
 static int
-movetoBOL (text *thisp)
+movetoBOL (text_t *thisp)
 {
    while (!movetoPrevChar(thisp))
    {
@@ -796,7 +780,7 @@ movetoBOL (text *thisp)
  *          1 otherwise.
  */
 static int
-movetoSTX (text *thisp)
+movetoSTX (text_t *thisp)
 {
    if (GAP_AT_START (thisp))
       return 0;
@@ -819,7 +803,7 @@ movetoSTX (text *thisp)
  * Returns: How far the function managed to move the gap on the current line.
  */
 static int
-movetoCol (text *thisp, int col)
+movetoCol (text_t *thisp, int col)
 {
    int counter= 0;
 
@@ -835,44 +819,148 @@ movetoCol (text *thisp, int col)
    return counter;
 }
 
+
+int newFile (buffer_t *new, size_t size)
+{
+  /* Allocate a data buffer */
+  new->core.buffer      = allocate (size + GAP_SIZE, "newFile()");
+  new->core.buffer_size = size + GAP_SIZE;
+
+  /* Initial size and location of the gap */
+  new->core.gap      = new->core.buffer;
+  new->core.gap_size = GAP_SIZE;
+
+  return 0;
+}
+
+/***
+ * readFile()
+ * @filep: Regular file pointer.
+ * @core:  Pointer to the new buffer core.
+ *
+ * Reads the current file into the array used in the buffer-gap scheme by
+ * BUFFER_GAP. Very simple, indeed.
+ */
+int readFile(FILE* filep, buffer_t *new)
+{
+   size_t  bytesRead;
+   struct stat filestatus;
+
+   if (0 != fstat (fileno (filep), &filestatus))
+      {
+         LOG("Could not fstat file before opening!\n");
+         return -1;
+      }
+
+   newFile (new, filestatus.st_size);
+
+   /* Start reading in the file after the gap. */
+   bytesRead= fread (&(new->core.buffer[GAP_SIZE]),
+                     filestatus.st_size,
+                     1,
+                     filep);
+   if (bytesRead != filestatus.st_size)
+      {
+         LOG("readFile() - Read: %d, file size: %d ?\n",
+                  bytesRead,
+                  (int)filestatus.st_size);
+      }
+
+   return 0;
+}
+
+/***
+ * saveFile():
+ * @currentp: Ponter to the buffer.
+ * @filename: The filename to be used for saving.
+ *
+ * This function can save the buffer-gap structure of BUFFER_GAP to a file.
+ *
+ * Returns: True/False depending on the result.
+ ***/
+int saveFile(buffer_t *currentp, char *filename)
+{
+   size_t bytesWritten;
+   FILE *filep;
+
+   unsigned int bs, gs;
+   char *b, *g;
+
+   if (NULL == (filep= fopen(filename, "w"))){
+      LOG("Could not open %s for saving.\n", filename);
+      return 0;
+   }
+
+   g= currentp->core.gap;
+   b= currentp->core.buffer;
+   gs= currentp->core.gap_size;
+   bs= currentp->core.buffer_size;
+
+   /* XXX: Check this ... */
+   if (g == b)
+      {
+         bytesWritten= fwrite (&(g[gs]), bs - gs, 1, filep);
+         if (bs - gs != bytesWritten)
+            {
+               LOG("saveFile() - Only wrote %d bytes to %s!\n",
+                        bytesWritten,
+                        filename);
+            }
+      }
+   else
+      {
+         bytesWritten= fwrite (b, g - b, 1, filep);
+         if (b - g != bytesWritten)
+            {
+               LOG("saveFile() - Only wrote %d bytes to %s!\n",
+                        bytesWritten,
+                        filename);
+            }
+         bytesWritten= fwrite (&(g[gs]), bs - gs - (g - b), 1, filep);
+         if (bs - gs - (g - b) != bytesWritten)
+            {
+               LOG("saveFile() - Only wrote %d bytes to %s!\n",
+                        bytesWritten,
+                        filename);
+            }
+      }
+
+   fclose(filep);
+
+   currentp->dirty = 0;
+
+   return 1;
+}
+
+
+void
+coreNewScreen (buffer_t *newBuffer)
+{
+   /* BUFFER_GAP needs this copy for the virtual screen */
+   newBuffer->screen.top = allocate (sizeof (text_t), __FUNCTION__);
+   memcpy (newBuffer->screen.top, &newBuffer->core, sizeof (text_t));
+
+   /* Invisible cursor that indicates top of screen */
+   newBuffer->screen.top->gap_size = 0;
+
+   newBuffer->position = 0;
+   newBuffer->screen.x = 0;
+   newBuffer->screen.y = 0;
+}
+
+
+void
+freeBuffer (buffer_t *buf)
+{
+  free (buf->filename);
+  free (buf->core.buffer);
+}
+
+
 #endif /* BUFFER_GAP_MODE */
 
 
 
-#ifdef COMPATIBLE
-
-char *
-editorCharacterGenerator (mark_t *currentp)
-{
-   char *genbuf= NULL;
-   int  i, j;
-
-   int nofbytes=  (currentp->scr.maxX) * (currentp->scr.maxY);
-   genbuf= allocate(nofbytes, "editorCharacterGenerator");
-
-   i= 0;
-   j= 0;
-   while (i < nofbytes)
-   {
-/* End of buffer? */
-      if (&(currentp->top->buffer[j]) ==
-          &(currentp->stx->buffer[currentp->stx->buffer_size]))
-         break;
-
-/* Inside gap? Skip gap! */
-      if (&(currentp->top->buffer[j]) == currentp->stx->gap)
-      {
-         j+= currentp->stx->gap_size;
-      }
-      genbuf[i++]= currentp->top->buffer[j++];
-   }
-
-   genbuf[i]= '\0';
-
-   return genbuf;
-}
-
-#endif /* COMPATIBLE */
 
 
 
@@ -992,9 +1080,10 @@ drawThisLine (ptr screen, ptr *the_buffer, int screen_y, int xmax)
 }
 #endif /* TOTALLY_NEW_COOL_STUFF */
 
-/* Local Variables:
- * mode: C;
- * c-file-style: ellemtel;
- * indent-tabs-mode: nil;
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
  * End:
  */

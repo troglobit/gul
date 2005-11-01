@@ -33,9 +33,10 @@ void *allocate(size_t memSize, char *callingFunc)
    return (ptr);
 }
 
-/* Local Variables:
- * mode: C;
- * c-file-style: ellemtel;
- * indent-tabs-mode: nil;
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
  * End:
  */

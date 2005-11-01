@@ -241,14 +241,23 @@ void screenDebugDisplay(void)
     }
 }
 
-keyevent gul_event(void)
+keyevent_t read_key(void)
 {
-  return gul_plugin_event();
+  return plugin_read_key();
 }
 
-/* Local Variables:
- * mode: C;
- * c-file-style: ellemtel;
- * indent-tabs-mode: nil;
+char *read_string (int x, int y)
+{
+  return plugin_read_string (x, y);
+}
+
+
+
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
  * End:
  */

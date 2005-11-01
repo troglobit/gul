@@ -9,6 +9,16 @@
 #include <features.h>
 #endif
 
+/* Size of editor ruler */
+#define RULER_WIDTH 80
+
+/* Size of status/io window */
+#define STATUS_WIDTH RULER_WIDTH
+
+/* Tabs are displayed as %TAB_WIDTH spaces */
+#define TAB_WIDTH   8
+
+
 /*** Debug messages to stderr? *****************************************/
 #ifdef DEBUG
 #define LOG(args...) \
@@ -36,7 +46,7 @@
  ***********************************************************************/
 
 /* The first lame editor core. */
-/* #define ORIGINAL_MODE */
+/* #define DLL_MODE */
 
 /* Yet Another Editor-core Model /Crash */
 #define BUFFER_GAP_MODE
@@ -45,3 +55,11 @@
 
 
 #endif  /* __CONFIG_H__ */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

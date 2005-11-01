@@ -25,7 +25,7 @@
 
 #include <unistd.h>
 
-#include "vt100scr.h"
+#include "vt100.h"
 #include "plugin.h"
 
 
@@ -114,16 +114,6 @@ void screenPluginUpdate(void)
         }
 }
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <termios.h>
-#include <string.h>
-#include <sys/time.h>
-
-#include <unistd.h>
-
-#include "vt100key.h"
-#include "plugin.h"
 
 static struct termios oldmode;
 void keyboardNoEcho(void)
@@ -176,9 +166,9 @@ static int isready(int fd)
 }
 
 /* Nonblocking check, 0 if there is no character. */
-keyevent processRawKeys(void)
+keyevent_t processRawKeys(void)
 {
-        keyevent keyreturn;
+        keyevent_t keyreturn;
         char c;
 
         c= getchar();
@@ -216,9 +206,9 @@ keyevent processRawKeys(void)
         return keyreturn;
 }
 
-keyevent gul_plugin_event(void)
+keyevent_t plugin_read_key(void)
 {
-        keyevent keyreturn;
+        keyevent_t keyreturn;
 
         if (isready(0)){
                 keyreturn= processRawKeys();
@@ -228,3 +218,11 @@ keyevent gul_plugin_event(void)
 }
 
 #endif /* VT100_PLUGIN */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

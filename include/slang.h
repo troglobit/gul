@@ -5,8 +5,8 @@
  * 23/4 1999 Crash <joachim.nilsson@mds.mdh.se>
  *
  */
-#ifndef SLANG_H
-#define SLANG_H
+#ifndef __SLANG_H__
+#define __SLANG_H__
 
 #include <slang.h>
 
@@ -46,4 +46,12 @@
 #define GUL_F12       SLANG2GUL(SL_KEY_F(12))
 
 
-#endif /* SLANG_H */
+#endif /* __SLANG_H__ */
+
+
+/**
+ * Local Variables:
+ *  c-file-style: "ellemtel"
+ *  indent-tabs-mode: nil
+ * End:
+ */

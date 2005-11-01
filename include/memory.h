@@ -1,9 +1,9 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef __MEMORY_H__
+#define __MEMORY_H__
 
 #include <stdlib.h>
 
 void *allocate(size_t memSize, char *callingFunc);
 
 
-#endif /* MEMORY_H */
+#endif /* __MEMORY_H__ */
