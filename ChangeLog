@@ -1,0 +1,180 @@
+2004-03-26  Joachim Nilsson  <crash@vmlinux.org>
+
+	* gul: initial version forked from editor project on vmlinux.org
+
+2000-01-30    <crash@vmlinux.org>
+
+	* Removed the "virtual screen"-stuff to make the editor work with one
+	screenful of data.
+
+	* "Release"...
+
+
+2000-01-04    <crash@vmlinux.org>
+
+	* Rewrite of yaei.c (Yet Another Editor-Core Implementation) almost
+	ready. It now features a simple buffer-gap implementation.
+
+	* Redid the display engine a bit. Many questions left though, e.g.
+	who is responsible for updating the display - who's the controller
+	in an MVC model?
+
+
+2000-01-02    <crash@vmlinux.org>
+
+	* Changed the plugin::createScreen () to call the new function
+	initPlugin () instead of the old way to call the respective
+	keyboard and screen plugin init functions.
+
+	This way plugin specific ordering of the init-functions is not
+	compromised.
+
+
+Tue Jul 13 00:14:35 CEST 1999
+	Let the keyboard return a structure with data (as 'A' or '1' for
+	instance) and an event. This is better than just returning an
+	int. And it's faster on 6502, i think! :-)
+	Did some cleanup with defines etc. Removed a goto. (!)
+	Now vt100 plugin is completely independant of ncurses.
+
+1999-07-07
+	A few days ago I added a vt100 interface.
+	I am also thinking about a redesign of the editor core.
+	Maybe I will listen to the "show me the code" Joachim tells
+	me occasionally :-)
+	instead of just talking.
+
+
+1999-06-08    <crash@vmlinux.org>
+
+	* He he ... I think I've solved the hscroll-mode problem. I've
+	introduced the pan*()-functions in plugin.c. They adjust the
+	lowest accepted x-pixchar and thus scrolling/panning horisontally!
+	Check out bindings in gulMain.c!!
+
+
+1999-05-09    <crash@vmlinux.org>
+
+	* Made some of the best code ever... :-)
+	Look in yaei.c for the result. Drop dead VI! And Emacs ... watch out!
+
+
+1999-05-08    <crash@vmlinux.org>
+
+	* Debugged the plugin system. A little word of advice from someone
+	who's been there - Don't try to debug ncurses programs without the
+	ncurses debug lib. Without it ncurses returns a lot of weird data,
+	especially when querying screen sizes and so.
+
+	The bugs were of course simple stupid ones - Wrong parameters for
+	otherwise perfectly good functions and some really poor logic, as
+	usual.
+
+
+1999-04-23    <crash@vmlinux.org>
+
+	* Introduced, finally, the file config.h with all optional defines...
+
+	* Added the plugin.{c|h}-system.
+
+	* Which induced a complete change in editor.c/h and gulMain.c. Now
+	editor.h is simply an "interface" for the editor-core. The editor.c
+	contains the origninal implementation by me.
+
+	* Added two new editor-cores:
+	  yaei.{c|h} - Yet Another Editor-core implementation. /Crash
+	  jakov.c - Yanked from Jakovs account on Imladris. Was JAkov's new
+	            routines in his editor.c-version.
+
+	* Small changes in spec.tex
+
+
+1999-04-05    <crash@vmlinux.org>
+
+	* Finally sat down and yanked out main() from editor.c and put it
+	in the agreed gulMain.c. This is mainly because of our new "plugin"
+	theory for the "base editor model". No model yet though...
+
+	* This brought on some changes to the Makefile and some include
+	files. No big stuff.
+
+
+1999-03-27    <crash@vmlinux.org>
+
+	* Moved a LOT of stuff from global variables to the 'mark_t' see
+	editor.h for details.
+
+	* The delete-function is almost rock-solid right now. Even the
+	insertCommand() is starting to look good!
+
+	* A lot of bugfixes made. The editor no longer needs a file when
+	starting. Even if the file given on the command line does not exist
+	the editor starts with "the empty file".
+
+	* Also, tried out Emacs's "Change Log"-mode. Works out quite nice,
+	actually. C-x 4 a för att lägga till en "entry". =)
+
+	* Tried to modularize the code into a lot more files to make it
+	more easy to work with. A lot more files, but everything is not
+	ready yet. main() still resides in editor.c instead of gulMain.c
+	for instance...
+
+
+1999-03-24    <crash@vmlinux.org>
+
+	* It's night again and I have actually a lot of school work to
+	be done, as usual. And it's an early class as well but still
+	I find myself in front of the computer listening to ... eh,
+	Limahl's Never Ending Story in my underwear. At least I got
+	some food today when I ytalked with JAkov and we decided to
+	go to Burger King before they closed. I managerd to pull a
+	lot of people from SdU. This food business will hopefully
+	help cure me from my sore throat and kick off spring at the
+	same time ... Did some comments and were trying to fix the
+	problem with the cursor getting "out of scope". This has been
+	a problem for some time now and I'm actually considering to
+	do a rewrite of the whole cursor movement stuff...
+	JAkov, me and Boran have discussed setting up a CVS-server,
+	that would really be a cool thing to play with! :)
+
+
+1999-03-05    <crash@vmlinux.org>
+
+	* Spent the entire week coding the cursor/gap-movement and
+	adding new functionality.
+	Jakob introduced the concept of "semantics" the code doesn't
+	look the same since... :)
+
+
+1999-02-27    <crash@vmlinux.org>
+
+	* To drunk to remember.
+
+
+1999-01-20    <crash@vmlinux.org>
+
+	* Discussions on maybe changing the 'text'-type.
+
+
+1999-01-19    <crash@vmlinux.org>
+
+	* Ah, more than one line in each dllSt. That's why!
+	That sucks! /Jocke
+
+
+1999-01-18    <crash@vmlinux.org>
+
+	* Began working on "moving through the file with the cursor".
+	Didn't work as well as it should. /Jocke
+
+
+1998-09-23    <xxjoni@pc2904.senet.abb.se>
+
+	* Stumbling on ... A simple core with absolutely no special
+	handling of parameters included. Very basic use of curses
+	implemented. /Jocke
+
+
+1998-09-14    <xxjoni@pc2904.senet.abb.se>
+
+	* First stumbling steps, parameter parsing. /Jocke

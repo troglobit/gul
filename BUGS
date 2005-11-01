@@ -1,0 +1,19 @@
+Known bugs in the current version of Gul:
+
+2000-01-12 yaei - the first buffer-gap core:
+
+	* Pretty stable!
+
+	* Rendering to screen does not work beyond the first screen. No
+	  page up, horisontal scrolling or anything that nice. :(
+
+
+1999-04-05 original editor core:
+
+	* The cursor sometimes gets a bit lost. Gets ahead or behind one row.
+
+	* When moving around a lot AND deleting, gul sometimes segfaults.
+
+	* Only works "OK" in a Linux console.
+
+

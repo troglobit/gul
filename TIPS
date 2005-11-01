@@ -1,0 +1,16 @@
+Some small tips when testing in different environments:
+
+	* When delete/backspace doesn't seem to work, try Ctrl-H ...
+
+	* If the display looks awful #1, take a look at display.c. Mainly
+	it's the statusbar, displayStatus(), that gets malplaced. 
+
+	* If the display looks awful #2, take a loog at the current
+	editor core. The functions for moving the virtual screen are
+	quite messed up.
+
+	* In gulMain.c there's a DEBUG-define that can be used to send
+	debug-messages to stderr. When set to zero stderr is redirected
+	to /dev/null.
+
+	* make clean first if nothing seems to work. ;)

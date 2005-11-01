@@ -1,0 +1,115 @@
+	gul - The one true GUL editor!
+	gul - The one true GUL editor!
+
+
+
+
+Comments are welcome.
+
+	- Joachim Nilsson <crash@vmlinux.org>
+
+
+
+Description
+===========
+
+A first attempt at writing an editor.
+First steps made in HP_UX 10.20 on a Windows NT 4.0 Workstation using
+E... and XDM-login on one of the HP PA-RISC servers at work.
+
+Development continued at home in Red Hat GNU/Linux on a simple old
+PentiumOverdrive wich later got upgraded into a Cyrix 6x86 166 MHz.
+Which in turn now only works as server to the Laptop PII @300MHz.
+Still Red Hat though ...
+
+Parallell testing done in Solaris at the student body, SdU, using a
+wide range of Sun SPARC IPX's SparcStation 2, SPARC 10's. Testing
+have also begun on our SparcStation ELC's.
+
+
+General information
+===================
+
+The documentation/specification is now rewritten in LaTeX. For a short
+introductory to LaTeX, see Dr. Posts' homepage under 'Courses':
+	http://www.idt.mdh.se/personal/kpt/
+
+"LaTeX is the lingua franca among scientists."
+"Based on TeX written by Donald Knuth."
+"Difficult to learn but very powerful."
+"When pronouncing LaTeX your screen is supposed to get real wet..."
+
+                                          -- dr. K. Post
+
+It's also the GNU projects preferred typesetting/documentation tool and
+it really isn't that difficult to learn if you've ever written HTML/XML/SGML.
+
+
+Installation
+============
+
+See the file INSTALL.
+
+
+Running
+=======
+
+The editor runs best in a TERM=linux environment but have also been
+tested in xterm-windows. The only keys working as of 1999-03-27 is
+cursor-keys and delete. Everything else is pretty much untested.
+Added:
+	native vt100 interface.
+	slang support.
+	new editor core based on buffer-gap.
+
+
+Bugs
+====
+
+Plenty. Do something about it! :P
+A trace is written to stderr. Redirect the trace to a file 
+when running gul. (gul filename 2>logfile) see the source
+for more info, as usual.
+
+
+Files
+=====
+
+IDEAS    - Random thoughts
+TIPS     - Some hints on what to do when the going gets tough
+TODO     - A list of things that needs attention.
+INSTALL  - HowTo install and compile both source and specification.
+README   - This short intro.
+ChangLog - A list of things that already have been done.
+
+
+---[ License
+
+Copyright (C) 2004 Joachim Nilsson
+Copyright (C) 1998-2000 Joachim Nilsson, Jakob Eriksson, Anders Bornäs
+
+gul is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+~
+~
+~
+~
+"README" 81 lines, 2155 characters written
+
+
+
+
+
