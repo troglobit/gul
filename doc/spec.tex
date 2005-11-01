@@ -226,7 +226,7 @@ Boran började ju tuta ihop en lista av tuffa ord som han inte förstod,
 när vi andra för länge sedan givit upp hoppet om att nånsin förstå vad
 det var vi pratade om ... Den här listan \emph{bör} kompletteras.
 
-\begin{tabular}{l|p{10cm}}
+\begin{tabular}{l|p{12cm}}
   \emph{Begrepp}    & \emph{Förklaring} \\ \hline
   GAPS(I)Z(E)       & Konstant betecknande storleken på buffergapet. \\ \hline
   Blockmarking      & Möjligheten att kunna markera text i rektangulära block. (Se även Appendix A) \\ \hline
@@ -310,7 +310,7 @@ typedef struct dllSt{
                            2 * sizeof(int))];
 }text;
 
-#define MAX_LINE_LENGTH 3 * (2 * sizeof(struct dllSt *) +\
+#define MAX_LINE_LENGTH 3 * (2 * sizeof(struct dllSt *) + \
                              2 * sizeof(int))
 \end{verbatim}
 
@@ -370,7 +370,7 @@ Givetvis först med de normala randvärdeskontrollerna. För att flytta
 \end{verbatim}
 
 När man vill lägga till tecken till buffern så skriver man de till
-gapets position noll, flyttar gapet ett steg till höger och minskar 
+gapets position noll, flyttar gapet ett steg till höger och minskar
 sedan storleken med ett.
 
 \begin{verbatim}

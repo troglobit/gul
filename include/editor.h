@@ -48,12 +48,11 @@ typedef struct screenSt{
  */
 /* XXX - Oh, maybe we can do a neat bitfield here of some, like dirty? */
 typedef struct currentSt{
-  char    *filename;            /* Filename of this buffer */
-  int      dirty;               /* Buffer dirty, needs to be saved. */
-  int      position;            /* byte position in file/buffer */
-  screen_t screen;              /* The screen */
+  char             *filename;   /* Filename of this buffer */
+  char              dirty;      /* Buffer dirty, needs to be saved. */
+  screen_t          screen;     /* The screen */
 
-  text_t  core;                 /* Depends on editor core, holds the file  */
+  text_t            core;       /* Depends on editor core, holds the file  */
 
   struct currentSt *prev;       /* With >1 buffer we might have prev. here. */
   struct currentSt *next;       /* With >1 buffer we have next buffer here. */
@@ -73,12 +72,16 @@ void page_down (buffer_t *currentp);
 void insert(buffer_t *currentp, int thisCommand);
 void delete(buffer_t *currentp);
 
+int goto_line (buffer_t *currentp, int line);
+
 /* Marking, copying and deleting text */
 void set_mark  (buffer_t *currentp);
 void set_point (buffer_t *currentp);
 void cut       (buffer_t *currentp);
 void copy      (buffer_t *currentp);
 void paste     (buffer_t *currentp);
+
+void search (buffer_t *currentp, char *pattern, int dir);
 
 int newFile (buffer_t *new, size_t size);
 int readFile(FILE* filep, buffer_t *new);

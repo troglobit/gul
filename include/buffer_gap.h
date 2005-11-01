@@ -16,6 +16,7 @@ typedef struct _text{
   char        *buffer;
   char        *gap;
   char        *point, *mark;
+  unsigned int position;   /* byte position in file/buffer */
   unsigned int buffer_size, gap_size;
 } text_t;
 

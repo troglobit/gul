@@ -227,7 +227,7 @@ void
 page_up (buffer_t *currentp)
 {
    int i;
-   int offset   = currentp->screen.maxY / 2; /* Move only half of screen */
+   int offset   = currentp->screen.maxY - 1; /* Move only half of screen */
 
    for (i = 0; i < offset; i++)
    {
@@ -249,7 +249,7 @@ void
 page_down (buffer_t *currentp)
 {
    int i;
-   int offset   = currentp->screen.maxY / 2; /* Move only half of screen */
+   int offset   = currentp->screen.maxY - 1; /* Move only half of screen */
 
    for (i = 0; i < offset; i++)
    {
@@ -368,6 +368,12 @@ insert (buffer_t *currentp, int thisCommand)
          currentp->screen.x++;
          break;
    }
+
+   /* Byte offset always increased by one,
+    * we store HT/TAB as only one char.
+    */
+   currentp->core.position ++;
+
 
    adjust_virtual_screen (currentp);
 }
@@ -542,7 +548,10 @@ backupBufferInfo (text_t *thisp)
 static char *
 restoreBufferInfo (text_t *thisp, char *backup_gap)
 {
-  char *gap_bis = thisp->gap;
+   char *gap_bis = thisp->gap;
+
+   /* Also fix the byte offset. */
+   thisp->position += backup_gap - thisp->gap;
 
    memmove (backup_gap, thisp->gap, thisp->gap_size);
    thisp->gap= backup_gap;
@@ -583,6 +592,8 @@ movetoNextChar (text_t *thisp)
    thisp->gap[0] = thisp->gap[thisp->gap_size];
    thisp->gap++;
 
+   thisp->position ++;
+
    return 0;
 }
 
@@ -607,6 +618,8 @@ movetoPrevChar (text_t *thisp)
    thisp->gap--;
    thisp->gap[thisp->gap_size] = thisp->gap[0];
 
+   thisp->position --;
+
    return 0;
 }
 
@@ -619,7 +632,7 @@ movetoNextLine (text_t *thisp)
    movetoEOL (thisp);
    if (movetoNextChar (thisp))
    {
-     restoreBufferInfo (thisp, backup);
+      restoreBufferInfo (thisp, backup);
       return 1;
    }
 
@@ -819,6 +832,73 @@ movetoCol (text_t *thisp, int col)
    return counter;
 }
 
+/* move gap to @line in current buffer */
+int goto_line (buffer_t *currentp, int line)
+{
+   int offset = line - currentp->screen.y;
+
+   if (offset > 0)
+   {
+      while (offset--)
+      {
+         if (movetoNextLine (&currentp->core))
+            break;
+
+         currentp->screen.y ++;
+      }
+      currentp->screen.x = 0;
+   }
+   else
+   {
+      offset = 1 - offset;
+      while (offset--)
+      {
+         if (movetoPrevLine (&currentp->core))
+            break;
+
+         currentp->screen.y --;
+      }
+      currentp->screen.x = 0;
+   }
+
+   adjust_virtual_screen (currentp);
+}
+
+
+
+
+/* i-search
+ * @currentp: buffer to search in
+ * @patter:   pattern to search for
+ * @dir:      forward or backwards
+ *
+ */
+
+void search (buffer_t *currentp, char *pattern, int dir)
+{
+   char *pos;
+
+   /* XXX - ignore direction, always forward currently */
+   pos = strstr (&currentp->core.gap[currentp->core.gap_size], pattern);
+   if (!pos)
+   {
+      /* not found ... */
+/* XXX - display this error in status field */
+   }
+   else
+   {
+      int i = pos - currentp->core.gap - currentp->core.gap_size;
+
+      while (i--)
+      {
+         right (currentp);
+      }
+
+      adjust_virtual_screen (currentp);
+   }
+
+}
+
 
 int newFile (buffer_t *new, size_t size)
 {
@@ -943,9 +1023,9 @@ coreNewScreen (buffer_t *newBuffer)
    /* Invisible cursor that indicates top of screen */
    newBuffer->screen.top->gap_size = 0;
 
-   newBuffer->position = 0;
-   newBuffer->screen.x = 0;
-   newBuffer->screen.y = 0;
+   newBuffer->core.position = 0;
+   newBuffer->screen.x      = 0;
+   newBuffer->screen.y      = 0;
 }
 
 

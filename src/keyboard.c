@@ -1,12 +1,18 @@
 /* Minimal set of key bindings. */
 
 #include "config.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "display.h"
 #include "editor.h"
 #include "gul.h"
 #include "help.h"
 #include "plugin.h"
 
+
+void do_search (buffer_t *currentp);
 
 /**
  * keyboard_loop - Read keyboard input and act upon it.
@@ -64,6 +70,24 @@ int keyboard_loop (buffer_t *currentBuffer)
             display_status (currentBuffer, "Pasting.");
             LOG ("Pasting from internal edit buffer\n");
             paste (currentBuffer);
+            break;
+
+         case GUL_C_g:          /* goto_line */
+         {
+            int y;
+            int line;
+            char *tmp;
+
+            y = display_status (currentBuffer, "Goto line: ");
+            tmp = read_string (11, y);
+            sscanf (tmp, "%d", &line);
+            free (tmp);
+            goto_line (currentBuffer, line);
+            break;
+         }
+
+         case GUL_C_f:          /* i-search */
+            do_search (currentBuffer);
             break;
 
          case GUL_ENTER:
@@ -124,6 +148,7 @@ int keyboard_loop (buffer_t *currentBuffer)
             break;
          case GUL_F7:
             LOG("[F7]\n");
+            do_search (currentBuffer);
             break;
          case GUL_F8:
             LOG("[F8]\n");
@@ -176,6 +201,19 @@ int keyboard_loop (buffer_t *currentBuffer)
 
 /* Tell main loop to quit/continue. */
    return quit;
+}
+
+
+void do_search (buffer_t *currentp)
+{
+   int y;
+   int line;
+   char *tmp;
+
+   y = display_status (currentp, "i-search: ");
+   tmp = read_string (10, y);
+   search (currentp, tmp, 0);
+   free (tmp);
 }
 
 

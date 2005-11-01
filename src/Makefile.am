@@ -19,4 +19,4 @@ gul_SOURCES =              ../include/config.h      \
               slang.c      ../include/slang.h       \
               vt100.c      ../include/vt100.h
 
-gul_LDADD   = -lncurses
+#gul_LDADD   = -lncurses

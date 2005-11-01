@@ -128,10 +128,11 @@ static void display_ruler (buffer_t *currentp)
    if (!filename)
      filename = noname;
 
-   sprintf(ruler, "-GUL--%s-- %s --L%d-C%d",
+   sprintf(ruler, "-GUL--%s-- %s --L%d-C%d-O%d",
            (currentp->dirty ? "**" : "--"),
            filename,
-           currentp->screen.y, currentp->screen.x);
+           currentp->screen.y, currentp->screen.x,
+           currentp->core.position);
 
    for (i= strlen(ruler); i < currentp->screen.maxX; i++)
       ruler[i]= '-';
@@ -147,7 +148,7 @@ static void display_ruler (buffer_t *currentp)
 static void display_toolbar (buffer_t *currentp)
 {
    int x, i, empty, len, extra;
-   char toolbar [] = "1/Help 2/Save 3/Open 4/Unused 5/FindPrev 6/FindNext 7/Find 8/Unused 9/Menu 0/Quit";
+   char toolbar [] = "1/Help 2/Save 3/Open 4/Unused 5/Unused 6/Unused 7/Find 8/Unused 9/Unused 0/Quit";
 
    len = strlen(toolbar);
    empty = 0;
