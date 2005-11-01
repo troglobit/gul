@@ -1,0 +1,123 @@
+
+                              VT100 escape codes
+                                       
+   This is a copy of a document which has been knocking around for many
+   years now, explaining how to drive a VT100 terminal. There are other
+   ways to go about this, notably programing with curses, but this is the
+   grass-roots level of working.
+   
+   See also: vt220 user defined graphics.
+From:   VAXB::DCC2         "Dave Court"  6-DEC-1991 19:45:42.87
+To:     GEOFF
+CC:
+Subj:   Escape codes
+
+        In a .COM file use:
+
+                ESC[0,8]=%X1B
+
+        to define the escape character. When an escape sequence is required use
+:
+
+                WRITE SYS$OUTPUT "''ESC'..."
+
+        In a text file use the following twice to put the escape character into
+a text file:
+
+                CTRL/[      -       on VT200
+                ESC         -       on VT100.
+
+        The escape sequences are as follows:
+
+Moving the Cursor
+
+        n,r,c are numbers.
+
+        [nA             - Up, no scroll.
+        [nB             - Down, no scroll.
+        [nC             - Right n columns.
+        [nD             - Left n columns.
+        [nE             - CR and down, no scroll.
+        [nF             - CR and up, no scroll.
+        [nG             - CR
+        [r;cH           - Move to row r, column c.
+        [nI             - Tab
+        [nL             - Inserts a blank line at cursor.
+        [n`             - Moves cursor to column n.
+        D               - Down, scroll in region.
+        E               - CR and cursor down (with scroll)
+        M               - Up, scroll in region (see later).
+        7               - Save position and attributes.
+        8               - Restore position and attributes.
+
+Display Characteristics
+
+        [0m             - Normal (default).
+        [1m             - Bold.
+        [2m             - Dim mode
+        [4m             - Underline.
+        [5m             - Blinking.
+        [7m             - Reverse video.
+        [8m             - Invisible mode.
+        #3              - Double height, double width (top).
+        #4              - Double height, double width (bottom).
+        #:              - Double height, single width (top).
+        #;              - Double height, single width (bottom).
+        #5              - Single width (default).
+        #6              - Double width.
+
+Erasing
+
+        [0K             - From cursor to end of line.
+        [1K             - From beginning of line to cursor.
+        [2K             - Entire line.
+        [0J             - From cursor to bottom of screen.
+        [1J             - From top of screen to cursor.
+        [2J             - Entire screen.
+        [M              - Removes the line that the cursor is on.
+
+Character Sets
+
+        (B              - US (default).
+        (A              - UK (shift 3 = pound).
+        (0              - Line graphics.
+        (1              - Other graphics.
+        (S              - User defined graphics.
+        n               - First half of char. set to same as second.
+        N               - Same as n but for next char only.
+        P1;n;1;5{S      - Starts definition of UDGs at character code n+32.
+        \               - Ends definition of UDGs.
+
+Scrolling regions
+
+        t,b are numbers.
+
+        [t;br           - define scrolling region.
+        [?6h            - cursor position 0;0 is upper left of region.
+        [?6l            - cursor position 0;0 is upper left of screen. (Default
+)
+
+Terminal Operations
+
+        c               - Resets terminal.
+        [3h             - Display controls mode.
+        [30h            - Invisible screen.
+        [30l            - Visible screen.
+        [?1h            - Application keypad.
+        [?1l            - Normal keypad.
+        [?2l            - VT52 mode.
+        [?3h            - 132 Columns.
+        [?3l            - 80 Columns.
+        [?4h            - Smooth-4 scroll.
+        [?4l            - Jump scroll.
+        [?5h            - Light screen.
+        [?5l            - Dark screen.
+        [?25l           - Cursor off.
+        [?25h           - Cursor on.
+
+        All sequences must follow the escape character immediately and all case
+s
+must be as shown.
+     _________________________________________________________________
+   
+   * S020 Homepage, * Send us mail * Disclaimer

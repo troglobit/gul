@@ -1,0 +1,640 @@
+
+		  Implementing Undo for Text Editors
+		  ------------ ---- ---	---- -------
+
+			    Craig Durland
+			   craig@cv.hp.com
+			    Copyright 1991
+
+
+			    February 1991
+
+   
+
+
+Probably anyone who has used a text editor has at one time or another
+made a boo boo and immediately wished they could to go back in time and
+not do it all over again.  The Undo command gives that ability by moving
+backwards in time, reversing the effects of the most recent changes to
+the text.  Some undo commands can go back to the begining of time,
+undoing all changes that have occured to the text.
+
+The undo described in this article is a subset of the idealized undo -
+it only reverses changes to text.  It doesn't keep track of cursor
+movements, buffer changes or the zillions of other things we do while
+editing text.  While this can make undoing changes disconcerting because
+it can jump from change to change differently from what you remember, it
+also reduces the amount of stuff that the editor needs to remember
+(saving memory) and helps keep the editor from bogging down trying to
+keep track of whats been going on.  Finally, the material presented is
+for text editors.  Editors of other types may find some of the
+discussion relevant but that will be a happy accident.
+
+Jonathan Payne (author of JOVE) has stated that "Undo/redo is trivial to
+implement" (comp.editors, Tue, 2 Jan 1990).  Having just implemented
+undo for the editor I am working on, I think that straight forward is a
+better term than trival.  Since it took me a long time to figure out a
+workable undo scheme, I thought others might be interested in what I
+did.
+
+
+
+Caveats:  The algorithms, code and data structures used in this article
+are based on working and tested code that has been "sanitized" to remove
+obscuring details (like what stack data structures I used).  If you use
+the code, make sure you understand it so that you can properly fill in
+the missing details.
+
+Conditions:  You are free to use the algorithms, code and data
+structures contained in this article in any way you please.  If you use
+large chunks, I would appreciate an acknowledgment.  If you distribute
+this article, in whole or part, please retain the authorship notice.
+
+
+
+			What is Not Discussed
+			---- --	--- ---------
+
+Redo is a undo for undo.  Very handy if you undo one time to many and
+need to undo that last undo.  I haven't implemented it yet but I think
+that it will be easy to modify the algorithms to support it.  I also
+think some dragons are there but they are hiding from me.  We'll see
+when I actually get around to doing it.
+
+
+
+	   Editor Implementations and How They Affect Undo
+	   ------ --------------- --- --- ---- ------ ----
+
+Two popular ways text editors store text are "buffer gap" and "linked
+list of lines" (described in detail else where - see comp.editors).  As
+you might imagine, different implementations for storing text can affect
+undo implementations.  Fortunately for this article, the affects are
+relatively minor.  As I discuss data structures and algorithms, I will
+point out the differences.
+
+Note:  I will refer to buffer gap editors as BGE and linked list editors
+as LLE.
+
+
+	       What You Need to Save to Implement Undo
+	       ---- ---	---- --	---- --	--------- ----
+
+I use Undo Events to represent text changes.  These events are kept in a
+undo stack, most recent event at the top of the stack.  There is one
+stack per text object (buffer in Emacs) so undo can only track changes
+on a per buffer basis.  This simplifies things quite a bit over tracking
+all changes globally in a multibuffer editor.
+
+I found that four event types seem to be enough describe all text
+changes.  They are:
+- BU_INSERT:  This event is used when text is inserted.  The most common
+  case is when you type.  When text is inserted, we need to remember how
+  much was inserted and where it was inserted.  We don't need to
+  remember the what the text was because to undo this type of event, all
+  we have to do is delete the inserted text.  Note that in order to
+  reduce the number of events saved (and memory used), you need to be
+  able to detect text that is inserted sequentially (like when you type
+  "123") so that all these events can packed into one event.  This can
+  affect more than you would think at first glance and will be descussed
+  more fully else where.
+
+- BU_DELETE:  This event is used when text is deleted, for example when
+  you use the delete (or backspace) key.  Here we need to remember the
+  place where the deletation took place and the text to be deleted.
+  Note that we have to save the text before (or while) it is deleted.
+  This is can cause trouble for some editor implementations.  Again,
+  event packing can save much of space if users like to lean on the
+  delete key.  To undo a delete, we have to insert the deleted text at
+  the place where it was deleted.
+
+- BU_SP:  A sequence point is a stopping point in the undo stack.  It
+  tells the undo routine that this is the last event to undo so the user
+  will think that one of his actions has been undone.  Note that this
+  implies that one user action may cause one or (many) more undo events
+  to be saved.  This is especially true when the editor supports macros
+  or an extension language.  I think that it is important that one press
+  of the undo key undoes one user action (there are a few exceptions
+  (like query replace)).  Probably one of the hardest things to "get
+  right" (from the users point of view) is where to place sequence
+  points.  Here is my list of rules for sequence points (take these with
+  a grain of salt - these are my opinions with nothing to back them up.
+  They may change.):
+  - Need sequence points so undoing stops at "natural, expected" places.
+  - Undo should stop where user explicitly marked the buffer as
+    unchanged (like save buffer to disk).  These are usually UNCHANGED
+    events.
+  - A string of self insert keys should undo as one.  Its pretty
+    annoying to have to hit undo 14 times to undo "this is a test".
+  - A word wrap or Return should break a character stream.  Thus undo
+    only backs up a line at at time, probably better than undoing an
+    entire paragraph when only one line needed undoing.
+  - Commands, macros, programs written in the extension language, etc
+    should undo as a unit.  ie if pressing a key caused a bunch of stuff
+    to happen, pressing undo should undo all the stuff the key caused.
+  - Since rules can't cover all cases (like query replace), programs
+    need to be able to add sequence points.
+
+  I also store the buffer modifed state here so I know to mark the
+  buffer as unchanged if it was before this change happened.
+
+- BU_UNCHANGED:  This event marks a time when the text was marked as
+  unchanged or saved.  Examples include saving the text to the disk.
+  When undoing, this event marks a stopping point:  The user has undoed
+  back to a time when the buffer was "safe".  When you make an
+  inadvertent change to text that you only wanted to look at, it is
+  psychologically reasuring to know the text is back to its original
+  state.
+
+  Note that BU_UNCHANGED events are really just special cases of
+  sequence points.  You could easily just combine them into one event.
+
+It should be obvious by now that much editing would generate a LOT of
+undo events.  Unless your computer has an infinite amount of memory, you
+need some rules about when to start throwing away events.  Since
+different people will have different ideas about this and the amount of
+memory can greatly affect this, you need to let the user control it.
+There are three parameters that need to be specified:
+- Save or don't save undos.  For Emacs like editors, there are probably
+  many buffers that don't need (or want) undo.  For example, I don't
+  care if help buffers have undo.  Not turning on undo for all buffers
+  can really save memory and help performance (undo can really slow down
+  extension programs).
+- The maximum amount of text saved.  When text is deleted, it has to be
+  saved somewhere.  The more deleted, the more that needs to saved.  It
+  adds up.  We need a point where we discard some of the old saved text
+  in order to save some.  Note that a big delete can clean out all the
+  existing undos and worst case, the delete is bigger than the max so we
+  have to throw away the undos and ignore the delete (because there is
+  not enough room to save it).
+- The maximum number of events saved.  Each event takes up a bit of
+  memory.  Events pile up amazingly fast during editing.  At some point
+  we have to start throwing away the old to make room for the new (kinda
+  like my garage).  When dumping events, you have to also clean up any
+  text the deleted event might have saved.
+
+It can be a real guessing game to figure out how to balance the number
+of events saved against text saved.  Different editing operations use up
+one or the other at different rates.  I'm currently using 600 events and
+a 5K save buffer.
+
+
+
+
+
+		       When an Editor Does Undo
+		       ---- -- ------ ---- ----
+
+Given the undo event types and rules, the editor just has to save undo
+events when needed and add sequence points at the "proper" times.  Now
+is the time you will be glad you funneled all you buffer changes through
+just a couple of insert/delete routines.  Here is where I save events
+for my Emacs like editor:
+- Insert a block of text.		save_for_undo(BU_INSERT,n);
+  This routine is used when doing things like a kill buffer yank.  It is
+  also used to undo a delete so care has to be taken not to get into a
+  do/undo tug of war.
+- Read a file.				save_for_undo(BU_UNCHANGED,0);
+  We mark the buffer as unchanged because it has been cleared and filled
+  with new text.  Note that it is up the buffer clear routine to save
+  the delete text.  Also note that to do a "real" undo, we should also
+  save_for_undo(BU_INSERT,<characters in file>).  I don't because I
+  don't think it makes sense and because of the clear buffer problem
+  mentioned below.
+- Insert n characters.			save_for_undo(BU_INSERT,n);
+  This is used for the self inserting characters.
+- Delete n characters.			save_for_undo(BU_DELETE,n);
+  Have to be careful here because this routine is also used to undo
+  character inserts.  Actually, the undo routine is the one who cares
+  and protects against this.
+- After a key has been processed.	save_for_undo(BU_SP,0);
+- Mark a buffer as unchanged.		save_for_undo(BU_UNCHANGED,0);
+- Save a file.  This routine doesn't need to do anything because it
+  calls the buffer_is_unchanged() routine.  That routine saves the event.
+
+Where I should (but don't) save undo events:
+- Clear buffer.  Because its hard to do with my type of editor.  See
+  below for more on this.  Other editors would not have this routine and
+  would just use delete.  Instead, I clear all undos.
+
+To do undo, the editor just calls the undo routine.
+
+
+
+			   Data Structures
+			   ----	----------
+
+Each text object (buffer) has a pointer to a undo header.  This header
+contains a undo event stack, number of event in the stack (so I can
+easily check to see if the stack has grown too big) and an area in which
+to save deleted text.
+
+In C, this looks like:
+     typedef struct
+     {
+       Undo *undo_stack;	/* where the undo events are */
+       int undo_count;		/* number of undos in the stack */
+       Bag *bag;		/* deleted text saved here */
+     } UndoHeader;
+
+An undo stack is a linked list of undo events.  I used a linked list
+because it was easy and worked well but there are many other ways to
+store the data that would probably work as well.  An event contains a
+pointer to the next (older) event, the event type (BU_INSERT, etc), a
+marker to where the event took place, the number of characters involved
+and a pointer to the saved text (if any).  Note that some events may not
+use some of these fields.  The clever programmer could probably save
+quite a bit of space by having different (sized) structures for each
+event type.
+
+LLEs (Linked List Editors) can run into problems when asked to save an
+delete event.  Its quite possible that the we could be asked to save
+more text than buffer contains.  For example, in Emacs, the user could
+hit control-U a bunch of times and hit the delete key - delete 16384
+characters when the buffer only contains 53.  With a BGE (Buffer Gap
+Editor), this is very easy to check but is very time consuming with a
+LLE.  What I do with LLE is "trust but verify".  I make enough room to
+hold that much deleted text, then go ahead and try and save it.  I then
+figure out how much I really saved (a side affect of copying the text)
+and save that number.  The big drawback with this is that its easy to
+clear out most of the undo stack when you didn't need to and looks very
+fishy when you can't undo very much.  The other way around this is to
+put the "save-deleted-text" stuff in the routine that actually deletes
+the text but this would add a lot of noise to a already hard to
+understand routine.
+
+A problem related to the I-don't-know-how-much-is-going-to-be-deleted
+problem is the clear-buffer problem.  With BGE, you know how much you
+are going to remove, with LLE, you don't.  So, I just clear the undo
+stack when the buffer is cleared because 1) most buffers will probably
+be bigger than the undo buffer anyway and cause it to be cleared and 2)
+buffer clears don't happen very often - usually for buffer deletes and
+file reads.
+
+C code:
+     typedef struct Undo
+     {
+       struct Undo *next;	/* pointer to next older event */
+       int type;
+       UnMark mark;		/* where the event took place */
+       int n;			/* number of characters involved */
+       char *text;		/* where deleted text is saved */
+     } Undo;
+
+In my editor, I have the concept of bags.  Bags hold various types of
+text objects and I have a lot of builtin support for them.  It was 
+natural and very easy to use these to hold deleted text.  Your editor is
+probably different so you'll have to use something else (like
+malloc()ing some space).  I use one per buffer and holds it all the
+deleted text.  The undo delete events point into the bag (actually, I
+use offsets but the concept is the same).
+
+The undo markers are where in the buffer the event took place.  These
+only matter for insert and delete events.  This is one of the areas
+where editor implementation really matters.  A BGE (buffer gap editor)
+is a real win here.  Since undo events are effectively snapshots of
+buffer history, as you undo, the buffer returns to its exact state back
+in time.  A BGE mark is just an offset into the buffer.  We can just
+store this offset in the event and never mess with it because we know
+that it will be correct when we undo to the point where we want to use
+it.  We can't do this with a LLE (linked list editor).  A LLE mark is a
+pair:  (line pointer, offset in line).  Both editor types have to adjust
+marks as text is inserted and deleted but unlike the BGE, LLE marks can
+become invalid as time goes on (and lines unlinked).  One example of
+this is if you insert text into the middle of a block and then delete
+that block.  The delete has unlinked the lines that were inserted so the
+marks with insert are invalid.  When you undo the delete, you can't undo
+the insert because you no longer know where it took place.  This is not
+a problem with BGE because even though the delete made the insert mark
+point to the wrong place, when the delete was undoed, the mark became
+valid again.
+
+To get around this problem a LLE has to either 1) track all cursor
+movement or 2) calculate the pair (line number, offset in line).
+  1) Pros:  Can undo cursor movements.
+     Cons:
+       - This would generate bazillions of cursor move events.
+       - This could really be a pain in the butt and slow down the
+       cursor movement routines.  One of the main reasons for writing a
+       LLE is not having to worry about stuff like this.
+  2) Pros:
+       - Some LLEs might already keep marks like this.
+       - You can (sometimes) keep track of this position so that you
+       don't have recalculate it all the time.  You would track it when
+       you could and mark it as invalid when you couldn't.
+       - Its easy to calculate.
+       - These marks work just like BGE marks.
+       - There are some optimizations that can be made if many events
+       are generated (sequentially) for the same line.  Basically, if
+       the dot line remains the same, you calculated the line number
+       earlier.  Caution - this can be trickier than you think.
+     Cons:
+       - It takes time to calculate the mark.
+       - You have to calculate it a lot.
+       - It adds a bunch of piddlie details to try and track the dot
+       and greatly increases the chances of screwing up.
+
+I chose to do 2) (since my editor is a LLE).  Here is the C code:
+     typedef struct
+     {
+       int line;
+       int offset;
+     } UnMark;
+
+For a BGE, just use the mark type you already have.
+
+Some combinations of events occur together frequently and it might be a
+win to create an event to take advantage of them.  For example, replace
+operations involve a delete and insert at the same place.  If you packed
+these two events into one, you could potentially save lots of space in a
+big query replace.
+
+
+		     Alternative Data Structures
+		     ----------- ---- ----------
+
+I've glossed over how I actually store the undo stack.  This is because
+there many (good) ways to do it.  I use linked lists because they are
+simple.  A more clever and compact method would be to pack the deleted
+text into the event structure (using the "clever" technique mentioned
+above) and store the event plus text in a fixed size data area.  This
+has serveral advantages:  You don't have to worry the number of events -
+when you run out space to store them, start removing the old events.  It
+is much easier to garbage collect the undo stack during undo.  Its
+also easier to make room for a new event.  The disadvantages are you
+have to worry about structure alignment (and machine architecture) and
+the some of the code will get messy (in my opinion).  The old trade off
+of fast and small verses big and simple (or as Julie Brown would say "I
+like 'em big and stupid").
+
+
+
+
+			   Global Variables
+			   ------ ---------
+
+I use a few global variables to make controling undo a little easier.
+
+Bool do_undo;
+  This variable is TRUE if undo is turned on for the current buffer.
+  The switch buffer code sets this so people who need to know can do so
+  quickly.  The user can change it by toggling a buffer flag.
+
+Buffer *current_buffer;
+  Pointer to the buffer where changes are taking place.  The current
+  undo header hangs off this buffer.
+
+int max_undos = 600;
+  The maximum number of undo events.
+
+int max_undo_saved = 5000;
+  The maximum amount of deleted characters that can be saved.
+
+
+
+		  Algorithm for Saving Undo Events
+		  --------- ---	------ ---- ------
+
+I save undo events as they occur.  I leave it to the undo routine to
+figure out how to undo this type of event because its easy, undo has
+more time to do it and this routine should be as fast as possible
+because most undo events will never be used and you want the editor to
+keep up with you.
+
+     save_for_undo(type,n)
+       int type;	/* event type:  BU_INSERT, etc */
+       int n;		/* number of characters involved (if any) */
+     {
+       Undo undo;
+       UnMark mark;
+
+       if (!do_undo) return;	/* don't save undos for this buffer */
+
+       switch (type)
+       {
+	 case BU_INSERT:			/* Characters inserted */
+	   set_unmark(&mark);
+	   pack_sequential_insert_events();
+
+	   undo.n = n;
+	   undo.mark = mark;
+
+	   break;
+	 case BU_DELETE:			/* Characters deleted */
+	 {
+	   if (n == 0) return;			/* that was easy! */
+
+	   set_unmark(&mark);
+	   undo.mark = mark;
+	   open_bag(n);		     /* make sure there is enough space */
+	   undo.n = save_text(n);    /* returns number of characters saved */
+
+	   break;
+	 }
+	 case BU_SP:				/* Set sequence point */
+	   if (last_event_was_a_sequence_point()) return;
+	   undo.n = buffer_is_not_modified();
+	   break;
+	 case BU_UNCHANGED:		/* Buffer has been marked safe */
+	   if (last_event_was_a_save()) return;
+	   break;
+       }
+
+       undo.type = type;
+
+       push_undo(&undo);
+     }
+
+
+
+		     Algorithm for Undoing Events
+		     --------- --- ------- ------
+
+This routine performs undo by reversing the effects of undo events from
+most recent until it finds a sequence point or runs out of events.
+
+Note that undo is turned off so we don't try and re-save undo events as
+we march through the stack.
+
+     undo()
+     {
+       int undo_flag, num_events = 0;
+       Undo *ptr;
+
+       if (first_undo_event_is_sequence_point()) pop_undo();
+
+       if (no_undos()) return;
+
+       undo_flag = do_undo; do_undo = FALSE;
+
+       while (ptr = pop_undo())
+       {
+	 num_events++;
+	 switch (ptr->type)
+	 {
+	   case BU_INSERT:	/* To undo: Delete inserted characters */
+	     goto_unmark(&ptr->mark);
+	     delete_text(ptr->n);
+	     break;
+	   case BU_DELETE:	/* To undo: Insert deleted characters */
+	     goto_unmark(&ptr->mark);
+	     insert_block(ptr->text, ptr->n);
+	     break;
+	   case BU_SP:		/* Hit a sequence point, stop undoing */
+	     if (ptr->n) goto done;
+	   case BU_UNCHANGED:	/* At this point, the buffer is unchanged */
+	     buffer_modified(FALSE);
+	     goto done;
+	 }
+       }
+
+     done:
+
+       gc_undos(num_events);	/* clean up the undo stack needed */
+
+       do_undo = undo_flag;
+
+       if (undo_stack_empty() && buffer_not_modified())
+	     save_for_undo(BU_UNCHANGED,0);
+     }
+
+
+
+		       Miscellaneous Algorithms
+		       ------------- ----------
+
+Here are some miscellaneous routines to flesh out undo.  Note that there
+are a lot missing, for example undo stack management and garbage
+collection.  The routines presented here aren't as "clean" as I'd like
+because they have to know how the undo stack is implemented.
+
+Note:  When I say walk the stack, I mean move towards the older events.
+I do this because it is easy and in the case of undo() and thats what you
+want.
+
+
+The next routine is used to make space available to hold a copy of the
+text that will be deleted.  Basically, it figures out which (if any) of
+the older events need to be removed from the stack to make room in the
+bag.  It does this by looking at delete events (the only event that
+saves text) and finding an event such that by deleting that event and all
+older events, it will remove the minimum number of events necessary to
+free enough space so that the bag can hold space_needed more characters.
+The key here is that the number of characters in the bag is the sum of
+all delete events (the n in the Undo stucture).  Note it would be
+faster, in general, to walk the stack backwards (from oldest event to
+youngest) and find the first event that met the requirements but that is
+not possible the way I implemented the stacks.
+
+
+	 /* Check to see if space_needed is available in the bag.  If not,
+	  *   try and pack the bag and stack to make enough room.  If more
+	  *   space is requested than we allow, clear the stack because if
+	  *   we can't save this undo, every undo before this one is
+	  *   invalid.
+	  * Returns:
+	  *   TRUE:  Bag (now) has enough room.
+	  *   FALSE:  You want too much space and can't have it.  Undo stack
+	  *     cleared.  Try again with a more reasonable request.
+	  */
+     static int open_bag(space_needed) int space_needed;
+     {
+       int tot, da_total, total_so_far;
+       Undo *ptr, *da_winner;
+       UndoHeader *header;
+
+       header = <the undo header for the current buffer>;
+
+       total_so_far = bag_size(header->bag); /* number of characters in bag */
+       tot = space_needed -(max_undo_saved -total_so_far);
+
+       if (tot <= 0) return TRUE;		/* Plenty of room! */
+
+       if (space_needed > max_undo_saved)	/* You want too much! */
+       {
+	 clear_undos();
+	 return FALSE;
+       }
+
+       da_winner = NULL;
+       for (ptr = <walk undo stack starting at the most recent event>)
+       {
+	 if (ptr->type == BU_DELETE)
+	 {
+	   if (total_so_far >= tot)	/* found enough space here */
+	   {
+	     da_winner = ptr;
+	     da_total = total_so_far;
+	   }
+	   else break;		/* the last one was the one we wanted */
+	   total_so_far -= ptr->n;
+	 }
+       }
+
+	   /* We KNOW (and can prove it) that da_winner != NULL because
+	    *   bag_size >= tot > max - bag_size
+	    *   (from
+	    *   max_undo_saved >= space_needed > max_undo_saved -bag_size
+	    *   among other things).  Since bag_size is the sum of all the
+	    *   BU_DELETEs, there must be one or more events that are
+	    *   winners.
+	    */
+       for (ptr = <walk undo stack starting at da_winner>)
+       {
+	 free_undo(ptr);
+       }
+       pack_bag(da_total);	/* remove text from bag, fix up pointers */
+
+       return TRUE;
+     }
+
+
+	 /* Go though the undo stack and adjust the text indices to reflect
+	  * n characters being removed from the front of the bag.  Shift n
+	  * characters off the front of the bag.
+	  */
+     static void pack_bag(n) int n;
+     {
+       Undo *ptr;
+       UndoHeader *header;
+
+       header = <the undo header for the current buffer>;
+
+       for (ptr = <walk undo stack starting at the most recent event>)
+	 if (ptr->type == BU_DELETE)
+	 {
+	   <adjust ptr->text back by n characters>
+	 }
+
+		/* remove n characters from front of bag */
+       slide_bag(header->bag,n);
+     }
+
+
+Here are a couple of routines that you will need if you have a LLE.
+This is how to calculate and use undo marks.
+
+     static void goto_unmark(mark) UnMark *mark;
+     {
+       goto_line(mark->line);
+       next_character(mark->offset);
+     }
+
+     static void set_unmark(mark) UnMark *mark;
+     {
+       extern Mark *the_dot;	/* the dot in the current buffer */
+
+       register Line *lp, *dot_line;
+       register int line;
+
+       dot_line = the_dot->line;
+       for (line = 1, lp = BUFFER_FIRST_LINE(current_buffer);
+		lp != dot_line; lp = lp->l_next)
+	 line++;
+
+       mark->line = line;
+       mark->offset = the_dot->offset;
+     }
+
+
+victoria:/usr/homes/tomer/News 16%> 

@@ -1,0 +1,29 @@
+\BOOKMARK [1][-]{section.1}{Funktionell beskrivning}{}
+\BOOKMARK [2][-]{subsection.1.1}{Krav p\345 design}{section.1}
+\BOOKMARK [2][-]{subsection.1.2}{Funktionssammanfattning}{section.1}
+\BOOKMARK [2][-]{subsection.1.3}{Namnkonventioner}{section.1}
+\BOOKMARK [2][-]{subsection.1.4}{Kort lista \366ver anv\344nda begrepp}{section.1}
+\BOOKMARK [1][-]{section.2}{Timeline - \304ven k\344nd som ''Fina listan'' :\)}{}
+\BOOKMARK [1][-]{section.3}{Implementationsbeskrivning}{}
+\BOOKMARK [2][-]{subsection.3.1}{Dubbell\344nkad lista av rader}{section.3}
+\BOOKMARK [2][-]{subsection.3.2}{Buffer-Gap}{section.3}
+\BOOKMARK [2][-]{subsection.3.3}{Inladdningen av filen}{section.3}
+\BOOKMARK [3][-]{subsubsection.3.3.1}{DLL -- Konvertering till l\344nkade rader}{subsection.3.3}
+\BOOKMARK [3][-]{subsubsection.3.3.2}{Buffer-Gap -- Ladda fil till Buffer}{subsection.3.3}
+\BOOKMARK [2][-]{subsection.3.4}{F\366rflyttning}{section.3}
+\BOOKMARK [2][-]{subsection.3.5}{Editering \(Notera att det inte \344r ''Buffer-Gap''\)}{section.3}
+\BOOKMARK [3][-]{subsubsection.3.5.1}{Grundl\344ggande editering}{subsection.3.5}
+\BOOKMARK [3][-]{subsubsection.3.5.2}{Undo/Redo \(B\366r vara konfigureringsbart f\366r anv\344ndaren\)}{subsection.3.5}
+\BOOKMARK [3][-]{subsubsection.3.5.3}{Kompaktering}{subsection.3.5}
+\BOOKMARK [2][-]{subsection.3.6}{Avklarade funktioner}{section.3}
+\BOOKMARK [1][-]{section.4}{Delaktiga}{}
+\BOOKMARK [1][-]{section.5}{Kommentarer}{}
+\BOOKMARK [1][-]{section.A}{Editorkommandon}{}
+\BOOKMARK [2][-]{subsection.A.1}{Different styles for marking text}{section.A}
+\BOOKMARK [2][-]{subsection.A.2}{Comments regarding the ``styles''}{section.A}
+\BOOKMARK [2][-]{subsection.A.3}{Command definitions}{section.A}
+\BOOKMARK [3][-]{subsubsection.A.3.1}{Edit}{subsection.A.3}
+\BOOKMARK [3][-]{subsubsection.A.3.2}{Movement}{subsection.A.3}
+\BOOKMARK [3][-]{subsubsection.A.3.3}{Block\137marking\137movement}{subsection.A.3}
+\BOOKMARK [3][-]{subsubsection.A.3.4}{Notepad\137marking\137movement}{subsection.A.3}
+\BOOKMARK [1][-]{section.B}{hitSearch - Hur s\366kning efter text b\366r g\345 till}{}

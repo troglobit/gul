@@ -1,0 +1,21 @@
+Interface editor CORE <----> screen - - - > plugin
+
+
+/* Createscreen creates a screeen. Spectravideo equivalent: initialize to
+   proper screenmode, ie SCREEN 0 */
+int createScreen(void);
+
+
+/* Spectravideo equiv: macro that defines maxy and maxx to 24 and 40, respectively. */
+void getScreenMaxYX(int *maxy, int *maxx);
+
+/* We need it to know when to call the SCREEN provided redraw() function. */
+/* The redraw() function links against our must-be-provided "text-generator"-
+ * function.
+ */
+int isScreenChanged(void);
+
+void updateScreen(void);
+
+int putPixchar(int x, int y, char ch /*, int depth ?? */);
+char getPixchar(int x, int y);

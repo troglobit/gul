@@ -1,0 +1,273 @@
+Utkast till generell skärmhantering för Gul Editor
+17/4 -99  --  Första utkastet, Joachim Nilsson
+12/1 -00  --  TIllägg om generaliseringar, Jocke
+=============================================================================
+
+Tankar och funderingar om ett generellt "pluginsystem" till editorn. Notera
+att detta bara är ett _utkast_, ideer som framförallt jag ensam hittat på
+med en del tankar från JAkov. Dessutom är det mest inriktat på skärmen än
+något annat (tex tangentbordsinput) så ta det för vad det är - Rent svammel!
+:-)                       /Jokke 17/4 -99
+
+
+Blandade önskemål & tankar
+==========================
+	Stöd för resize! (xterm-fönster tex!)
+	På Spectravideo blir den virtuella skärmen samma som den riktiga. ;)
+	För ncurses borde man kunna göra något liknande.
+
+	Djup    - 7, 8, 16 (unicode) bitars tecken.
+	Array   - pixcharArray. Arrayen skall vara endimensionell istf. två-
+             dimensionell för då blir den enklare att porta till ex.v.
+             Spectravideo. (JAkovs önskemål. :-)
+	Flagga  - som talar om om den virtuella skärmen är dirty,
+             dvs om skärmrutinerna skall uppdatera skärmen.
+
+   Det här ger ju dessutom början till filen config.h som det nu blivit
+   dags för ett tag nu. #Defines som DEBUG, NCURSES, GUL_CORE, JOE_CORE,
+   VT100 etc. får fritt spelrum. Detta bör underlätta betydligt för olika
+   bisarra delar i projektet. Allt plugin-jidder: skärm{NCURSES|VT100} och
+   olika editor-kärnor{GUL_CORE|JOE_CORE} etc. 
+
+   Fil I/O. Samma tok här om man har olika kärnor så måste man ju hantera
+   dessa. Just nu har jag lagt in #if defined (EDITOR_MODE) i io.c för att
+   styra det.
+   
+
+Generaliseringar & Förenklingar (Nytt 12/1 -00)
+===============================================
+För att snabba upp renderingen till skärmen och förenkla det här med
+rendering har jag ett förslag om att styra upp API:t som finns implementerat
+i de (mycket excellenta {ncurses,slang,vt100}.c) skärmpluginen. Anledningen
+till detta  är det dubbeljobb som görs i slang och ncurses varianterna, 
+dessa har nämligen färdiga virtuella skärmar och "dirtyflaggor" som man
+borde kunna använda mer direkt istf. som nu.
+
+Ett slags "wrapperfunktioner" och/eller något som är eller liknar det
+som funktionspekare erbjuder. På så vis skulle man kunna ha flera nivåer
+av API-stöd vid renderingen.
+
+	- En mer generell, minimal, API där de allra mest basala funktionerna
+	  finns. De som inte stöds är då NULL!
+
+	- Sedan följer flera nivåer av avancemang ovanpå detta som alla
+	  har egna fina intressanta detaljer som renderingsmotorn kan använda
+	  sig av om de finns med i aktuellt plugin.
+
+Allt som egentligen behövs är att styra upp de existerande rutinerna s.a.
+interfaceen går att använda mot standardbiblioteken.
+
+   
+Funktioner
+==========
+	putPixchar
+	getPixChar
+	createArray(maxX, maxy)
+	resizeArray(new_maxX, new_maxY)
+	        - Liten trixig sak det här med resize
+
+
+Implementation
+==============
+	Lite jidder om implementation. Gjort lite mer objektorienterat för
+	att tydliggöra exakt VAD det är man ska använda för att skriva till
+	skärmen från editorkärnan samt vad man måste skriva för rutiner till
+	skärm-plugin som tex vt100/ncurses/annat.
+
+class screen{
+private:
+	int  maxX, maxY;				/* Virtuella skärmens storlek */
+	int  currentX, currentY;	/* */
+	char *pixcharArray= NULL;	/* Den virtuella skärmen		*/
+
+	/* Flaggor */
+	int dirtyFlag;
+	int needsRedraw;
+
+	/* Interna funktioner */
+	int resizeScreen(int newMaxX, int newMaxy);
+   int isScreenDirty(void);
+
+public:
+	/* Metoder */
+	int createScreen(void);
+
+   void getScreenMaxYX(int *maxy, int *maxx);
+   int isScreenChanged(void);
+
+   void updateScreen(void);
+
+   int putPixchar(int x, int y, char ch /*, int depth ?? */);
+   char getPixchar(int x, int y);
+
+  	/* Kool rutin som man kan anropa med en funktion som argument.
+  	 * den funktionen levererar antingen en ström med tecken eller
+  	 * tecken för tecken till rutinen som ritar om hela skärmen.
+  	 */
+//   int redrawScreen((supplierfunc *)(argument ...));
+};
+
+/*** Tangentbordshantering ******************************************/
+class keyboard
+{
+   int keyboardType();
+   int flowcontrol;
+
+public:
+   char init(void);
+   char checkForInput();
+}
+
+    
+
+/*** createScreen() *****************************************************
+ * Your basic contructor type thingy... :)
+ ************************************************************************
+ */
+int screen::createScreen(void)
+{
+	if (!pixcharArray)
+		free (pixcharArray);
+
+   screenPluginInit();
+   screenPluginGetMaxYX(&maxY, &maxX);
+	pixcharArray= allocate(maxX * maxY, "screen::createScreen()");
+	isDirty= 0;
+
+	return 0;
+}
+
+void screen::getScreenMaxYX(int *maxy, int *maxx)
+{
+   *maxx= maxX;
+   *maxy= maxY;
+}
+
+
+/*** resizeScreen() *****************************************************
+ * Skapar ny virtuell skärm med samma storlek som den fysiska skärmen och
+ * kopierar över all synlig text till den nya.
+ ************************************************************************
+ */
+static int resizeScreen(int newMaxX, int newMaxy)
+{
+	char *newPixcharArray;
+   int  x, y;
+
+	newPixcharArray= (char *)allocate(newMaxX * newMaxY, "resizeScreen()");
+
+   /* Kopiera så mycket som möjligt till den nya arrayen */
+   for (y= 0; y < (newMaxY > maxY ? maxY : newMaxY); y++){
+      for (x= 0; y < (newMaxX > maxX ? maxX : newMaxX); x++){
+         newPixcharArray[y*maxX + x]= pixcharArray[y*maxX + x];
+      }
+   }
+   /* Kritiskt område... :( */
+   free(pixcharArray);
+   pixcharArray= newPixcharArray;
+   maxX= newMaxX;
+   maxY= newMaxY;
+
+   /* Nu ser ju förmodligen inte skärmen klok ut så man skulle behöva
+    * rita om den...
+    */
+   isDirty= 1;
+   
+	return 0;
+}
+
+int screen::isDirty(void)
+{
+	return isDirty;
+}
+
+
+/*** isChanged() ********************************************************
+ * Den här är tom jag emot upplägget i, men jag gjorde så här som ett
+ * första test. resizeScreen() kanske inte eg. borde ligga här eftersom
+ * funktionen nog bara borde svara på frågan och inte GÖRA något...
+ * ... men men. :)
+ ************************************************************************
+ */
+int screen::isChanged(void)
+{
+	int newMaxX, newMaxY;
+	
+   screenPluginGetMaxYX(&newMaxY, &newMaxX);
+	
+	if(newMaxX != maxX || newMaxY != maxY){
+      resizeScreen(newMaxX, newMaxY);
+      return 1;
+	}else{
+		return 0;
+	}
+}
+
+
+void screen::update(void)
+{
+   screenPluginUpdate();
+}
+
+int screen::putPixchar(int x, int y, char ch)
+{
+	if (!pixcharArray)
+		return 1;
+   
+	pixcharArray[y*maxX + x]= ch;
+   isDirty= 1;
+   
+	return 0;
+}
+
+char screen::getPixchar(int x, int y)
+{
+	if (!pixcharArray)
+		return 0;
+	
+	return pixcharArray[y*maxX + x];
+}
+
+char keyboard::checkForInput(void)
+{
+   return keyboardPluginCheckForInput();
+}
+
+void keyboard::init(void)
+{
+   keyboardPluginInit();
+}
+
+
+
+
+/***********************************************************************
+ * Rutiner som respektive skärmhanterar-plugin måste tillhandahålla
+ ***********************************************************************
+ */
+
+/* Div. inställningar och sånt... */
+void screenPluginInit(void);
+
+/* Ska returnera skärmens storlek i just det ögonblicket. För ev. resize */
+void screenPluginGetMaxYX(int *maxY, int *maxX);
+
+/* Läser ur framebuffern/virtuella skärmen och skriver ut på skärmen */
+void screenPluginUpdate(void);
+
+
+/***********************************************************************
+ * Rutiner som respektive tangenbords-plugin måste tillhandahålla
+ ***********************************************************************
+ */
+
+/* Initierar tangentbordspluginet */
+void keyboardPluginInit(void);
+
+/* Kontrollerar (EJ väntar) om ett tecken finns, 0 om inget fanns... */
+char keyboardPluginCheckForInput(void);
+
+
+
+
+

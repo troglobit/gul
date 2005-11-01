@@ -1,5 +1,5 @@
 # Dive in and do what these dirs tell you.
-SUBDIRS    = man src
+SUBDIRS    = doc man src
 
 # Stuff that would otherwise not be distributed.
 # .lsm:  Linux Software Map - http://lsm.execpc.com/lsm/

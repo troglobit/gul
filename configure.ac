@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(gul, 0.1.1, [http://vmlinux.org/gul/])
+AC_INIT(gul, 0.1.2, [http://vmlinux.org/gul/])
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(include/settings.h)
-AC_CONFIG_SRCDIR(configure.in)
+AC_CONFIG_SRCDIR(configure.ac)
 
 dnl Every other copy of the package version number gets its value from here
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
@@ -65,6 +65,28 @@ LDFLAGS="-s"])
 AC_ARG_ENABLE(pedantic-compiler,
               AC_HELP_STRING([--enable-pedantic-compiler], [Enable pedantic checks in GCC [default=no]]),
               [CFLAGS="$CFLAGS -Wall -pedantic -Wformat=2 -Wunreachable-code -Winline"])
+
+
+dnl Checks for documentation
+dnl Required for building the documentation
+AC_PATH_PROG([LATEX], [latex], no)
+if test "x$LATEX" = xno; then
+  missing_progs="$missing_progs latex"
+fi
+AC_PATH_PROG([DVIPS], [dvips], no)
+if test "x$DVIPS" = xno; then
+  missing_progs="$missing_progs dvips"
+fi
+AC_PATH_PROG([PS2PDF], [ps2pdf], no)
+if test "x$PS2PDF" = xno; then
+  missing_progs="$missing_progs ps2pdf"
+fi
+AC_PATH_PROG([FIG2DEV], [fig2dev], no)
+if test "x$FIG2DEV" = xno; then
+  if test "x$maintainer_mode" = xyes; then
+    missing_progs="missing_progs fig2dev"
+  fi
+fi
 
 
 dnl Checks for libraries.
@@ -194,5 +216,6 @@ dnl Checks for library functions.
 
 AC_OUTPUT(gul.lsm gul.spec \
           Makefile         \
+          doc/Makefile     \
           man/Makefile     \
           src/Makefile)

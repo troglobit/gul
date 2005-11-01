@@ -1,0 +1,412 @@
+From jpayne%flam@Sun.COM Wed Jan  3 01:25:56 1990
+From: jpayne%flam@Sun.COM (Jonathan Payne)
+Newsgroups: comp.editors,gnu.emacs,comp.unix.wizards
+Subject: Re: GNU Emacs, memory usage, releasing
+Keywords: GNU emacs malloc memory working set gap editor
+Date: 2 Jan 90 21:45:25 GMT
+Reply-To: jpayne@sun.UUCP (Jonathan Payne)
+Organization: Sun Microsystems, Mountain View
+
+
+All this talk about emacs and buffer gap vs. linked list is interesting,
+and I just have to put in my two cents worth.  I've already implemented
+my own version of emacs using linked lists, so that's my experience.  I
+read the emacs cookbook for the redisplay algorithm before I started
+JOVE.  I picked linked list because I knew I could not store the files in
+memory simply because I wrote JOVE for the pdp11/70.  But since I moved
+to bigger machines I have also put off using buffer gap because I could
+not quite see how to make the redisplay algorithm be as smart and cheap
+as JOVE's.  My first exposure to buffer gap was checking out Gosling's
+emacs (that thing was so full of good ideas!) and the first thing I
+noticed was how amazingly smart the redisplay algorithm was, but also how
+amazingly expensive it was.  I couldn't see how to make a smart redisplay
+algorithm be fast with buffer gap.  I have since then learned, and now I
+am writing another version of JOVE using buffer gap.
+
+I will never use a linked list of lines approach again.  Buffer gap is SO
+much better in lots ways from an implementor's point of view and often
+>from the user's point of view.  Here are the reasons that come to mind:
+
+	o File i/o is blindingly fast.  It's standard to implement
+	  read-file the following way:
+	  	- make sure the buffer gap is big enough for the whole
+	 	  file
+		- make one call to read to read the whole file into the
+		  buffer
+	  That's it.  Simple as anything, FAST as anything.  On my Sun
+	  3/60 I can read in a megabyte in a second.
+
+	  Writing files is done in two chunks, the data to the left of
+	  the gap and then the data to the right.
+
+	o A buffer position is represented as an integer.  That's very
+	  convenient in lots of ways.  Forward character is simply
+	  	b->point += 1;
+	  with some bounds checking.  No special casing being at the end
+	  or beginning of a line.
+
+	  You can then define marks, which are easy to update for
+	  insertions.  There are hacks you can use so that marks don't
+	  need updating after every insertion, but rather after every
+	  time the gap is moved, which is relatively rare.
+
+	  You can define marks with lengths associated with them, and
+	  mark them as dirty when changes are made within the span of the
+	  mark.
+
+	  All are possible with linked list, but the code is harder to
+	  write, less reliable, and the implementation will be slower.
+
+	o Insert and delete operations of ANY kind are trivial to
+	  implement.  Move the gap to the point of insertion, and either
+	  make the gap smaller (for insertion) or make the gap bigger for
+	  deletion.  No splicing together lines in a linked list and
+	  garbage like that.
+
+	o No line length hassles.
+
+	o Undo/redo is trivial to implement in this scheme.  I just
+	  implemented undo/redo in a prototype I am working on, very easy
+	  to understand, very nice semantics.  I am not crazy about undo
+	  in VI, Gosling's emacs, or GNUemacs - I'd be curious to see
+	  what you think.
+
+	o Regular expression search is MUCH cleaner.  I ripped the code
+	  out of JOVE and converted it to buffer gap, and it's fast and
+	  much smaller, and definitely much easier to understand, and is
+	  more functional (it searches across newline bounderies).
+
+Lessee.  You complained about the memory usage and the slowness of buffer
+gap.  First of all, I think the average file in UNIX is much less than
+100k.  Actually I KNOW the average file is much less than that, but for
+the hacker types, I bet the average size of a source files is also less
+than 100k, more like 50k and below.  The point is, moving the gap around
+is not that big a deal.  The amount of copying done is directly related
+to how far the gap is moving, not how big the file is, and most of the
+time the gap does not move very far!  It just doesn't.
+
+I thought paging algorithms were geared towards sequential access, and
+that some versions of UNIX provided a system call to tell the pager not
+to try and be smart about paging in adjacent pages for certain processes
+like LISP processes during garbage collection.  But ... I could be wrong.
+
+>7) Most interestingly when the gap closes, because we have inserted that
+>much worth of data, the *entire* buffer contents is realloc()ated. If the
+>buffer is not the top one in virtual memory, or it is but you have a a
+>realloc() that will not attempt just extending a block, but simply allocates
+>a new block and copies the old into the new, you are in for extra overheads.
+>They are no longer proportional to the amount of work you do, but to the
+>total size of the file as well, which may be bad news.
+
+>8) most interestingly, realloc()ating the buffer will leave large holes in
+>your virtual address space, that will expand forever, taking up if anything
+>swap space. The holes are also likely to get fragmented as your session
+>progresses (remember, GNU emacs has such high overheads that you are
+>supposed to start it up once as a server and then use emacsclient as the
+>"real" editor), and therefore the virtual memory profile of your session
+>will worsen steadily.
+
+These are the main problems with buffer gap.
+
+>9) GNU emacs also has some other interesting overheads. The screen display
+>procedure is no speed daemon either...
+
+The redisplay algorithm can be kept smart and cheap.
+
+>The better solution, made relatively easy by the reasonably modular and
+>layered structure of GNU emacs, would be to accept The Emacs Cookbook
+>recommendation (adopted by Jove and the MicroEmacs/Gnu family of editors) and
+>implement a linked list system. I would suggest just reading (or map, on the
+>operating systems that allow it) the file to be edited as a large lump of
+>virtual address space, then building a linked list of pointers to lines
+>therein, and then to allocate modified lines from ageneral purpose arena.
+>Informing the OS of the peculiar access patterns would also help, if
+>possible.
+
+Again, I think this would muck up the rest of the code in the editor.
+How would you access consecutive pieces of the buffer?  In buffer gap,
+you do CharAt(pos).  What would that look like in your new design?  At
+the least you would need accessor functions (not macros, either) to deal
+with boundery conditions.  OR, you have to move the knowledge of how the
+buffer is stored into the places that need good performance.  I had to do
+that for the redisplay algorithm in JOVE and for the regular expression
+searches.
+
+I'm not saying all this isn't possible.  It's just my belief that it's
+not clearly a win.  In fact, in my eyes, for 99% of the editing that I
+do, a buffer gap solution makes the most sense.
+
+Just my two cents...
+
+Jonathan Payne
+
+From jpayne%flam@Sun.COM Wed Jan  3 15:23:08 1990
+From: jpayne%flam@Sun.COM (Jonathan Payne)
+Newsgroups: comp.editors,comp.emacs
+Subject: What is buffer gap you ask?
+Date: 3 Jan 90 19:41:09 GMT
+
+
+Since my posting I have had a lot of people ask what buffer gap is.
+So instead of answering each in turn I figured I would just post a
+message.  I learned about buffer gap in the Emacs Cookbook that was
+written at MIT a million years ago.  I think it was someone's master's
+thesis.  I didn't see it implemented until Gosling's emacs.
+
+Buffer gap is just one way to store a bunch of characters you wish to
+edit.  (Another way is having a linked list of lines.)  Emacs uses the
+buffer gap mechanism, and here is what a buffer looks like in emacs.
+
+|<----- first half -----><----- gap -----><------ second half ------>|
+
+An emacs buffer is just one huge array of characters, with a gap in the
+middle.  There are no characters in the gap.  So at any given time the
+buffer is described as the characters on the left side of the gap,
+followed by the characters on the right side of the gap.
+
+Why is there a gap?  Well if there isn't a gap and you want to insert one
+character at the beginning of the buffer, you would have to copy all the
+characters over to the right by one, and then stick in the character you
+were inserting.  That's ridiculous, right?  Imagine editing a 100kbyte
+file and inserting characters at the beginning.  The editor would be
+spending the entire time copying characters over to the right one.
+Delete would be done by copying characters to the left, just as slow.
+
+With a buffer gap, editing operations are achieved by moving the gap to
+the place in the buffer where you want to make the change, and then
+either by shrinking the size of the gap for insertions, or increasing the
+size of the gap for deletions.  In case it isn't obvious, this makes
+insertion and deletion incredible simple to implement.  To insert a
+character C at position POS in a buffer, you would do something like this:
+
+	/* Move the gap to position POS.  That is, make the first half
+	   be POS characters long. */
+	Buffer_MoveGap(b, pos);
+	b->data[b->first_half++] = c;
+	b->gap_size -= 1;
+
+There, done.  The gap is now one character smaller because we made the
+first half bigger while sticking in the character we wished to insert.
+Actually, at the beginning of the routine there should have been a check
+to make sure that there is room in the gap for more characters.  When the
+gapsize is 0, it is necessary to realloc the entire buffer.  Deletion is
+even easier.  To delete N characters at POS, all you do is make the gap
+bigger!  That is, by making the gap bigger, you take away from characters
+that used to be part of the buffer.
+
+	Buffer_MoveGap(b, pos);
+	b->gap_size += n;
+
+That is delete, folks.
+
+Moving the gap is pretty trivial.  Just decide if you are moving it
+forward or backward, and use bcopy.  bcopy is smart enough to handle
+overlapping regions.
+
+So, when emacs reads in a file it allocates enough memory for the entire
+file, plus maybe 1024 bytes for the buffer gap.  Initially the buffer gap
+is at the end of the file, so when you insert at the beginning of the
+file right after reading it in, you will notice a longer delay than
+usual, because it first has to move the gap to the beginning of the
+file.  The gap only has to be moved when you are doing edit operations.
+
+To examine the contents of a buffer, you can define a macro:
+
+	Buffer_CharAt(b, pos)
+
+All this does it check to see whether pos is in the first half or the
+second half, and then index that one HUGE array of characters correctly.
+It's surprisingly fast, actually.
+
+Somebody mentioned that GNU search takes two strings to search in.  That
+was Stallman's way of optimizing the hell out of the search.  The two
+strings passed in represent the first half and the second half of the
+buffer.  Now the search code does not have to use the Buffer_CharAt macro
+to examine the buffer because it is guarunteed to have two contiguous
+strings of valid data.  That's a good idea - I might have to adopt that
+approach.
+
+Notice that with this approach to storing the file, you can edit binary
+files without thinking about it.  There are no line length limits.
+Newline characters are just normal characters, which you can search for
+if you want.  Also notice that to read a file, you do the following:
+
+	fstat(fd, &stbuf);
+
+	/* make sure the gap is at least as big as the file */
+	Buffer_EnsureGapSize(b, stbuf.st_size);
+	read(fd, &b->data[b->first_size], stbuf.st_size);
+
+There, we just inserted a file into the buffer ... with ONE call to the
+read system call.  Straight into the buffer, not into a temporary
+buffer.  This is FAST.  On my Sun 3/60 it takes about a second to read in
+a megabyte.
+
+Redisplay.
+
+One of the hard things with buffer gap is coming up with a good, fast
+redisplay algorithm.  With a linked list approach, it's really easy to
+write one.  It's important that internally the editor can munge around
+and make changes to the buffer, and then just make one call to redisplay
+when it's done.  And the redisplay should be smart enough to use insert
+and delete line capabilities of the terminal/window system for scrolling
+and for when lines are inserted and deleted.  The way any smart redisplay
+algorithm should work is in stages:
+
+	1) Layout the window.  This means figure out which lines are going
+	   to go where; basically how the screen should look when the
+	   redisplay is done, without actually doing any output to the
+	   screen.
+
+	2) Compare this layout to the layout of the screen after the last
+	   redisplay.  This boils down to comparing lines to see if the
+	   same lines are in the same place as before.  When you scroll,
+	   all the lines will be off by how ever many lines you scrolled
+	   by.  This is easy to detect, and when you do, you just use the
+	   terminals insert/delete line capability to make the redisplay
+	   faster.
+
+	3) Repaint the lines which are different from before.  Lines are
+	   different either because they have been changed, or because
+	   they weren't even visible before.
+
+So how do you actually compare lines quickly?  You can't do a string
+comparison, because the scrolling algorithms have to do lots of
+comparisons.  With a linked list approach to storing a buffer, you can
+just compare the line pointers (a simple integer comparison!) in phase 2
+(above).  So it's nice and fast.  But what do you do for buffer gap
+implementations?  Well there are a couple of solutions, and I can tell
+you two of them.  The first is Gosling's approach (which GNU still uses
+to a certain extent) which is to calculate a hash value for each line
+based on the contents of the line as it would appear on the screen, and
+then using those hash values to do phase 2 of the redisplay.  This has
+two bad problems in my opinion.  The first is that it takes a long time
+to calculate those hash values, and second, since it's based on the
+contents of the lines and not the physical position of those lines in the
+file, the redisplay can be soooooo smart that it does unintuitive
+things.  For instance, if you have duplicate code (shame shame shame) and
+you type ^V to move forward a page, emacs will sometimes scroll BACKWARDS
+on you!  It's very confusing, even if it is the fastest way to update the
+screen.
+
+Since it takes so long to calculate those hash values, Gosling and
+Stallman had to kludge up the redisplay algorithm to try and optimize the
+90% case of just inserting characters.  That's a shame and isn't
+necessary.
+
+I am not sure if I am allowed to describe the fast way to do this, but if
+you are interested, I will see whether my managers will complain.
+
+Anyway, so I hope this helps people understand buffer gap.  I can't
+imagine writing an editor any other way, even though it does have it's
+disadvantages.
+
+From jpayne%flam@Sun.COM Mon Jan  8 21:42:39 1990
+From: jpayne%flam@Sun.COM (Jonathan Payne)
+Newsgroups: comp.editors,comp.emacs
+Subject: a relatively quick redisplay with buffer gap
+Date: 6 Jan 90 00:13:25 GMT
+
+
+Well a couple of days ago I hinted at "something wonderful" in the world
+of redisplay with buffer gap.  I've since decided it's not all that
+amazing, AND, come to think of it, something like this was hinted at in
+Craig Finseth's cookbook.  So here's how my buffer gap redisplay
+algorithm works.  Maybe you'll find it useful.
+
+You need a new data structure to associate with a text object (e.g., an
+emacs buffer).  Call it a span.  It's just like an emacs mark, except in
+addition to a position, it has a (positive) length and a modified flag
+associated with it.  When text is inserted or deleted in a buffer, all
+the spans are updated accordingly.  That is, if the change occurs before
+the span, the spans position is updated, but the length is left
+unchanged.  If the change occurs AFTER the span (> pos + length) then the
+span is unchanged.  If, however, a change occurs in the middle of a span,
+that span is marked as dirty and the length is adjusted.  There are a few
+other conditions, but that's the general idea.
+
+
+First, a simple redisplay algorithm.  This doesn't do insert/delete line,
+but it does handle wrapping lines at character or word bounderies.
+
+The redisplay algorithm maintains one of those spans for each line in the
+window.  Each line in the window is layed out and redrawn iff
+
+	1) The span we used to represent this line has its modified flag
+	   set.
+
+	2) The buffer position we have reached is different from what it
+	   was the last time we displayed this line, OR
+
+#1 happens when an insertion or deletion happened in that line, and #2
+happens when a change in a previous line causes a ripple through into
+lower lines.  Most of the time, the redisplay only updates one line, the
+one line that has the modified flag set.  But sometimes, that will ripple
+down into other lines.  For instance, when a line first wraps the rest of
+the screen will be redrawn because of #2 above.
+
+Laying out a line basically means scanning through the buffer, one
+character at a time, expanding tabs and Control characters until either a
+Newline character is reached, or it's time to wrap the line.  Then it
+sets the pos and length of the span representing that line, and returns
+the buffer position that should be used for laying out the next line.  In
+word wrap mode, it backs up to the last space character and returns the
+first character after that.  In normal character wrapping mode, it just
+returns the next character.
+
+	[This is different from emacs fill mode, which inserts newlines
+	 into the document.  This new way doesn't insert newlines.  This
+	 is nice because the entire paragraph is always filled.  It's
+	 easy to make it so when you're typing in the middle of a HUGE
+	 word which wraps, and then type a space, the left half of the
+	 word might just pop up to the previous line if there is room.]
+
+What's the overhead?  It's maintaining these spans.  It turns out editors
+tend to maintain spans or marks for other reasons, so this isn't all that
+big a deal.  And, maintaining them is pretty simple, compared to the
+alternatives.  It's just a few integer comparisons and adjustments, and
+it's a small drop in the bucket compared to lots of other things going on
+in the editor.
+
+So this gives you a nice redisplay algorithm, very snappy, not too smart
+in that it won't do terminal insert/delete line kinds of things.  But,
+that's not all that hard, now.  Remember, the hard part was figuring out
+how to compare one line to another quickly.  In GNU and Gosling's
+emacses, comparing lines is done by hashing on the contents and then using
+the hash values.  In this new scheme, comparisons are done by buffer
+positions, namely the position of the spans represented in each line.
+
+This changes the above redisplay algorithm.  There now has to be a layout
+phase, followed by a movelines phase, followed by a redraw phase.  The
+layout phase re-layouts a line for reasons #1 and #2 above, then the the
+movelines phase looks for ways to move lines around instead of redrawing
+them.  And then the redraw phase goes through and redraws any lines that
+didn't get fixed up by being moved around.
+
+There are certain optimizations you can do in the layout phase, to cut
+down on the amount of laying out you do.  For instance, if you find
+yourself laying out a line because the position is different, you can do
+a quick scan down the list of lines from the previous redisplay looking
+for a line which began with that position after the last redisplay.  When
+that's the case, you can just copy that layout info into the new line,
+instead of recalculating it.
+
+--------------------
+
+So what this algorithm has to offer over the other one is, it doesn't
+hash on the contents of the lines for the movelines phase of the
+redisplay.  It also doesn't re-layout lines that don't need it.  I am not
+sure, but I think the other algorithm doesn't know which lines to
+re-layout, so it always does them all, when the simple optimizations
+(e.g., inserting a character on a line which doesn't wrap) don't work.
+When some sort of scrolling has occurred, part or all of the window will
+have to be relayed out, which involves scanning through the buffer, but
+there are optimizations that can be done to make this a little faster.
+
+See?  Nothing earthshaking, after all.  I just like the way it works A
+LOT!  This whole mechanism lends itself quite nicely to wysiwyg
+environments with variable width fonts, multiple fonts, styles,
+word-wrapping lines without inserting Newlines (the way of the future),
+all different kinds of justification (left, right, centered, left-right),
+etc.
+

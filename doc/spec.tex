@@ -1,0 +1,759 @@
+% -*-LaTeX-*- vim:set ts=3 sw=3 ruler:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The complete sourece specification for the GUL Editor.
+%
+%%% Revision history %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 981220 - LaTeX formatting done by Joachim Nilsson.
+% 990119 - Some small fixing up and additions made /Jocke
+% 990608 - Small fixes and additions. /Jocke
+%
+%%% Saker att tänka på i LaTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 1. Prova att använda Emacs, det hjälper oerhört, trots att den är lite
+%    stor och tungrodd ibland. Jag är tvungen att starta Emacs med:
+%    $ emacs -rv spec.tex      # -rv == reversed video
+%    För annars blir färgerna i X helt sjuka, tack Red Hat! :(
+%
+% 2. Specialtecken i LaTeX är: # $ % & _ { } | ~ ^ \
+%    Så för att skriva såna, tänk C!
+%
+% 3. M-x untabify är din vän, även om LaTeX-moden i Emacs tar hand om
+%    dig så kan den vara en bra kompis i alla väder.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentclass[a4paper,draft]{article}       % draft == redigeringsläge.
+\documentclass[a4paper]{article}
+\usepackage{a4wide}
+\usepackage[T1]{fontenc}
+\usepackage[swedish]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{graphics}
+\usepackage[dvi2ps]{graphicx}
+\usepackage{url}
+\usepackage{fancyheadings}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{rawfonts}
+\usepackage{color}
+\usepackage{hyperref}
+\definecolor{light}{gray}{.92}
+
+%\addtolength{\oddsidemargin}{-10mm}
+%\addtolength{\evensidemargin}{-10mm}
+%\addtolength{\topmargin}{-15mm}
+%\addtolength{\textwidth}{20mm}
+%\addtolength{\textheight}{15mm}
+%%\renewcommand{\baselinestretch}{1.5}
+
+% Ställer in juste:a stycken. Indragning resp. separering.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex plus 0.3ex minus 0.1ex}
+
+% Ställer in sidhuvud & sidfot.
+\pagestyle{fancy}                 % Fräcka sidhuvuden
+%\addtolength{\headwidth}{2cm}     % Sidhuvd bredare än texten.
+%\setlength{\headrulewidth}{0.4pt} % Linje i sidhuvud är 0.4 punkter
+%%\setlength{\footrulewidth}{2pt}   % Linje i sidhuvud är 2 punkter
+
+% Följande kommandon definerar vad som ska finnas i sidhuvud och
+% sidfot. Om man skriver dubbelsidiga dokument finns även formen
+% \kommando[text på udda sida]{text på jämn sida}
+\lhead{\rightmark}
+\chead{}
+\rhead{Sida \thepage.}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+% Eget TeX-kommando för att skriva mail-referenser. Observera att man
+% måste ``escape:a ut'' alla LaTeX specialtecken så länge man inte skriver
+% i en ``verbatim'' omgivning ...
+% Tex: \mailto{mig@mig.org}
+%      \mailto{sven\_jerring@heaven.org}
+\newcommand{\mailto}[1]{<\url{#1}>}
+
+\title{Specifikation Editorprojekt - GUL Editor}
+\author{981015 Joachim Nilsson}
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\begin{abstract}
+Projekt för att vidga vyer flytta berg och skriva den ultimata editorn.\\
+Med lite tur så lär vi oss lite oxå på vägen dit. :)
+\end{abstract}
+
+%\newpage
+\tableofcontents
+
+\newpage
+\section{Funktionell beskrivning}
+När vi för många månar sedan med oförstörda sinnen, då alla samlade i
+den perfekta enheten 'Campus', djärvt och med en dåres drömmar och
+visioner gav oss in i detta projekt så ställde vi upp vissa mål. Detta
+dokument är ett försök att sammanfatta dessa på ett så klart och tydligt
+sätt som möjligt ...
+
+En varning kanske är på sin plats: Upprepningar och otydligheter är
+sällan ovanliga i texten nedan. Den är dessutom ofantligt lååång redan.
+Så minns denna varning när ni mot slutet av dagen utsvultna flämtandes
+tittar upp från skärmen med ett plågat uttryck i ansiktet. *he he*
+
+
+\subsection{Krav på design}
+Här följer nu en sammanfattning av punkter som vi talat om. Vissa saker
+är vi rörande överens om andra vet vi inte vad vi tycker, utom att det
+låter ballt och borde vara med...
+
+\begin{itemize}
+\item Själva editorkärnan skall vara liten.
+
+\item Snabb och resurssnål (i sin enklaste/renaste form).
+
+\item Mer lik typ Notepad än VI (för det finns redan så många vi-
+  kloner). Dvs inga separata kommando/editerings-lägen.
+
+\item Modulariserad av bara DEN. Ska tex klara att mappa olika
+  tangentkombinationer till olika keysets precis som att man
+  enkelt skall kunna kompilera om med en annan display-modul
+  och vips kunna ha en editor för X (GTK+?!) likväl som man
+  skall kunna köra den på sin favoritterminal (Wyse 50 ;).
+
+\item För snabba sökningar har Jakob tänkt ut att använda hashing.
+  (Endast han själv verkar veta hur detta skall funka dock, för
+  inget mer har hörts om detta... :) [Jakob skall fylla i här!]
+
+\item Recovery-filer! Hur? Tja, svår och intressant++ fråga!
+
+\item Swapfiler? Man kan ju bara inte he en hel fil (stor) i minnet
+  utan är ju eg. piskad att ha en swap, kanske i kobination med
+  den ovan nämda recovery-filen?!
+
+\item Unicode-support?
+
+\item Jag vill ha stöd för folding ... /Crash
+\end{itemize}
+
+\subsection{Funktionssammanfattning}
+Fritt tagen ur tidigare maildiskussioner. Andra id\'{e}er om hur
+upplägget av sammanfattningen bör se ut välkomnas som vanligt.
+
+Sammanfattningen ursprungligen gjord av Jakob 23/10 -98 med kommentarer
+och tillägg av Jocke.
+
+\begin{verbatim}
+Jakob <jakov@quicknet.se> Fri Oct 23 00:22:16 1998
+> Plattformsoberoende.
+>    "Wrap"-funktioner eller "Wrap"-defines till utskrift på
+>    skärmen.
+>    Tillägg av mig [Jakob]: Liknande tänkade vid access mot
+>                            filsystemet.
+
+Wrappers som gör att hur än filsystemet fungerar (alla sjuka
+och konstiga fall!) så är editorn oberoende av detta.
+
+> > Liten binär.
+>    Mindre än pico.
+>    pico är ganska stor, 270 kb på legolas
+>    och drygt 100kb på min linux. (Med delade bibliotek.)
+>    Jag tycker vår design ska vara mycket liten.
+
+Vi skulle visst satsa på att försöka komma under 150kB, vilket
+jag personligen inte tror är något som helst problem! :-)
+
+> Multilevel undo. (Som mål iaf.)
+
+Är eg. oxå avklarat (i teorin) redan. Se vidare nedan.
+
+> Effektiv och snabb minneshantering.
+>    Någon annan lösning än vanlig GAP och LL.
+
+För förslag, se "Implementationsbeskrivning".
+
+> Förslag från min sida angående stubbar:
+>    Se om vi inte kan utnyttja #ifdef och #define i rätt hög
+>    grad. På så vis kan binären hållas liten.
+\end{verbatim}
+
+Vi var även inne på konceptet 'tempfiler'. Vilket fortfarande nog är
+en rätt intressant diskussion. För som Anders mycket listigt påpekar
+i ett brev, så använder både VI och EMACS denna lösning och kan däremd
+även skryta med ''recovery''-funktioner.
+
+
+%\subsection{Filnamn och standard för \#defines och variabelnamn}
+\subsection{Namnkonventioner}
+Filnamn och standard för \#defines och variabelnamn.
+
+När vi diskuterade detta tidigare så var vi alla så rörande
+överens, men en liten rekapitulation av vad som sagts kanske
+är på sin plats:
+
+Sammanfattning av Anders 11/10 -98 med kommentarer av Jocke.
+
+\begin{verbatim}
+Anders Bornäs <mail_boran@yahoo.com> Fri, 11 Sep 1998
+> gulMain.c gulMain.h  <- typ main eller så
+> mem.c mem.h          <- utbytbar minneshantering
+
+memory.*
+
+> io.c io.h            <- nja, filhantering egentligen
+
+vfs.*                  <- Virtual file system == Filhantering?
+io.*                   <- Input==Keyboard, Output==Screen?
+
+> disp.c disp.h        <- skärmutskrifter
+
+display.*
+
+> misc.h               <- en favorit jag _måste_ ha!
+>                         (TRUE, FALSE, RANDOMVAL mm)
+\end{verbatim}
+
+Variabelnamn har jag för mig att vi istf. att använda underscore
+så skulle vi hålla oss till något i den här stilen:
+
+\texttt{filename/fileName, thisNode, previousNode, nodep, nodepp osv.}
+
+Där \texttt{'p'} och  \texttt{'pp'} används till att tala om att det
+är pekare resp. dubbelpekare. Givetvis så är det ju inte hela världen
+om man använder underscore då och då.
+
+\texttt{\#define}'s skall givetvis vara VERSALER! :)
+
+\subsection{Kort lista över använda begrepp}
+Boran började ju tuta ihop en lista av tuffa ord som han inte förstod,
+när vi andra för länge sedan givit upp hoppet om att nånsin förstå vad
+det var vi pratade om ... Den här listan \emph{bör} kompletteras.
+
+\begin{tabular}{l|p{10cm}}
+  \emph{Begrepp}    & \emph{Förklaring} \\ \hline
+  GAPS(I)Z(E)       & Konstant betecknande storleken på buffergapet. \\ \hline
+  Blockmarking      & Möjligheten att kunna markera text i rektangulära block. (Se även Appendix A) \\ \hline
+  linescroll(ing)   & Dvs inte wrappat som i emacs/vi. (Se även \texttt{M-x hscroll-mode} i Emacs.) \\ \hline
+  ll                & Linked list, se editor.101.txt \\ \hline
+  buffer gap        & Se filen buffer-gap.txt i distributionen eller
+                      på editorns hemsida: \url{http://vmlinux.org/gul/editor/txt/buffer-gap.txt}. \\ \hline
+  Folding           & Tänk dig att kunna markera rader, tex alla
+                      kommentarer, och sedan kunna välja ``Fold out'' i editorn för att
+                      dessa sedan skall ``försvinna'' eller snarare vikas undan, därav namnet. \\ \hline
+  Virtual keys      & Möjlighet att ha olika ''keymaps''. Dvs att kunna binda
+                      tangentkombinationer till olika funktioner i editorn. \\ \hline
+  Key binding       & Se: Virtual keys. \\ \hline
+  GULPL             & GUL Public License \\ \hline
+  KAFFE             & Fullkomligt nödvändigt för att kunna leva.
+\end{tabular}
+
+
+\newpage
+\section{Timeline - Även känd som ''Fina listan'' :)}
+Här följer nu en liten hur-vi-skulle-kunna-gå-tillväga-lista väldigt fint
+sammanfattad av Anders!
+
+\textbf{Den Fina Listan}
+\begin{enumerate}
+\item printa text
+\item läsa in fil till allokerat minne
+\item markörförflyttning (simpel)
+\item infoga ta bort
+\item spara fil
+\item ordna bra (nåja) tangentmappningar
+\item snygga till minneshanteringen
+\item rätta till presentationen
+\item utöka funtionaliteten
+\label{punkt9}
+\item goto \ref{punkt9}.
+\item ... i stort sett.
+\end{enumerate}
+
+Efter den fina listan kan jag nu stolt säga att 1--4 är ''klart''. En
+fil går att läsa in från prompten, in i strukturen av länkade rader (se
+vidare nedan för beskrivning av \textit{exakt} hur det fungerar). Där
+man sedan tack vare curses både kan se början av filen (första skärmsidan),
+flytta runt en markör och ta bort och infoga tecken. :-D
+
+Se vidare filen \texttt{TODO} i distributionen\footnote{Det är *så* koolt
+  att kunna säga just ``distributionen'' om det här lilla hacket! ;)}
+
+\newpage
+\section{Implementationsbeskrivning}
+
+\begin{figure}[ht]
+\begin{center} % Used to be a 270 deg rotated kernel-concept.eps
+\resizebox{!}{15cm}{{\rotatebox{0}{\includegraphics[]{overview}}}}
+\end{center}
+\caption{Översikt av nuvarande design.}
+\label{kernel_concept}
+\end{figure}
+
+
+\subsection{Dubbellänkad lista av rader}
+\textbf{Kort beskrivning:} Enl. den funktionella beskrivningen ovan så
+byggs filen upp av en datastruktur av ''dubbellänkade rader''. Där
+varje ''rad'' inte nödvändigtvis måste vara just en fysisk rad i filen
+utan är ett block om ''256'' bytes någonstans ur filen.
+
+Den mycket bisarra konstruktionen nedan enl.
+$ 3\cdot(2 \cdot sizeof(struct dllSt *) + 2 \cdot sizeof(int)) $ är
+till för att på ett snyggt sätt aligna hela \textit{dllSt} till en
+jämn tvåpotens. I det här fallet 64 bytes (om pekare och \textit{int}
+x är fyra bytes).
+
+\label{dllSt}
+\begin{verbatim}
+typedef struct dllSt{
+   struct dllSt  *previous;
+   struct dllSt  *next;
+   int           begin;
+   int           end;
+   char          line[3 * (2 * sizeof(struct dllSt *) +
+                           2 * sizeof(int))];
+}text;
+
+#define MAX_LINE_LENGTH 3 * (2 * sizeof(struct dllSt *) +\
+                             2 * sizeof(int))
+\end{verbatim}
+
+\textbf{Detta upplägg har valts pga främst två orsaker}
+\begin{itemize}
+\item Enkel id\'{e}, lätt att implementera.
+\item Ger små datablock som är enklare/snabbare att hantera.
+\item Snygg alignment till jämna block om 16 bytes\footnote{notera
+  att NFS alltid cache:ar block om 16 bytes, vad nu det kan
+  vara bra till?}.
+\end{itemize}
+
+
+\subsection{Buffer-Gap}
+Efter att ha lagt sisådär ett par-tre månader på att försöka få till
+implementationen av DLL, ovan, så satte sig Jocke ner och tog tag
+Buffer-Gap-metoden.  Det var dags att leka med de stora pojkarna!
+
+Det visade sig att Buffer-Gap faktiskt var väldigt enkel.  Buffern som
+var så omtalad var bara en minnesarea med hela filinnehållet i och det
+bisarra gapet var bara markören som man lät glida omkring i buffern.
+
+\begin{verbatim}
+|<----- first half -----><----- gap -----><------ second half ------>|
+\end{verbatim}
+
+När man vill flytta markören åt höger så kopierar man teckent till
+höger om gapet till gapets position noll och flyttar sedan gapet ett
+steg till höger:
+
+\begin{verbatim}
+   thisp->gap[0] = thisp->gap[thisp->gap_size];
+   thisp->gap++;
+
+Efter att ha lagt sisådär ett par-tre månader på att försöka få till
+implementationen av DLL, ovan, [<---G-A-P--->]så satte sig Jocke ner
+och tog tag Buffer-Gap-metoden.  Det var dags att leka med de stora
+pojkarna!
+
+Efter att ha lagt sisådär ett par-tre månader på att försöka få till
+implementationen av DLL, ovan, s[<---G-A-P--->]å satte sig Jocke ner
+och tog tag Buffer-Gap-metoden.  Det var dags att leka med de stora
+pojkarna!
+
+Efter att ha lagt sisådär ett par-tre månader på att försöka få till
+implementationen av DLL, ovan, så[<---G-A-P--->] satte sig Jocke ner
+och tog tag Buffer-Gap-metoden.  Det var dags att leka med de stora
+pojkarna!
+\end{verbatim}
+
+Givetvis först med de normala randvärdeskontrollerna. För att flytta
+åt vänster är det ungefär likadant:
+
+\begin{verbatim}
+   thisp->gap--;
+   thisp->gap[thisp->gap_size] = thisp->gap[0];
+\end{verbatim}
+
+När man vill lägga till tecken till buffern så skriver man de till
+gapets position noll, flyttar gapet ett steg till höger och minskar 
+sedan storleken med ett.
+
+\begin{verbatim}
+   thisp->gap[0] = character;
+   thisp->gap++;
+   thisp->gap_size--;
+\end{verbatim}
+
+Övriga förflyttningskommandon och kommandon för att radera tecken till
+vänster och höger om gapet är bara variationer på ovanstående.
+
+
+\subsection{Inladdningen av filen}
+Allting börjas med att man tex läser in en fil, vilket nog ändå
+är det garanterat vanligaste man gör ... det är ju sällan man
+skapar en ny fil och skriver och skriver och helt plötsligt är
+allt klart, färdigt. Förvisso finns det ju de som vill öppna
+filen ifråga från editorn ... men i dagens drag'n'drop-värld så
+är dessa puckon en utrotningshotatd art. ;)
+
+
+\subsubsection{DLL -- Konvertering till länkade rader}
+\textbf{Vid inladdningen sker följande}
+\begin{enumerate}
+\item Fåniga kontroller om filen finns och annat tjafs.
+\item Allokera nod.
+\item Fyll noden mha fread (använd MAX\_LINE\_LENGTH).
+\item Sätt begin till noll och end till det fread returnerar.
+\item Upprepa 2-4 tills fread returnerar EOF eller fread
+  returnerar något annat än MAX\_LINE\_LENGTH.
+\end{enumerate}
+
+Efter inladdningen så blir fönster/utskrivnings-servern anmodad
+att visa den inladdade texten.
+
+
+\subsubsection{Buffer-Gap -- Ladda fil till Buffer}
+Under Buffer-Gap är det extremt lätt att ladda in filen eftersom
+allt man behöver göra är:
+\begin{enumerate}
+\item Ta reda på filstorleken.
+\item Allokera tillräckligt stor buffer plus \texttt{GAP\_SIZE} bytes.
+\item Sätt gap att peka på buffer
+\item Läs in allt data från filen till \texttt{\&(buffer[GAP\_SIZE])}.
+\item Markören (Gap) står nu på första tecknet i filen.
+\item Klart.
+\end{enumerate}
+
+
+\subsection{Förflyttning}
+All förflyttning sker precis som man är van vid, eller som man
+har valt att själv mappa funktionerna för förflyttning.
+
+För varje förflyttningskommando som kommer in till händelsehanteraren
+(\texttt{while(1)}-loopen) så skickas det vidare till
+fönster/utskrivnings-servern som flyttar markören och/eller uppdaterar
+texten på skärmen.
+
+Fönster/utskrivnings-servern har hand om allt vad fönsterstorlek,
+wrap, och annat larv. Den håller även reda på var i filen/buffern
+man befinner sig. Tex: \texttt{Col=45, Row=16}. Det är då viktigt
+att den är synkad med var editor-kärnan befinner sig ... Det här
+är bara en från min sida en flummig ide som uppstod mitt i natten.
+Alla andra lösningar (för att hålla det så modulariserat som möjligt)
+är som vanligt välkomna, dvs ni \emph{måste} hitta på nåt bättre!!
+
+Eftersom filen lagras i minnet i en dllSt struktur (se \ref{dllSt}).
+Så innebär det ju att man måste tänka till lite när man flyttar sig
+runt i den. Att göra ``pil ned'' är inte bara att sätta \textit{'currentRow'}
+till \textit{'currentRow->next')} utan att man måste söka upp nästa
+'\verb:\:n' i \textit{'currentRow->text[]')} eller efterföljande noder ...
+
+Detta är en smula trist och just för tilfället så är det inte så
+kul, frågan är hur mycket man eg. tjänar på en sån här minnesstruktur?
+
+\subsection{Editering (Notera att det inte är ''Buffer-Gap'')}
+\subsubsection{Grundläggande editering}
+När en användare skall ta bort tecken till vänster så delas
+noden upp i två och end justeras allt eftersom i den vänstra
+av de två noderna. När tecken tas bort till höger sker i
+princip samma sak med det enda undantaget att det är i den
+högra av de två och det är begin som flyttas.
+
+Även vid skrivning av tecken så skapas en ny nod som fylls med
+de tecken som skrivs för att sedan länkas in på lämpligt ställe
+när markören förflyttas. Detta sker genom att den aktuella noden
+i vilken markören befinner sig delas i två exakt där markören är
+i arrayen. Den enda skillnaden är att så länge man befinner sig
+inne i noden och skriver och markören befinner sig i/på 'end'
+utan att vara vid MAX\_LINE\_LENGTH så fortsätter man att jobba
+i den nuvarande noden!
+
+Snurrigt? Gissa om det är snurrigt första veckan man tänker på
+det, gissa! :-)
+
+\subsubsection{Undo/Redo (Bör vara konfigureringsbart för användaren)}
+En enkel förklaring skulle kunna vara att man ''spelar in'' vad
+användaren trycker på för tangenter och sedan spelar upp det
+hela baklänges (utan att radera) när man gör undo. Redo i sin
+tur skulle bara betyda att man spelar framlänges från där man
+står på tapen. (Tapen är givetvis oändligt lång åt höger. ;)
+
+Apropå konfigureringsbarheten (undo-djupet tex) så kom Jakob på
+något kul där: ''På en 64:a får man poke:a en adress ...;-)''
+
+\subsubsection{Kompaktering}
+Rent genrellt sett är den här implementationen av en editor
+väldigt enkel. Dess största problem dock är att den är enormt
+kladdig! Detta avhjälps genom att man med jämna intervall,
+när det inte finns några tecken/kommandon att utföra,
+kompakterar de noder man varit och ändrat i.
+
+Detta kan lösas på många sätt. Ett kan vara att man har en
+lista av vilka noder man varit inne och ''pillat'' i så att
+man inte börjar från början av filen med att försöka
+kompaktera, då detta är ganska onödigt. Tänk bara på att
+kompaktering bör ske i små steg och inte rekursivt/allt på en
+gång.
+\\[5mm]
+\textbf{Ex)}
+Om man har en länkad lista av noder som är editerade och
+man alltid länkar in nya noder först i den listan. Så kan
+det vara en bra ide att titta bakifrån den listan för att
+se om den näst sista och sista kan slås ihop. Om detta
+inte går fortsätter man med den näst näst sista och den
+näst sista etc. :-)
+
+
+\subsection{Avklarade funktioner}
+Hit kan nog bara räknas en delsmängd av ``Grundläggande editering''.
+Pga problemen med curses (att det är puckat och inte kan mappa alla
+tangenter tex BACKSPACE) så sitter vi just nu med en hop fina
+funktioner utan keybindings. HOME, END, BACKSPACE, DEL och annat
+finns redan implementerat ...
+
+Ett finfint pluginsystem har börjat ta form. Se vidare filen \texttt{virtual\_screen.txt}
+för lite info om det. Annars är såsen nog bästa informationen just nu.
+
+Se filen \texttt{TODO} för vidare info.
+
+
+\newpage
+\section{Delaktiga}
+Delaktiga i detta projekt är följande individer.
+
+\begin{tabular}{llp{10cm}}
+  Anders ``Boran'' Bornäs              & \mailto{boran@telia.com}   & Ericsson Radar Systems AB \\
+
+  Jakob ``Jakov af Wallby'' Eriksson   & \mailto{jakob@quicknet.se}       & Quicknet AB \\
+
+  Joachim ``Crash Override'' Nilsson   & \mailto{joachim.nilsson@home.se} & ABB, urk.   \\
+\end{tabular}
+
+
+\newpage
+\section{Kommentarer}
+\begin{tabular}{lp{10cm}}
+  2004-03-30 & Fiffig översiktsbild och en del omstrukturering av dokumentet. /Jocke \\
+  990423 & Lade till insert \& peek till kommandodefinitionslistan. Skrev lite om pluginsystemet. \\
+  990327 & Massor av fixxar gjorda och en hel del omstrukturering/modularisering.
+  Viss uppdatering av spec.tex, se vidare ChangeLog och TODO i distributionen. \\
+
+  990119 & Små fixar och ändringar gjorda. Tog bla bort kapitlet ``RFC'' och
+  lade det ist. som en parentes under ``Delaktiga''. Den senare blev
+  dessutom omdöpt till ``Delaktiga samt deras kommentarer''. \\
+
+  990101 & Fylleri alla luckor och städar upp i \LaTeX-koden.
+
+  Skriver en liten fin README som en handledning till hur man ska
+  bet\'{e} sig för att skriva ut, läsa och ''kompilera''
+  \LaTeX.
+
+  Kommentarer kan ju nu med fördel skrivas direkt i \LaTeX-koden
+  som \texttt{\% [Jokke] -- Lade till bla bla bla...}. Eller något
+  liknande. \\
+
+  981220 & Konvertering till \LaTeX \\
+
+  981023 & Här kan man ju förslagsvis lägga sina kommentarer, om man nu
+  inte vill lägga dem direkt i texten. Om man gör detta kan det
+  vara bra att tala om att man gjort det med nån liten fånig
+  remark i vänstra kolumnen typ som detta:
+
+  [Jokke]  Så här kan en sån där fånig inlinekommentar se ut. :P \\
+\end{tabular}
+
+\appendix
+\newpage
+\section{Editorkommandon}
+   Användbart i allt från makron till keybindings. Infogat från
+   \texttt{internal\_commands.txt}. En väldigt bra sammanfattning
+   gjord av Jakov af Wallby 26/10 -98.
+
+   \subsection{Different styles for marking text}
+      Two ways of marking text are possible. An example follows where marked
+      text is displayed in upper case and unmarked text is displayed in lower
+      case. In both examples the same commands are pressed, just different
+      marking styles are used.
+
+      \textbf{NOTEPAD.EXE style}
+      \texttt{\\
+         hello all fri\colorbox{light}{ends, is this not a}\\
+         \colorbox{light}{cool editor or what, jag provar att} skriva\\
+         lite på svenska också\\
+         hej.\\
+      }
+
+      \textbf{COOL.EXE style}
+      \texttt{ \\
+         hello all fri\colorbox{light}{ends, is this not a~~~} \\
+         cool editor o\colorbox{light}{r what, jag provar att} skriva \\
+         lite på svenska också. \\
+         hej. \\
+      }
+
+   \subsection{Comments regarding the ``styles''}
+      In both examples\footnote{Bägge de här ''exemplen'' övergår nog mitt
+      (Jockes) förstånd, för jag ser ingen skillnad på dem ... ;)}, the user
+      entered "mark mode" (or held shift or whatever) and pushed: one down,
+      21 right. In the NOTEPAD.EXE, this marks the text in a ``stream of bytes''
+      fashion.
+
+      In GULPL block marking mode\footnote{Ah, nu förstår jag! Ändrade markeringen
+      s.a. det skall framgå lite tydligare hur markeringen funkar. En klart dödskool
+      feature som vi(m) bara MÅSTE ha! :-D}, this marks a block of 2 times 21
+      characters.
+
+      All this is high level input stuff not really concerning the
+      first implementation of the editor.
+
+   \subsection{Command definitions}
+      Here comes the first definitions.
+
+      Regard these commands as allocated for future releases, all need not be
+      implemented at once.
+
+      \subsubsection{Edit}
+         \begin{tabular}{ll}
+            insert              & Used to insert a charater. \\
+            peek                & What is the current character? \\
+            delete              & \\
+            copy                & \\
+            paste-normal        & \\
+            paste-block         & \\
+            replace-character   & \\
+            replace-word        & \\
+            replace-line        & \\
+            replace-block       & \\
+            replace-marked      & \\
+          \end{tabular}
+
+      \subsubsection{Movement}
+         \begin{tabular}{lp{8cm}}
+            row-end             & [same as line-end] \\
+            row-start           & [same as line-start] \\
+            column-end          & [cool feature, similar to line-end and line-start] \\
+            column-start        & [Almost the same as page-start. (page-start sets X coord to 0)] \\
+            word-end            & \\
+            word-start          & \\
+            column-word-end     & [same as word-end, but in a vertical fashion.] \\
+            column-word-start   & [same as word-start, but in a vertical fashion.] \\
+            \\ %\hline
+            file-end            & \\
+            file-start          & \\
+            page-end            & \\
+            page-start          & \\
+            block-end           & [block: a piece of text separated from any other] \\
+            block-start         & [piece of text by two newlines] \\
+            \\ %\hline
+            up                  & \\
+            down                & \\
+            left                & \\
+            right               & \\
+            left-up             & \\
+            right-up            & \\
+            left-down           & \\
+            right-down          & \\
+         \end{tabular}
+
+      \subsubsection{Block\_marking\_movement}
+         \begin{tabular}{lp{7.5cm}}
+            BM\_row-end          & [same as line-end] \\
+            BM\_row-start        & [same as line-start] \\
+            BM\_column-end       & [cool feature, similar to line-end and line-start] \\
+            BM\_column-start     & [Almost the same as page-start. (page-start sets X coord to 0)] \\
+            BM\_word-end         & \\
+            BM\_word-start       & \\
+            BM\_column-word-end  & [same as word-end, but in a vertical fashion.] \\
+            BM\_column-word-start& [same as word-start, but in a vertical fashion.] \\
+            BM\_file-end         & \\
+            BM\_file-start       & \\
+            BM\_page-end         & \\
+            BM\_page-start       & \\
+            BM\_block-end        & [block: a piece of text separated from any other] \\
+            BM\_block-start      & [piece of text by two newlines] \\
+            \\ %\hline
+            BM\_up               & \\
+            BM\_down             & \\
+            BM\_left             & \\
+            BM\_right            & \\
+            BM\_left-up          & \\
+            BM\_right-up         & \\
+            BM\_left-down        & \\
+            BM\_right-down       & \\
+         \end{tabular}
+
+      \subsubsection{Notepad\_marking\_movement}
+         \begin{tabular}{lp{7.5cm}}
+            NM\_row-end          & [same as line-end] \\
+            NM\_row-start        & [same as line-start] \\
+            NM\_column-end       & [cool feature, similar to line-end and line-start] \\
+            NM\_column-start     & [Almost the same as page-start. (page-start sets X coord to 0)] \\
+            NM\_word-end         & \\
+            NM\_word-start       & \\
+            NM\_column-word-end  & [same as word-end, but in a vertical fashion.] \\
+            NM\_column-word-start& [same as word-start, but in a vertical fashion.] \\
+            NM\_file-end         & \\
+            NM\_file-start       & \\
+            NM\_page-end         & \\
+            NM\_page-start       & \\
+            NM\_block-end        & [block: a piece of text separated from any other] \\
+            NM\_block-start      & [piece of text by two newlines] \\
+            \\
+            NM\_up               & \\
+            NM\_down             & \\
+            NM\_left             & \\
+            NM\_right            & \\
+            NM\_left-up          & \\
+            NM\_right-up         & \\
+            NM\_left-down        & \\
+            NM\_right-down       & \\
+         \end{tabular}
+
+\newpage
+\section{hitSearch - Hur sökning efter text bör gå till}
+   Infogat från \texttt{hitSearch.txt}. Ännu en väldigt bra sammanfattning
+   gjord av Jakov af Wallby 26/11 -98. Viss omformatering för \LaTeX gjord
+   för att ge presentationen önskat utseende av Crash Override.
+
+   Lite pseudokod i C-format för enklast möjliga textsökning om
+   dokumentet ligger i en sträng. Håll till godo:
+\begin{verbatim}
+/*
+ * NAME:
+ *    hitSearch
+ *
+ *    hitSearch takes document in 'textstr',
+ *    searched for pattern in 'patternstr' and
+ *    returns position in document where hit first occured or
+ *    -1 on miss.
+ *
+ * BUGS:
+ *    Not known. Not tested for many cases either, like empty
+ *    strings etc.
+ */
+int hitSearch(char *textstr, char *patternstr)
+{
+   int hitPos, tPos, pPos;
+
+   tPos= 0;
+   while (textstr[tPos]){
+      pPos= 0;
+      while (textstr[tPos]==patternstr[pPos] &&
+             patternstr[pPos] && textstr[tPos]){
+         pPos++, tPos++;
+      }
+      if ('\0' == patternstr[pPos]){
+         if (isspace(textstr[tPos]) ||
+             '\0' == textstr[tPos]){
+            tPos-= pPos;
+            return tPos;
+         }else{
+            tPos-= pPos;
+         }
+      }
+      tPos++;
+      /* On miss, "tPos" must be backed as many steps as
+       * already compared. (pPos). pPos must then be set
+       * to zero.
+       */
+   }
+   return -1; /* For error */
+}
+\end{verbatim}
+
+\end{document}

@@ -1,0 +1,21 @@
+Begin3
+Title:		gul
+Version:	0.1.2
+Entered-date:	2004-03-31
+Description:	The one true GUL editor!
+		gul.lsm.  Generated from gul.lsm.in by configure.
+		Please edit gul.lsm.in to fix the Keywords and
+		Primary-site entries, add several more lines of
+		description here if appropriate, and to delete these
+		instructions.
+Keywords:	[substitute your keywords here]
+Author: 	crash@vmlinux.org (Joachim Nilsson)
+Maintained-by:	crash@vmlinux.org (Joachim Nilsson)
+Primary-site:	metlab.unc.edu pub/Linux/apps/some/directory
+		31k gul-0.1.2.tar.gz
+		500  gul.lsm
+Alternate-site: 
+Original-site:  
+Platforms:      
+Copying-policy:	GNU copyleft
+End

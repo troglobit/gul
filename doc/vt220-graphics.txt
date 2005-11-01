@@ -1,0 +1,132 @@
+
+                          VT220 user defined graphics
+                                       
+   This document, for which I have no attribution, tells you how to
+   create user defined graphics for a VT200-alike terminal. The examples
+   work on VMS, but can easily be converted to *nix.
+   
+   User defined characters can be used to create foreign character sets,
+   symbols, and can be put together to create high-res pictures.
+   
+   See also: vt100 control codes
+* User Defined Graphics
+
+The following is a description of ONE method of doing UDGs.
+NB UDG's are rather terminal-specific, so only rely on this to work on
+these ickle Wyse thingies...
+
+* Size
+
+UDGs are effectively 8 pixels wide by 10 pixels high. (although see later)
+Due to the display characteristics each pixel is approximately twice as high
+as it is wide.
+
+To simplify design and data entry (and minimise distortion)
+you may wish to use pairs of pixels horizontally.
+
+* Data Format
+
+The UDG is first split into two parts, the first consisting of the top 6 rows,
+the other the bottom 4 rows.
+
+For each part 8 pieces of ASCII data are calculated, one for each column.
+The top pixel of each part is the least signifant byte ie it has 'weight' 1.
+Convert the binary sequence down the column for the 6/4 rows to a number and
+add 63. (this brings all values into the range of printable ASCII characters)
+Convert this number to its ASCII character.  You should then have 16 pieces
+of ASCII data.
+
+       columns    vvv   weight
+
+       ########~\  1
+       ########  | 2     ADD UP 'WEIGHTINGS' FOR EACH COLUMN
+     > ########  | 4
+ rows> ########  | 8     ---\ ADD ---\ ASCII ---\ 16 ASCII CHARS
+     > ########  | 16    ---/  63 ---/ CHAR  ---/(8 FOR TOP FIRST,
+       ########_/  32                             THEN 8 FOR BOTTOM)
+       ########~\  1
+       ########  | 2
+       ########  | 4
+       ########_/  8
+
+
+* UDG definition
+
+COM FILE: First define the escape character using
+
+        ESC[0,8]=27
+
+This now allows you to represent the escape character using ''ESC'
+Use the
+
+        WRITE SYS$OUTPUT "stuff"
+
+command, simply putting ''ESC'in the quotes wherever the escape character
+is required.
+
+* Definition
+
+For  read the escape character, which is either used in a com file as
+shown above or entered directly into a file in editing using CNTRL [ twice
+on a VT200 terminal. (for the chr function in pascal/basic ,escape is chr(27))
+Use
+
+        P1;n;1{#1
+
+to define the UDG with ASCII code n+32. Place the first 8 pieces of data
+right after this. Follow this data with /
+Now put in the other 8 pieces of data. End the UDG definition with
+
+        \  P1;n;1{#1xxxxxxxx/xxxxxxxx\
+
+To define more than one UDG on one line, separate the data with a ; i.e.
+
+        P1;n;1{#1xxxxxxxx/xxxxxxxx;xxxxxxxx/xxxxxxxx\
+
+This will define the UDG which is next in the ASCII sequence.
+
+* Display of UDGs
+
+To show the UDG the UDG character set is selected. UDGs may then be displayed
+using ordinary ASCII codes. Use
+
+        (#1   to select UDGs
+ and    (B    to return to the normal character set.
+
+* NB!!!! ~~~~~~~~
+* Distortion
+
+You may notice distortion at the edges of your UDGs. This seems to be because
+the rightmost edge column gets repeated a coupla times.  This may mean you
+have to tweak your graphics to get them to look right.  (as I had to in the
+example below)
+
+* ALSO
+
+A poor little single black dot with white dots either side will be
+obliterated.  (Please consult others about all this for details...I don't
+know much about the silly quirks on these terminals)  The two effects
+above are minimised if horizontal pixel pairs are used as mentioned
+earlier.
+
+* Example
+
+The following example from my login.com defines UDGs ABC as a skull and
+uses them as a VAX prompt.
+
+$   ESC[0,8]=27
+$   write sys$output "''ESC'P1;33;1{#1{{eeEFnn/?@@@NNFF''ESC'\"
+$   write sys$output "''ESC'P1;34;1{#1~~nnNFfe/MMFFFNN@''ESC'\"
+$   write sys$output "''ESC'P1;35;1{#1{{??????/@???????''ESC'\"
+$   set prompt = "''ESC'(#1ABC''ESC'(B "
+
+
+* Disclaimer!
+
+I accept no responsiblity for people putting silly smily graphics all
+over their programming assignments!!
+
+3M '91
+     _________________________________________________________________
+   
+   * S020 Homepage, * Send us mail * Disclaimer

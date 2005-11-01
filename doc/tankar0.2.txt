@@ -1,0 +1,132 @@
+Jag skickade nyss en lite mindre version
+till joachim.
+nu skickar jag igen.
+detta ar bara lite tankar jag haft.
+
+En fraga till er bada:
+
+Ska man i editorn utga fran en handelseko och
+sedan plocka ut KEYPRESSES fran den,
+eller ska man utga fran KEYPRESSES
+getchar();
+
+och plocka dessa fran en handelseko om det finns
+en sadan i systemet?
+
+Antingen far man emulera getchar()
+i vissa fall eller sa far man emulera (skapa) en 
+handelseko i vissa fall.
+
+Jag fragar eftersom vi kanske iaf maste gora
+en intern handelseko;
+det kan ju komma in flera saker an KEYPRESS.
+Tex resize.
+
+
+
+Jakbo
+--------------------------------------------------
+
+
+inte hela filen i minnet.
+
+Jag vill egentligen implementera en
+virtuell fil, eller virtuell array.
+Att arrayen sedan egentligen ar implementerad
+som en lankad lista, det ska inte markas.
+(har finns utrymme for optimering, som tex
+ett cache-system.)
+
+
+virtuell skarm som renderas.
+sa fort ngt skrivs in ska skarmen renderas om.
+(detta kan optimeras senare.)
+
+
+Nar markoren flyttas runt,
+kollas bara i den virtuella skarmen efter hur markoren kan
+flytta sig.
+For att man ska kunna skjuta in ny text maste man
+veta vilken position i textmassan som motsvarar en viss
+position pa skarmen.
+Detta fungerar eftersom det finns en array med lika manga
+element som det finns rader pa skarmen.
+Varje element innehaller tva tal (index) som talar om var i "filen"
+som den ska borja lasa och hur langt.
+Om man skjuter in nagot tecken pa en rad (INSERT) kontrolleras
+forst var nagonstans i "filen" som raden borjar. Mha det raknas
+det ut var i filen som det ska skjutas in ett tecken.
+Sedan okas talet med 1 som anger hur manga tecken som ska lasas in
+fran filen for den aktuella raden.
+Sedan gor man operationen INSERT CHARACTER in THIS place in VIRTUAL FILE.
+Sist for raden uppdaterar man raden man star pa fran och med tecknet
+som lades till.
+Det slutgiltiga steget galler alla synliga
+rader som kommer efter raden man star pa.
+Dvs alla rader som kommer efter raden man uppdaterade kommer att
+borja ett steg langre in i "filen".
+Losning:
+stega igenom arrayen med startindex och langd. For alla
+rader efter den man uppdaterade oka startindex med 1.
+
+
+Nu kan jag definiera interfacen (datatyperna):
+Jag sager inte att de ska se ut exakt sa har,
+bara att den funktionaliteten behovs.
+
+VIRTUELL FIL:
+
+	int memInsert(char character, vFILE* virtualFile, int position);
+	char memGet(int position, vFILE* virtualFile);
+	int saveMem(vFILE* virtualFile, char* filename);
+	vFILE* loadMem(char* filename);
+
+VIRTUELL SKARM:
+	void setCharacter(char value, int column, int row, vSCREEN* screen);
+	char getCharacter(int column, int row, vSCREEN* screen);
+	int getCurrentColumn(vSCREEN* screen);
+	int getCurrentRow(vSCREEN* screen);
+	int getStartIndexOfRow(int row, vSCREEN* screen));
+	int setStartIndexOfRow(int index, value, vSCREEN* screen));
+	int getVisibleRows(vSCREEN* screen)
+
+VIRTUELL KNAPPSATS:
+	int isKey(vINPUTDEVICE* keyboard);
+	char consumeKey(vINPUTDEVICE* keyboard);
+
+(i ett handelsestyrt system som X11 eller Amiga far man leta i handelsekon
+ efter knappnedtryckningar. gtk+ ?)
+
+--------------------------------------
+Jag tar chansen nar jag val borjar koda och byter ut alla vanliga typer mot
+egna, sa vi kan typedefa eller defina om till olika
+stora typer.
+Dessutom kan det vara ide att anvanda funktionspekare sa
+att man far lite objektkansla. Exempel:
+screen->setStartIndexOfRow(row, screen);
+istallet for:
+setStartIndexOfRow(row, screen);
+
+Observera att det fortfarande inte ar C++, bara ANSI C.
+Det enda jag ar skeptisk till ar hur det fungerar
+med aldre kompilatorer och hur snabbt det ar.
+(Man far en pekaruppslagning extra.)
+Det dumma ar att man far ju saklart ingen "this-pekare" i
+ANSI C, darfor maste man skicka med motsvarigheten till
+det.
+
+
+Optimering av minneshantering:
+(Gor inte detta forran efter att en fungerande variant finns.)
+Istallet for att man har en funktion:
+	char memGet(int position, vFILE* virtualFile);
+sa har man en funktion:
+	STRINGLIST memGet(int position, int length, vFILE* virtualFile);
+
+dar STRINGLIST:
+typedef struct STRINGLIST_str{
+	char* block;
+	struct STRINGLIST_str* next;
+}STRINGLIST;
+Det ar en NULL-terminerad lista av strangar.
+
