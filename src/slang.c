@@ -15,7 +15,7 @@
 #define SCREEN_RESIZED(maxY, maxX)                                      \
    (((maxY) != SLtt_Screen_Rows || (maxX) != SLtt_Screen_Cols) ? 1 : 0)
 
-/*
+/**
  * screenPluginInit():
  *
  * Initiates the screen and the various SLang variables.
@@ -35,7 +35,7 @@ Sorry, exiting!\n");
    }
 }
 
-/*
+/**
  * screenPluginFinish():
  *
  * Call this when quitting from the editor.
@@ -46,7 +46,7 @@ screenPluginFinish (void)
    SLsmg_reset_smg ();
 }
 
-/*
+/**
  * screenPluginGetMaxYX():
  * @maxY: Pointer to return maximum no. of columns in.
  * @maxX: Pointer to return maximum no. or rows in.
@@ -71,7 +71,7 @@ screenPluginGetMaxYX (int *maxY, int *maxX)
 
       if (SCREEN_RESIZED(*maxY, *maxX))
       {
-/* Need to readjust the SLang screen */
+         /* Need to readjust the SLang screen */
          SLsmg_reset_smg ();
          if (SLsmg_init_smg () == -1)
          {
@@ -84,7 +84,7 @@ screenPluginGetMaxYX (int *maxY, int *maxX)
 }
 
 
-/*
+/**
  * screenPluginPositionCursor():
  * @x: Column
  * @y: Row
@@ -94,15 +94,15 @@ screenPluginGetMaxYX (int *maxY, int *maxX)
 void
 screenPluginPositionCursor (int x, int y)
 {
-/* Move to [row, col] */
+   /* Move to [row, col] */
    SLsmg_gotorc(y, x);
    LOG("screenPluginPositionCursor (%d,%d)\n", y, x);
    SLsmg_refresh ();
 }
 
 
-/*
- * screenPluginUpdate():
+/**
+ * screenPluginUpdate() - 
  *
  * Reads from the frame-buffer/virtual-screen and updates the physical
  * screen accordingly.
@@ -117,8 +117,7 @@ screenPluginUpdate (void)
 
    LOG("screenPluginUpdate()");
 
-/* Just in case, I check that there have not been any resize events.
- */
+   /* Just in case, check that there have not been any resize events. */
    getScreenMaxYX (&virtualYmax, &virtualXmax);
 
    LOG(" - [%d, %d]\n", virtualXmax, virtualYmax);
@@ -144,7 +143,7 @@ screenPluginUpdate (void)
 }
 
 
-/*
+/**
  * keyboardPluginInit():
  *
  * Initiates the keyboard.
@@ -160,21 +159,21 @@ keyboardPluginInit (void)
       exit (-1);
    }
 
-/* ABORT_CHAR        -- -1 is to keep system predefined...
-** use SLang_set_abort_signal to add a hook function.
-** FLOW_CONTROL      -- TRUE/FALSE, enable/disable ^S & ^Q.
-** OUTPUT_PROCESSING -- TRUE/FALSE, special processing?
-*/
+ /* ABORT_CHAR        -- -1 is to keep system predefined...
+  * use SLang_set_abort_signal to add a hook function.
+  * FLOW_CONTROL      -- TRUE/FALSE, enable/disable ^S & ^Q.
+  * OUTPUT_PROCESSING -- TRUE/FALSE, special processing?
+  */
    if (-1 == SLang_init_tty (-1, 0, 0))
    {
       LOG("Unable to initialize the tty properly!\n");
       exit (-1);
    }
 
-/*  Slang_set_abort_signal (signal_sigint_handler); */
+   /*  Slang_set_abort_signal (signal_sigint_handler); */
 }
 
-/*
+/**
  * keyboardPluginFinish ()
  * Reset all special keyboard handling back to that previous.
  */
@@ -189,16 +188,14 @@ static int gul_emulate_ncurses_getch (void)
 {
    int ch;
 
-   while (0 == SLang_input_pending (1000))
-     continue;
+   while (0 == SLang_input_pending (1000)) continue;
 
    ch = SLang_getkey ();
 
    if (ch == 033)                      /* escape */
-     {
-        if (0 == SLang_input_pending (TIMEOUT))
-          return 033;
-     }
+   {
+      if (0 == SLang_input_pending (TIMEOUT)) return ch;
+   }
 
    SLang_ungetkey (ch);
 
@@ -206,7 +203,7 @@ static int gul_emulate_ncurses_getch (void)
 }
 
 
-/*
+/**
  * plugin_read_key():
  *
  * Checks for waiting input, does NOT wait for input!
@@ -220,17 +217,6 @@ plugin_read_key (void)
 
    keyevent_t input = {GUL_NO_EVENT, GUL_NO_DATA};
 
-#if 0
-   if (!SLang_input_pending (0))
-      return input;
-
-/* Nu skavise vad vad JAkov har kokat ihop ... ett par öl innanför
- * västen och allting är så mycket klarare. :-)
- */
-
-/* S-Lang returnerar vanliga tecken 0-255 och andra som >255 */
-   ch = SLkp_getkey ();
-#endif
    ch = gul_emulate_ncurses_getch ();
    ch = (SL_KEY_ERR == ch ? 0 : ch);
 
@@ -248,7 +234,7 @@ plugin_read_key (void)
    return input;
 }
 
-/*
+/**
  * initPlugin():
  *
  * Initates the control.
@@ -261,7 +247,7 @@ initPlugin (void)
 }
 
 
-/*
+/**
  * pluginFinish ():
  *
  * Releases all memory and resets the screen and keyboard back to normal.
