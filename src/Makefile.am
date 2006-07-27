@@ -5,7 +5,7 @@ gul_SOURCES =              ../include/config.h      \
                            ../include/editor.h      \
                            ../include/help.h        \
                            ../include/system.h      \
-              gul.c        ../include/gul.h         \
+              main.c       ../include/gul.h         \
               display.c    ../include/display.h     \
               buffer_gap.c ../include/buffer_gap.h  \
               dll.c        ../include/dll.h         \
