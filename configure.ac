@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(gul, 0.1.2, [http://vmlinux.org/gul/])
+AC_INIT([gul],[0.1.2],[http://vmlinux.org/gul/])
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
-AM_CONFIG_HEADER(include/settings.h)
+AC_CONFIG_HEADERS([include/settings.h])
 AC_CONFIG_SRCDIR(configure.ac)
 
 dnl Every other copy of the package version number gets its value from here
@@ -57,13 +57,13 @@ fi
 
 dnl Enable/disable stuff
 AC_ARG_ENABLE(debug,
-              AC_HELP_STRING([--enable-debug], [Enable debugging with GDB [default=no]]),[
+              AS_HELP_STRING([--enable-debug],[Enable debugging with GDB [default=no]]),[
 CFLAGS="$CFLAGS -g -DDEBUG=1"],[
 CFLAGS="$CFLAGS $OPTIMIZER_CFLAGS"
 LDFLAGS="-s"])
 
 AC_ARG_ENABLE(pedantic-compiler,
-              AC_HELP_STRING([--enable-pedantic-compiler], [Enable pedantic checks in GCC [default=no]]),
+              AS_HELP_STRING([--enable-pedantic-compiler],[Enable pedantic checks in GCC [default=no]]),
               [CFLAGS="$CFLAGS -Wall -pedantic -Wformat=2 -Wunreachable-code -Winline"])
 
 
@@ -92,7 +92,7 @@ fi
 dnl Checks for libraries.
 AC_ARG_WITH(slang, [  --with-slang[=DIR]         Use S-Lang instead of ncurses],
         [AC_CACHE_CHECK([if this is a BSD system], gul_cv_bsdish,
-                [AC_TRY_RUN([#include <sys/param.h>
+                [AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/param.h>
 
 main ()
 {
@@ -101,10 +101,7 @@ main ()
 #else
         exit (1);
 #endif
-}],
-                        gul_cv_bsdish=yes,
-                        gul_cv_bsdish=no,
-                        gul_cv_bsdish=no)])
+}]])],[gul_cv_bsdish=yes],[gul_cv_bsdish=no],[gul_cv_bsdish=no])])
 
         AC_MSG_CHECKING(for S-Lang)
         if test $withval = yes; then
@@ -214,8 +211,9 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 
 dnl Checks for library functions.
 
-AC_OUTPUT(gul.lsm gul.spec \
+AC_CONFIG_FILES([gul.lsm gul.spec \
           Makefile         \
           doc/Makefile     \
           man/Makefile     \
-          src/Makefile)
+          src/Makefile])
+AC_OUTPUT
