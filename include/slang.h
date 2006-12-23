@@ -1,10 +1,9 @@
-/*
- * ncurses.h
+/* S-Lang Backend
  *
- * Definition translations ...
- * 23/4 1999 Crash <joachim.nilsson@mds.mdh.se>
- *
+ * 15/7 1999   Joachim Nilsson <joachim.nilsson@mds.mdh.se>
+ * 2006-12-22  Joachim Nilsson <joachim.nilsson@vmlinux.org>
  */
+
 #ifndef __SLANG_H__
 #define __SLANG_H__
 

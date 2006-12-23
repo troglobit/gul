@@ -29,7 +29,7 @@
 
 /*** Frontend **********************************************************/
 /* NCurses for screen handling and keyboard input. */
-#define NCURSES_PLUGIN
+/* #define NCURSES_PLUGIN */
 
 /*
  *#define VT100KEY_PLUGIN
@@ -37,7 +37,7 @@
  */
 
 /* SLang plugin for screen and keyboard */
-/* #define SLANG_PLUGIN */
+#define SLANG_PLUGIN
 
 /*** Backend ***********************************************************
  * Comment out the ones that are not to be used.

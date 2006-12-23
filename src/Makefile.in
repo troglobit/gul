@@ -50,10 +50,9 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_gul_OBJECTS = main.$(OBJEXT) display.$(OBJEXT) buffer_gap.$(OBJEXT) \
-	dll.$(OBJEXT) fileio.$(OBJEXT) keyboard.$(OBJEXT) \
-	memory.$(OBJEXT) error.$(OBJEXT) misc.$(OBJEXT) \
-	plugin.$(OBJEXT) ncurses.$(OBJEXT) slang.$(OBJEXT) \
-	vt100.$(OBJEXT)
+	fileio.$(OBJEXT) keyboard.$(OBJEXT) memory.$(OBJEXT) \
+	error.$(OBJEXT) misc.$(OBJEXT) plugin.$(OBJEXT) \
+	slang.$(OBJEXT)
 gul_OBJECTS = $(am_gul_OBJECTS)
 gul_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
@@ -162,6 +161,9 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
 # gul_SOURCES=gul.c xmalloc.c system.h aclocal.m4 gul.1
+#              ncurses.c    ../include/ncurses.h     \
+#              dll.c        ../include/dll.h         \
+#              vt100.c      ../include/vt100.h
 gul_SOURCES = ../include/config.h      \
                            ../include/editor.h      \
                            ../include/help.h        \
@@ -169,16 +171,13 @@ gul_SOURCES = ../include/config.h      \
               main.c       ../include/gul.h         \
               display.c    ../include/display.h     \
               buffer_gap.c ../include/buffer_gap.h  \
-              dll.c        ../include/dll.h         \
 	      fileio.c     ../include/fileio.h      \
               keyboard.c   ../include/keyboard.h    \
               memory.c     ../include/memory.h      \
               error.c                               \
               misc.c       ../include/misc.h        \
               plugin.c     ../include/plugin.h      \
-              ncurses.c    ../include/ncurses.h     \
-              slang.c      ../include/slang.h       \
-              vt100.c      ../include/vt100.h
+              slang.c      ../include/slang.h
 
 all: all-am
 
@@ -248,17 +247,14 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer_gap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/display.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/keyboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ncurses.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/slang.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vt100.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
