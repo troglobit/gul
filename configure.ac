@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT([gul],[0.1.2],[http://vmlinux.org/gul/])
+AC_INIT([gul],[0.1.2],[http://github.com/troglobit/gul/])
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AC_CONFIG_HEADERS([include/settings.h])
@@ -197,7 +197,6 @@ AC_CHECK_HEADERS(errno.h features.h netdb.h stdio.h syslog.h ncurses.h)
 
 AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h sys/mkdev.h sys/sysmacros.h string.h memory.h fcntl.h dirent.h sys/ndir.h ndir.h alloca.h locale.h )
 
-jm_CHECK_TYPE_STRUCT_UTIMBUF
 AC_HEADER_MAJOR
 AC_FUNC_ALLOCA
 AC_STRUCT_TM

@@ -30,9 +30,7 @@ tex_files      = spec.tex
 pkgdata_DATA   = spec.dvi spec.ps spec.pdf
 
 fig_files      = overview.fig
-
-eps_files      = $(patsubst %.fig,%.eps,${fig_files})
-
+eps_files      = overview.eps
 eps_cleanfiles = ${eps_files}
 
 EXTRA_DIST     = ${fig_files} ${eps_files} ${tex_files} spec.ps spec.pdf \

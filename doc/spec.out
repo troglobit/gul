@@ -8,8 +8,8 @@
 \BOOKMARK [2][-]{subsection.3.1}{Dubbell\344nkad lista av rader}{section.3}
 \BOOKMARK [2][-]{subsection.3.2}{Buffer-Gap}{section.3}
 \BOOKMARK [2][-]{subsection.3.3}{Inladdningen av filen}{section.3}
-\BOOKMARK [3][-]{subsubsection.3.3.1}{DLL -- Konvertering till l\344nkade rader}{subsection.3.3}
-\BOOKMARK [3][-]{subsubsection.3.3.2}{Buffer-Gap -- Ladda fil till Buffer}{subsection.3.3}
+\BOOKMARK [3][-]{subsubsection.3.3.1}{DLL \205 Konvertering till l\344nkade rader}{subsection.3.3}
+\BOOKMARK [3][-]{subsubsection.3.3.2}{Buffer-Gap \205 Ladda fil till Buffer}{subsection.3.3}
 \BOOKMARK [2][-]{subsection.3.4}{F\366rflyttning}{section.3}
 \BOOKMARK [2][-]{subsection.3.5}{Editering \(Notera att det inte \344r ''Buffer-Gap''\)}{section.3}
 \BOOKMARK [3][-]{subsubsection.3.5.1}{Grundl\344ggande editering}{subsection.3.5}
@@ -18,12 +18,12 @@
 \BOOKMARK [2][-]{subsection.3.6}{Avklarade funktioner}{section.3}
 \BOOKMARK [1][-]{section.4}{Delaktiga}{}
 \BOOKMARK [1][-]{section.5}{Kommentarer}{}
-\BOOKMARK [1][-]{section.A}{Editorkommandon}{}
-\BOOKMARK [2][-]{subsection.A.1}{Different styles for marking text}{section.A}
-\BOOKMARK [2][-]{subsection.A.2}{Comments regarding the ``styles''}{section.A}
-\BOOKMARK [2][-]{subsection.A.3}{Command definitions}{section.A}
+\BOOKMARK [1][-]{appendix.A}{Editorkommandon}{}
+\BOOKMARK [2][-]{subsection.A.1}{Different styles for marking text}{appendix.A}
+\BOOKMARK [2][-]{subsection.A.2}{Comments regarding the ``styles''}{appendix.A}
+\BOOKMARK [2][-]{subsection.A.3}{Command definitions}{appendix.A}
 \BOOKMARK [3][-]{subsubsection.A.3.1}{Edit}{subsection.A.3}
 \BOOKMARK [3][-]{subsubsection.A.3.2}{Movement}{subsection.A.3}
 \BOOKMARK [3][-]{subsubsection.A.3.3}{Block\137marking\137movement}{subsection.A.3}
 \BOOKMARK [3][-]{subsubsection.A.3.4}{Notepad\137marking\137movement}{subsection.A.3}
-\BOOKMARK [1][-]{section.B}{hitSearch - Hur s\366kning efter text b\366r g\345 till}{}
+\BOOKMARK [1][-]{appendix.B}{hitSearch - Hur s\366kning efter text b\366r g\345 till}{}
