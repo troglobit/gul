@@ -103,108 +103,96 @@ main ()
 #endif
 }]])],[gul_cv_bsdish=yes],[gul_cv_bsdish=no],[gul_cv_bsdish=no])])
 
-        AC_MSG_CHECKING(for S-Lang)
-        if test $withval = yes; then
-                if test -d $srcdir/../slang; then
-                        gul_cv_slang=$srcdir/../slang/src
-                        CPPFLAGS="$CPPFLAGS -I${gul_cv_slang}"
-                        LDFLAGS="$LDFLAGS -L${gul_cv_slang}/objs"
-                else
-                        if test -d $gul_cv_prefix/include/slang; then
-                                CPPFLAGS="$CPPFLAGS -I$gul_cv_prefix/include/slang"
-                        elif test -d /usr/include/slang; then
-                                CPPFLAGS="$CPPFLAGS -I/usr/include/slang"
-                        fi
-                        gul_cv_slang=yes
-                fi
+AC_MSG_CHECKING(for S-Lang)
+if test $withval = yes; then
+        if test -d $srcdir/../slang; then
+                gul_cv_slang=$srcdir/../slang/src
+                CPPFLAGS="$CPPFLAGS -I${gul_cv_slang}"
+                LDFLAGS="$LDFLAGS -L${gul_cv_slang}/objs"
         else
-                dnl ---Check to see if $withval is a source directory
-                if test -f $withval/src/slang.h; then
-                        gul_cv_slang=$withval/src
-                        CPPFLAGS="$CPPFLAGS -I${gul_cv_slang}"
-                        LDFLAGS="$LDFLAGS -L${gul_cv_slang}/objs"
-                else
-                        dnl ---Must be installed somewhere
-                        gul_cv_slang=$withval
-                        if test -d $withval/include/slang; then
-                                CPPFLAGS="$CPPFLAGS -I${withval}/include/slang"
-                        elif test -d $withval/include; then
-                                CPPFLAGS="$CPPFLAGS -I${withval}/include"
-                        fi
-                        LDFLAGS="$LDFLAGS -L${withval}/lib"
+                if test -d $gul_cv_prefix/include/slang; then
+                        CPPFLAGS="$CPPFLAGS -I$gul_cv_prefix/include/slang"
+                elif test -d /usr/include/slang; then
+                        CPPFLAGS="$CPPFLAGS -I/usr/include/slang"
                 fi
+                gul_cv_slang=yes
         fi
-        AC_MSG_RESULT($gul_cv_slang)
-        if test $gul_cv_bsdish = yes; then
-                AC_CHECK_LIB(termlib, main)
+else
+        dnl ---Check to see if $withval is a source directory
+        if test -f $withval/src/slang.h; then
+                gul_cv_slang=$withval/src
+                CPPFLAGS="$CPPFLAGS -I${gul_cv_slang}"
+                LDFLAGS="$LDFLAGS -L${gul_cv_slang}/objs"
+        else
+                dnl ---Must be installed somewhere
+                gul_cv_slang=$withval
+                if test -d $withval/include/slang; then
+                        CPPFLAGS="$CPPFLAGS -I${withval}/include/slang"
+                elif test -d $withval/include; then
+                        CPPFLAGS="$CPPFLAGS -I${withval}/include"
+                fi
+                LDFLAGS="$LDFLAGS -L${withval}/lib"
         fi
-        AC_DEFINE(USE_SLANG_CURSES,1,
-                [ Define if you compile with SLang instead of curses/ncurses. ])
-        AC_DEFINE(HAVE_COLOR,1,[ Define if your curses library supports color. ])
-        GUL_LIB_OBJECTS="$GUL_LIB_OBJECTS resize.o"
+fi
+AC_MSG_RESULT($gul_cv_slang)
+if test $gul_cv_bsdish = yes; then
+        AC_CHECK_LIB(termlib, main)
+fi
+AC_DEFINE(USE_SLANG_CURSES,1,
+        [ Define if you compile with SLang instead of curses/ncurses. ])
+AC_DEFINE(HAVE_COLOR,1,[ Define if your curses library supports color. ])
+GUL_LIB_OBJECTS="$GUL_LIB_OBJECTS resize.o"
 
-        dnl --- now that we've found it, check the link
+dnl --- now that we've found it, check the link
 
-        AC_CHECK_LIB(slang, SLtt_get_terminfo,
-                [GULLIBS="$GULLIBS -lslang -lm"],
-                [AC_MSG_ERROR(unable to compile.  check config.log)], -lm)
+AC_CHECK_LIB(slang, SLtt_get_terminfo,
+        [GULLIBS="$GULLIBS -lslang -lm"],
+        [AC_MSG_ERROR(unable to compile.  check config.log)], -lm)
 
-        ],
+],
 
-        [gul_cv_curses=/usr
-        AC_ARG_WITH(curses, [  --with-curses=DIR          Where ncurses is installed ],
-                [if test $withval != yes; then
-                        gul_cv_curses=$withval
-                fi
-                if test x$gul_cv_curses != x/usr; then
-                        LDFLAGS="-L${gul_cv_curses}/lib $LDFLAGS"
-                        CPPFLAGS="$CPPFLAGS -I${gul_cv_curses}/include"
-                fi])
+[gul_cv_curses=/usr
+AC_ARG_WITH(curses, [  --with-curses=DIR          Where ncurses is installed ],
+        [if test $withval != yes; then
+                gul_cv_curses=$withval
+        fi
+        if test x$gul_cv_curses != x/usr; then
+                LDFLAGS="-L${gul_cv_curses}/lib $LDFLAGS"
+                CPPFLAGS="$CPPFLAGS -I${gul_cv_curses}/include"
+        fi])
 
-	AC_CHECK_FUNC(initscr,,[
-	cf_ncurses="ncurses"
-	for lib in ncurses ncursesw
-	do
-		AC_CHECK_LIB($lib, waddnwstr, [cf_ncurses="$lib"; break])
-	done
-        AC_CHECK_LIB($cf_ncurses, initscr,
-                [GULLIBS="$GULLIBS -l$cf_ncurses"
-                if test x$gul_cv_curses = x/usr -a -d /usr/include/ncurses; then
-                        CPPFLAGS="$CPPFLAGS -I/usr/include/ncurses"
-                fi
+AC_CHECK_FUNC(initscr,,[
+cf_ncurses="ncurses"
+for lib in ncurses ncursesw
+do
+	AC_CHECK_LIB($lib, waddnwstr, [cf_ncurses="$lib"; break])
+done
+AC_CHECK_LIB($cf_ncurses, initscr,
+        [GULLIBS="$GULLIBS -l$cf_ncurses"
+        if test x$gul_cv_curses = x/usr -a -d /usr/include/ncurses; then
+                CPPFLAGS="$CPPFLAGS -I/usr/include/ncurses"
+        fi
 
-                if test "$cf_ncurses" = ncursesw; then
-			AC_CHECK_HEADERS(ncursesw/ncurses.h,[cf_cv_ncurses_header="ncursesw/ncurses.h"])
-		else
-			AC_CHECK_HEADERS(ncurses.h,[cf_cv_ncurses_header="ncurses.h"])
-		fi],
+        if test "$cf_ncurses" = ncursesw; then
+		AC_CHECK_HEADERS(ncursesw/ncurses.h,[cf_cv_ncurses_header="ncursesw/ncurses.h"])
+	else
+		AC_CHECK_HEADERS(ncurses.h,[cf_cv_ncurses_header="ncurses.h"])
+	fi],
 
-                [CF_CURSES_LIBS])
-		])
+        [CF_CURSES_LIBS])
+	])
 
-        old_LIBS="$LIBS"
-        LIBS="$LIBS $GULLIBS"
-        ])
+old_LIBS="$LIBS"
+LIBS="$LIBS $GULLIBS"
+])
 
-
-dnl Checks for standard header files:
-dnl ANSI C header files, sys/types.h, sys/stat.h, stdlib.h, string.h,
-dnl memory.h, strings.h, inttypes.h, stdint.h, unistd.h
 AC_HEADER_STDC
 
 dnl Check for gul specific includes
 AC_CHECK_HEADERS(errno.h features.h netdb.h stdio.h syslog.h ncurses.h)
-
 AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h sys/mkdev.h sys/sysmacros.h string.h memory.h fcntl.h dirent.h sys/ndir.h ndir.h alloca.h locale.h )
 
 AC_HEADER_MAJOR
-AC_FUNC_ALLOCA
-AC_STRUCT_TM
-AC_STRUCT_ST_BLOCKS
-AC_FUNC_CLOSEDIR_VOID
-AC_CHECK_FUNCS(mkfifo)
-AC_CHECK_FUNC(mknod)
-AC_CHECK_HEADER(argp.h,,AC_MSG_ERROR(Cannot continue: argp.h not found))
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 
