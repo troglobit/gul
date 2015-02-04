@@ -70,39 +70,42 @@ Bugs
 Plenty. Do something about it! :P
 
 A trace is written to stderr. Redirect the trace to a file when running
-gul. (`gul filename 2>logfile?`) see the source for more info, as usual.
+gul, see the source for more info, as usual.
+
+    gul filename 2>logfile
 
 
 Files
 -----
 
-- IDEAS: Random thoughts
-- TIPS: Some hints on what to do when the going gets tough
-- TODO: A list of things that needs attention.
-- INSTALL: HowTo install and compile both source and specification.
-- README: This short intro.
-- ChangLog: A list of things that already have been done.
+- `IDEAS`: Random thoughts
+- `TIPS`: Some hints on what to do when the going gets tough
+- `TODO`: A list of things that needs attention.
+- `INSTALL`: HowTo install and compile both source and specification.
+- `README`: This short intro.
+- `ChangLog`: A list of things that already have been done.
 
 
 License
 -------
 
-Copyright (C) 2004 Joachim Nilsson
-Copyright (C) 1998-2000 Joachim Nilsson, Jakob Eriksson, Anders Bornäs
+    Copyright (C) 2004 Joachim Nilsson
+    Copyright (C) 1998-2000 Joachim Nilsson, Jakob Eriksson, Anders Bornäs
+    
+    The 'gul' editor is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License as
+    published by the Free Software Foundation; either version 2 of the
+    License, or (at your option) any later version.
 
-The 'gul' editor is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by the
-Free Software Foundation; either version 2 of the License, or (at your
-option) any later version.
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+    02110-1301, USA.
 
     ~
     ~
