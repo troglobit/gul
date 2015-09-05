@@ -1,25 +1,18 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT([gul],[0.1.2],[http://github.com/troglobit/gul/])
+AC_INIT([gul],[0.1.3-pre],[https://github.com/troglobit/gul/])
 
-dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AC_CONFIG_HEADERS([include/settings.h])
 AC_CONFIG_SRCDIR(configure.ac)
-
-dnl Every other copy of the package version number gets its value from here
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
-AC_SUBST(VERSION)
-
-ISODATE=`date +%Y-%m-%d`
-AC_SUBST(ISODATE)
-
-AC_CANONICAL_HOST
-
-dnl Checks for programs.
-AC_PROG_INSTALL
 AC_PROG_CC
+AC_PROG_INSTALL
+AC_HEADER_STDC
+
+AC_CHECK_HEADERS(errno.h features.h netdb.h stdio.h syslog.h ncurses.h)
+AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h sys/mkdev.h sys/sysmacros.h string.h memory.h fcntl.h dirent.h sys/ndir.h ndir.h alloca.h locale.h )
 
 dnl Add _GNU_SOURCE to enable features and activate legacy API.
 CFLAGS="${CFLAGS} -D_GNU_SOURCE"
@@ -64,7 +57,7 @@ LDFLAGS="-s"])
 
 AC_ARG_ENABLE(pedantic-compiler,
               AS_HELP_STRING([--enable-pedantic-compiler],[Enable pedantic checks in GCC [default=no]]),
-              [CFLAGS="$CFLAGS -Wall -pedantic -Wformat=2 -Wunreachable-code -Winline"])
+              [CFLAGS="$CFLAGS -W -Wall -Wformat=2 -Wunreachable-code -Winline"])
 
 
 dnl Checks for documentation
@@ -186,21 +179,5 @@ old_LIBS="$LIBS"
 LIBS="$LIBS $GULLIBS"
 ])
 
-AC_HEADER_STDC
-
-dnl Check for gul specific includes
-AC_CHECK_HEADERS(errno.h features.h netdb.h stdio.h syslog.h ncurses.h)
-AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h sys/mkdev.h sys/sysmacros.h string.h memory.h fcntl.h dirent.h sys/ndir.h ndir.h alloca.h locale.h )
-
-AC_HEADER_MAJOR
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-
-dnl Checks for library functions.
-
-AC_CONFIG_FILES([gul.lsm gul.spec \
-          Makefile         \
-          doc/Makefile     \
-          man/Makefile     \
-          src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile man/Makefile])
 AC_OUTPUT
