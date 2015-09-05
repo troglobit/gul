@@ -469,8 +469,8 @@ marking styles are used.
 
 **NOTEPAD.EXE style**
 
-hello all fri<p style="color:white; background-color:black;">ends, is this not a  
-cool editor or what, jag provar att</p> skriva  
+hello all fri<div style="color:white; background-color:black;">ends, is this not a  
+cool editor or what, jag provar att</div> skriva  
 lite på svenska också  
 hej.  
 
