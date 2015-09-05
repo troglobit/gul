@@ -137,7 +137,7 @@ static void finish(int sig)
 
 
 
-void trySave(buffer_t * buf)
+void trySave(buffer_t *buf)
 {
 	if (!buf->filename) {
 		/* #include <unistd.h>
@@ -151,7 +151,7 @@ void trySave(buffer_t * buf)
 	saveFile(buf, buf->filename);
 }
 
-buffer_t *tryLoad(buffer_t * buf)
+buffer_t *tryLoad(buffer_t *buf)
 {
 	int y;
 	char *fileName;

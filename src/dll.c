@@ -39,27 +39,27 @@
 
 /*** Prototypes *********************************************************
  */
-static text *insertNode(buffer_t * currentp);
+static text *insertNode(buffer_t *currentp);
 int calculateXposition(text * thisp, int i);
-text *splitNode(buffer_t * currentp);
-text *deleteRightNode(buffer_t * currentp);
-void insertCommand(buffer_t * currentp, int command);
-buffer_t *backupBufferInfo(buffer_t * currentp);
-void restoreBufferInfo(buffer_t * backup_info, buffer_t * currentp);
-int getNextNode(buffer_t * currentp);
-int getPrevNode(buffer_t * currentp);
-int movetoNextChar(buffer_t * currentp);
-int movetoPrevChar(buffer_t * currentp);
-int atSTX(buffer_t * currentp);
-char getCurrentChar(buffer_t * currentp);
-int getCurrentColumn(buffer_t * currentp);
-int movetoEOL(buffer_t * currentp);
-int movetoBOL(buffer_t * currentp);
-int movetoSTX(buffer_t * currentp);
-int movetoCol(buffer_t * currentp, int col);
+text *splitNode(buffer_t *currentp);
+text *deleteRightNode(buffer_t *currentp);
+void insertCommand(buffer_t *currentp, int command);
+buffer_t *backupBufferInfo(buffer_t *currentp);
+void restoreBufferInfo(buffer_t *backup_info, buffer_t *currentp);
+int getNextNode(buffer_t *currentp);
+int getPrevNode(buffer_t *currentp);
+int movetoNextChar(buffer_t *currentp);
+int movetoPrevChar(buffer_t *currentp);
+int atSTX(buffer_t *currentp);
+char getCurrentChar(buffer_t *currentp);
+int getCurrentColumn(buffer_t *currentp);
+int movetoEOL(buffer_t *currentp);
+int movetoBOL(buffer_t *currentp);
+int movetoSTX(buffer_t *currentp);
+int movetoCol(buffer_t *currentp, int col);
 
 
-void left(buffer_t * currentp)
+void left(buffer_t *currentp)
 {
 	if (movetoPrevChar(currentp)) {
 		if ('\n' == getCurrentChar(currentp)) {
@@ -73,7 +73,7 @@ void left(buffer_t * currentp)
 	}
 }
 
-void right(buffer_t * currentp)
+void right(buffer_t *currentp)
 {
 	char previousChar;
 
@@ -91,7 +91,7 @@ void right(buffer_t * currentp)
 	}
 }
 
-void up(buffer_t * currentp)
+void up(buffer_t *currentp)
 {
 	buffer_t *safe_state;
 
@@ -109,7 +109,7 @@ void up(buffer_t * currentp)
 	}
 }
 
-void down(buffer_t * currentp)
+void down(buffer_t *currentp)
 {
 	buffer_t *safe_state;
 
@@ -126,7 +126,7 @@ void down(buffer_t * currentp)
 	}
 }
 
-void insert(buffer_t * currentp, int thisCommand)
+void insert(buffer_t *currentp, int thisCommand)
 {
 	/* Skriv in tecknet i strukturen ... mycket jox... */
 	if (13 == (char)thisCommand) {
@@ -144,7 +144,7 @@ void insert(buffer_t * currentp, int thisCommand)
 }
 
 
-void delete(buffer_t * currentp)
+void delete(buffer_t *currentp)
 {
 	if (currentp->pos + 1 == currentp->core.node->end) {
 		currentp->core.node->end--;
@@ -193,7 +193,7 @@ int calculateXposition(text * thisp, int i)
  * This needs another implementation and interface. Something more
  * like the fread()-function...
  */
-char *editorCharacterGenerator(buffer_t * currentp)
+char *editorCharacterGenerator(buffer_t *currentp)
 {
 	int i, j;
 	text *thisText;
@@ -228,7 +228,7 @@ char *editorCharacterGenerator(buffer_t * currentp)
  * Returnerar pekaren till den högra av de två.
  ************************************************************************
  */
-text *splitNode(buffer_t * currentp)
+text *splitNode(buffer_t *currentp)
 {
 	text *left, *right;
 	text *thisp = currentp->core.node;
@@ -309,7 +309,7 @@ text *splitNode(buffer_t * currentp)
  * om NULL returneras... För då har ingenting gjorts.
  ************************************************************************
  */
-text *deleteRightNode(buffer_t * currentp)
+text *deleteRightNode(buffer_t *currentp)
 {
 	text *thisp = currentp->core.node;
 
@@ -357,7 +357,7 @@ text *deleteRightNode(buffer_t * currentp)
  * Returnerar pekaren till den nya fräsha noden.
  ************************************************************************
  */
-static text *insertNode(buffer_t * currentp)
+static text *insertNode(buffer_t *currentp)
 {
 	text *newNode;
 
@@ -394,7 +394,7 @@ static text *insertNode(buffer_t * currentp)
  * infoga tecken vid markören ...
  ************************************************************************
  */
-void insertCommand(buffer_t * currentp, int command)
+void insertCommand(buffer_t *currentp, int command)
 {
 	/* Är detta en tom nod? Mindre troligt faktiskt eftersom alla såna
 	 * brukar tas bort direkt av delete...
@@ -427,7 +427,7 @@ void insertCommand(buffer_t * currentp, int command)
 /*** backupBufferInfo() *************************************************
  * Backup
  */
-buffer_t *backupBufferInfo(buffer_t * currentp)
+buffer_t *backupBufferInfo(buffer_t *currentp)
 {
 	buffer_t *backup_info;
 
@@ -440,7 +440,7 @@ buffer_t *backupBufferInfo(buffer_t * currentp)
 /*** restoreBufferInfo() ************************************************
  * Restore
  */
-void restoreBufferInfo(buffer_t * backup_info, buffer_t * currentp)
+void restoreBufferInfo(buffer_t *backup_info, buffer_t *currentp)
 {
 	memcpy(currentp, backup_info, sizeof(buffer_t));
 
@@ -455,7 +455,7 @@ void restoreBufferInfo(buffer_t * backup_info, buffer_t * currentp)
  * Funktionen misslyckas vid slutet på filen.
  ************************************************************************
  */
-int getNextNode(buffer_t * currentp)
+int getNextNode(buffer_t *currentp)
 {
 	if (currentp->core.node->next) {
 		currentp->core.node = currentp->core.node->next;
@@ -474,7 +474,7 @@ int getNextNode(buffer_t * currentp)
  * misslyckas.
  ************************************************************************
  */
-int getPrevNode(buffer_t * currentp)
+int getPrevNode(buffer_t *currentp)
 {
 	if (!((currentp->core.node)->previous)) {
 		return 0;
@@ -499,7 +499,7 @@ int getPrevNode(buffer_t * currentp)
  * misslyckas.
  ************************************************************************
  */
-int movetoNextChar(buffer_t * currentp)
+int movetoNextChar(buffer_t *currentp)
 {
 	while (currentp->pos == currentp->core.node->end) {
 		if (!getNextNode(currentp)) {
@@ -521,7 +521,7 @@ int movetoNextChar(buffer_t * currentp)
  * nuvarande nod är ekvivalent med början på densamma.
  ************************************************************************
  */
-int movetoPrevChar(buffer_t * currentp)
+int movetoPrevChar(buffer_t *currentp)
 {
 	currentp->pos--;
 	if (currentp->pos < currentp->core.node->begin) {
@@ -540,7 +540,7 @@ int movetoPrevChar(buffer_t * currentp)
  * Står vi i början på filen?
  ************************************************************************
  */
-int atSTX(buffer_t * currentp)
+int atSTX(buffer_t *currentp)
 {
 	if (!currentp->core.node->previous && currentp->pos == currentp->core.node->begin)
 		return 1;
@@ -549,13 +549,13 @@ int atSTX(buffer_t * currentp)
 }
 
 
-char getCurrentChar(buffer_t * currentp)
+char getCurrentChar(buffer_t *currentp)
 {
 	return currentp->core.node->line[currentp->pos];
 }
 
 
-int getCurrentColumn(buffer_t * currentp)
+int getCurrentColumn(buffer_t *currentp)
 {
 	int counter = 0;
 	buffer_t *prev_state;
@@ -585,7 +585,7 @@ int getCurrentColumn(buffer_t * currentp)
  *
  ************************************************************************
  */
-int movetoEOL(buffer_t * currentp)
+int movetoEOL(buffer_t *currentp)
 {
 	do {
 //      if ('\n' == getCurrentChar(currentp))
@@ -606,7 +606,7 @@ int movetoEOL(buffer_t * currentp)
  * beginning of a line as well as the sister function movetoEOL()!
  ************************************************************************
  */
-int movetoBOL(buffer_t * currentp)
+int movetoBOL(buffer_t *currentp)
 {
 	while (movetoPrevChar(currentp)) {
 //      if ('\n' == getCurrentChar(currentp)){
@@ -627,7 +627,7 @@ int movetoBOL(buffer_t * currentp)
  *
  ************************************************************************
  */
-int movetoSTX(buffer_t * currentp)
+int movetoSTX(buffer_t *currentp)
 {
 	currentp->core.node = currentp->core.stx;
 	currentp->pos = currentp->core.stx->begin;
@@ -640,7 +640,7 @@ int movetoSTX(buffer_t * currentp)
  *
  ************************************************************************
  */
-int movetoCol(buffer_t * currentp, int col)
+int movetoCol(buffer_t *currentp, int col)
 {
 	int counter = 0;
 
@@ -691,7 +691,7 @@ text_t *readFile(FILE *filep, text_t * core)
  * klarar att spara markerad text från valfria pos. och annat jox.
  ************************************************************************
  */
-int saveFile(buffer_t * currentp, char *filename)
+int saveFile(buffer_t *currentp, char *filename)
 {
 	text *thisp;
 	size_t bytesWritten;

@@ -69,13 +69,13 @@ static int movetoPrevLine(text_t * thisp);
 static char getCurrentChar(text_t * thisp);
 static int getCurrentColumn(text_t * thisp);
 static int atSTX(text_t * thisp);
-static int move_virtual_screen(buffer_t * currentp, int offset);
+static int move_virtual_screen(buffer_t *currentp, int offset);
 
 
 /* Must be called after any movement {left,right,up,down}
  * XXX - Should perhaps be in display.c?
  */
-void adjust_virtual_screen(buffer_t * currentp)
+void adjust_virtual_screen(buffer_t *currentp)
 {
 	/* left */
 	while ((currentp->screen.x - currentp->screen.hpos) <= 0 && currentp->screen.hpos >= 5)
@@ -100,7 +100,7 @@ void adjust_virtual_screen(buffer_t * currentp)
  *
  * Moves the cursor left one character.
  */
-void left(buffer_t * currentp)
+void left(buffer_t *currentp)
 {
 	if (movetoPrevChar(&currentp->core)) {
 		/* Failed to move */
@@ -123,7 +123,7 @@ void left(buffer_t * currentp)
  *
  * Moves the cursor right one character.
  */
-void right(buffer_t * currentp)
+void right(buffer_t *currentp)
 {
 	char prevChar;
 
@@ -150,7 +150,7 @@ void right(buffer_t * currentp)
  *
  * Moves the cursor up one line.
  */
-void up(buffer_t * currentp)
+void up(buffer_t *currentp)
 {
 	if (movetoPrevLine(&currentp->core)) {
 		;
@@ -168,7 +168,7 @@ void up(buffer_t * currentp)
  *
  * Moves the cursor down one line.
  */
-void down(buffer_t * currentp)
+void down(buffer_t *currentp)
 {
 	if (movetoNextLine(&currentp->core)) ;
 	else {
@@ -180,7 +180,7 @@ void down(buffer_t * currentp)
 }
 
 
-void end_of_line(buffer_t * currentp)
+void end_of_line(buffer_t *currentp)
 {
 	movetoEOL(&currentp->core);
 	currentp->screen.x = getCurrentColumn(&currentp->core);
@@ -188,7 +188,7 @@ void end_of_line(buffer_t * currentp)
 	adjust_virtual_screen(currentp);
 }
 
-void beginning_of_line(buffer_t * currentp)
+void beginning_of_line(buffer_t *currentp)
 {
 	movetoBOL(&currentp->core);
 	currentp->screen.x = 0;
@@ -196,7 +196,7 @@ void beginning_of_line(buffer_t * currentp)
 	adjust_virtual_screen(currentp);
 }
 
-void page_up(buffer_t * currentp)
+void page_up(buffer_t *currentp)
 {
 	int i;
 	int offset = currentp->screen.maxY - 1;	/* Move only half of screen */
@@ -213,7 +213,7 @@ void page_up(buffer_t * currentp)
 	adjust_virtual_screen(currentp);
 }
 
-void page_down(buffer_t * currentp)
+void page_down(buffer_t *currentp)
 {
 	int i;
 	int offset = currentp->screen.maxY - 1;	/* Move only half of screen */
@@ -231,7 +231,7 @@ void page_down(buffer_t * currentp)
 }
 
 /* try moving the screen vertically by @offset */
-static int move_virtual_screen(buffer_t * currentp, int offset)
+static int move_virtual_screen(buffer_t *currentp, int offset)
 {
 	int counter = 0;
 
@@ -269,7 +269,7 @@ static int move_virtual_screen(buffer_t * currentp, int offset)
  * consistent. Messy code to follow ... /Jocke
  *
  */
-static void allocate_new_gap(buffer_t * currentp)
+static void allocate_new_gap(buffer_t *currentp)
 {
 	int newsize = currentp->core.buffer_size + GAP_SIZE;
 	char *first = currentp->core.buffer;
@@ -301,7 +301,7 @@ static void allocate_new_gap(buffer_t * currentp)
  *
  * Insert a charcter/command at the current cursor position.
  */
-void insert(buffer_t * currentp, int thisCommand)
+void insert(buffer_t *currentp, int thisCommand)
 {
 	if (0 == currentp->core.gap_size)
 		allocate_new_gap(currentp);
@@ -343,7 +343,7 @@ void insert(buffer_t * currentp, int thisCommand)
  *
  * Delete the charcter/command at the current cursor position.
  */
-void delete(buffer_t * currentp)
+void delete(buffer_t *currentp)
 {
 /* Detect if gap at end of buffer */
 	if (GAP_AT_END(&currentp->core)) {
@@ -357,29 +357,29 @@ void delete(buffer_t * currentp)
 }
 
 
-void set_mark(buffer_t * currentp)
+void set_mark(buffer_t *currentp)
 {
 	currentp->core.mark = currentp->core.gap;
 }
 
-void set_point(buffer_t * currentp)
+void set_point(buffer_t *currentp)
 {
 	currentp->core.point = currentp->core.gap;
 }
 
-void cut(buffer_t * currentp)
+void cut(buffer_t *currentp)
 {
 	set_point(currentp);
 
 /* Do cutting of text here. */
 }
 
-void copy(buffer_t * currentp)
+void copy(buffer_t *currentp)
 {
 	set_point(currentp);
 }
 
-void paste(buffer_t * currentp)
+void paste(buffer_t *currentp)
 {
 /* here is where the actual copying of the
  * previously marked text is done.
@@ -403,7 +403,7 @@ void paste(buffer_t * currentp)
  * Returns: A dynamically allocated character array of data to be freed
  *          after usage.
  */
-char *editorCharacterGenerator(buffer_t * currentp)
+char *editorCharacterGenerator(buffer_t *currentp)
 {
 	char curr;
 	char *genbuf = NULL;
@@ -513,7 +513,7 @@ static char *restoreBufferInfo(text_t * thisp, char *backup_gap)
  * Deadweight in this core, but still here to maintain
  * ... eh ... symmetry? *Dylan*
  */
-static void freeBufferInfo(buffer_t * backup_info)
+static void freeBufferInfo(buffer_t *backup_info)
 {
 }
 
@@ -757,7 +757,7 @@ static int movetoCol(text_t * thisp, int col)
 }
 
 /* move gap to @line in current buffer */
-int goto_line(buffer_t * currentp, int line)
+int goto_line(buffer_t *currentp, int line)
 {
 	int offset = line - currentp->screen.y;
 
@@ -793,7 +793,7 @@ int goto_line(buffer_t * currentp, int line)
  *
  */
 
-void search(buffer_t * currentp, char *pattern, int dir)
+void search(buffer_t *currentp, char *pattern, int dir)
 {
 	char *pos;
 
@@ -815,7 +815,7 @@ void search(buffer_t * currentp, char *pattern, int dir)
 }
 
 
-int newFile(buffer_t * new, size_t size)
+int newFile(buffer_t *new, size_t size)
 {
 	/* Allocate a data buffer */
 	new->core.buffer_size = size + GAP_SIZE;
@@ -840,7 +840,7 @@ int newFile(buffer_t * new, size_t size)
  * Reads the current file into the array used in the buffer-gap scheme by
  * BUFFER_GAP. Very simple, indeed.
  */
-int readFile(FILE *filep, buffer_t * new)
+int readFile(FILE *filep, buffer_t *new)
 {
 	size_t bytesRead;
 	struct stat filestatus;
@@ -870,7 +870,7 @@ int readFile(FILE *filep, buffer_t * new)
  *
  * Returns: True/False depending on the result.
  ***/
-int saveFile(buffer_t * currentp, char *filename)
+int saveFile(buffer_t *currentp, char *filename)
 {
 	size_t bytesWritten;
 	FILE *filep;
@@ -913,7 +913,7 @@ int saveFile(buffer_t * currentp, char *filename)
 }
 
 
-void coreNewScreen(buffer_t * newBuffer)
+void coreNewScreen(buffer_t *newBuffer)
 {
 	/* BUFFER_GAP needs this copy for the virtual screen */
 	newBuffer->screen.top = calloc(sizeof(text_t), sizeof(char));
@@ -933,7 +933,7 @@ void coreNewScreen(buffer_t * newBuffer)
 }
 
 
-void freeBuffer(buffer_t * buf)
+void freeBuffer(buffer_t *buf)
 {
 	free(buf->filename);
 	free(buf->core.buffer);

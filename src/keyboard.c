@@ -12,7 +12,7 @@
 #include "plugin.h"
 
 
-void do_search(buffer_t * currentp);
+void do_search(buffer_t *currentp);
 
 /**
  * keyboard_loop - Read keyboard input and act upon it.
@@ -23,7 +23,7 @@ void do_search(buffer_t * currentp);
  *
  * To quit the editor this function returns non-zero value.
  */
-int keyboard_loop(buffer_t * currentBuffer)
+int keyboard_loop(buffer_t *currentBuffer)
 {
 	int quit = 0;		/* Quit the application. */
 	int closure = 1;	/* Keybinding closure */
@@ -200,7 +200,7 @@ int keyboard_loop(buffer_t * currentBuffer)
 }
 
 
-void do_search(buffer_t * currentp)
+void do_search(buffer_t *currentp)
 {
 	int y;
 	int line;

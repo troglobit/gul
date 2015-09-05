@@ -14,13 +14,13 @@
 #include "display.h"
 #include "memory.h"
 
-static void display_ruler(buffer_t * currentp);
-static void display_toolbar(buffer_t * currentp);
-static void display_cursor(buffer_t * currentp);
-static void display_text(buffer_t * currentp);
+static void display_ruler(buffer_t *currentp);
+static void display_toolbar(buffer_t *currentp);
+static void display_cursor(buffer_t *currentp);
+static void display_text(buffer_t *currentp);
 
 
-void display(buffer_t * currentp)
+void display(buffer_t *currentp)
 {
 	getScreenMaxYX(&(currentp->screen.maxY), &(currentp->screen.maxX));
 /* Reservera sista raden som statusrad... */
@@ -42,7 +42,7 @@ void display(buffer_t * currentp)
 }
 
 
-static void display_cursor(buffer_t * currentp)
+static void display_cursor(buffer_t *currentp)
 {
 	screenPositionCursor(currentp->screen.x - currentp->screen.hpos, currentp->screen.y - currentp->screen.vpos);
 
@@ -50,7 +50,7 @@ static void display_cursor(buffer_t * currentp)
  */
 }
 
-static void display_text(buffer_t * currentp)
+static void display_text(buffer_t *currentp)
 {
 	int x, y, xmax, ymax;
 	int i = 0;
@@ -109,7 +109,7 @@ void popUp_OK(char *message)
 static char *noname = "<noname>";
 
 /* OBS måste ta hänsyn till maxX && klara resize! */
-static void display_ruler(buffer_t * currentp)
+static void display_ruler(buffer_t *currentp)
 {
 	int i;
 	char *ruler, *filename = currentp->filename;
@@ -140,7 +140,7 @@ static void display_ruler(buffer_t * currentp)
 
 
 /* 1/Help 2/Save 3/Open 4/Unused 5/FindPrev 6/FindNext 7/Find 8/Unused 9/Menu 0/Quit */
-static void display_toolbar(buffer_t * currentp)
+static void display_toolbar(buffer_t *currentp)
 {
 	int x, i, empty, len, extra;
 	char toolbar[] = "1/Help 2/Save 3/Open 4/Unused 5/Unused 6/Unused 7/Find 8/Unused 9/Unused 0/Quit";
@@ -166,7 +166,7 @@ static void display_toolbar(buffer_t * currentp)
 
 
 
-int display_status(buffer_t * currentp, char *message)
+int display_status(buffer_t *currentp, char *message)
 {
 	int i;
 	int status_y = currentp->screen.maxY + 2;
