@@ -5,6 +5,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "plugin.h"
 #include "memory.h"
 
@@ -49,8 +51,11 @@ int createScreen(void)
    * size and hope the plugin does its own bit.
    */
   screenPluginGetMaxYX(&(currentScreen.maxY), &(currentScreen.maxX));
-  currentScreen.pixcharArray=
-    allocate((currentScreen.maxX) * (currentScreen.maxY), "screen::createScreen()");
+  currentScreen.pixcharArray = calloc(currentScreen.maxX * currentScreen.maxY, sizeof(char));
+  if (!currentScreen.pixcharArray) {
+     perror("Failed allocating new buffer");
+     exit(1);
+  }
 
   currentScreen.dirtyFlag= 0;
   currentScreen.hpos= 0;
@@ -86,7 +91,11 @@ static int resizeScreen(int newMaxX, int newMaxY)
   char *newPixcharArray;
   int  x, y;
 
-  newPixcharArray= (char *)allocate(newMaxX * newMaxY, "resizeScreen()");
+  newPixcharArray = calloc(newMaxX * newMaxY, sizeof(char));
+  if (!newPixcharArray) {
+     perror("Failed allocating new buffer");
+     exit(1);
+  }
 
   /* Kopiera så mycket som möjligt till den nya arrayen */
   for (y= 0;

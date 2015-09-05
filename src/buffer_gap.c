@@ -43,7 +43,7 @@
 
 #include "editor.h"
 #include "buffer_gap.h"
-#include "memory.h"
+
 
 /*** Macros *************************************************************
  */
@@ -77,27 +77,21 @@ static int  move_virtual_screen (buffer_t *currentp, int offset);
  */
 void adjust_virtual_screen (buffer_t *currentp)
 {
-/* left */
+   /* left */
    while ((currentp->screen.x - currentp->screen.hpos) <= 0 && currentp->screen.hpos >= 5)
-   {
       currentp->screen.hpos -= 5;
-   }
-/* right */
-   while ((currentp->screen.x - currentp->screen.hpos) >= (currentp->screen.maxX - 1))
-   {
-      currentp->screen.hpos += 5;
-   }
 
-/* up */
+   /* right */
+   while ((currentp->screen.x - currentp->screen.hpos) >= (currentp->screen.maxX - 1))
+      currentp->screen.hpos += 5;
+
+   /* up */
    while ((currentp->screen.y - currentp->screen.vpos) <= 0 && currentp->screen.vpos >= 5)
-   {
       currentp->screen.vpos -= move_virtual_screen (currentp, -5);
-   }
-/* down */
+
+   /* down */
    while ((currentp->screen.y - currentp->screen.vpos) >= currentp->screen.maxY)
-   {
       currentp->screen.vpos += move_virtual_screen (currentp, 5);
-   }
 }
 
 /*
@@ -111,7 +105,7 @@ left (buffer_t *currentp)
 {
    if (movetoPrevChar (&currentp->core))
    {
-/* Failed to move */
+      /* Failed to move */
    }
    else
    {
@@ -144,7 +138,7 @@ right (buffer_t *currentp)
    prevChar= getCurrentChar (&currentp->core);
    if (movetoNextChar (&currentp->core))
    {
-/* Failed to move */
+      /* Failed to move */
    }
    else
    {
@@ -174,7 +168,9 @@ void
 up (buffer_t *currentp)
 {
    if (movetoPrevLine (&currentp->core))
+   {
       ;
+   }
    else
    {
       currentp->screen.y--;
@@ -315,13 +311,17 @@ move_virtual_screen (buffer_t *currentp, int offset)
 static void
 allocate_new_gap (buffer_t *currentp)
 {
-   int newsize    = currentp->core.buffer_size + GAP_SIZE;
-   char *newbuffer= allocate (newsize, "allocate_new_gap()");
+   int newsize     = currentp->core.buffer_size + GAP_SIZE;
+   char *first     = currentp->core.buffer;
+   int firstlen    = currentp->core.gap - currentp->core.buffer;
+   char *second    = &(currentp->core.gap[currentp->core.gap_size]);
+   int secondlen   = currentp->core.buffer + currentp->core.buffer_size - second;
+   char *newbuffer = calloc(newsize, sizeof(char));
 
-   char *first = currentp->core.buffer;
-   int firstlen= currentp->core.gap - currentp->core.buffer;
-   char *second = &(currentp->core.gap[currentp->core.gap_size]);
-   int secondlen= currentp->core.buffer + currentp->core.buffer_size - second;
+   if (!newbuffer) {
+      perror("Failed allocating new buffer");
+      exit(1);
+   }
 
    memcpy (newbuffer, first, firstlen);
    memcpy (&(newbuffer[firstlen + GAP_SIZE]), second, secondlen);
@@ -461,11 +461,15 @@ editorCharacterGenerator (buffer_t *currentp)
 
    memcpy (&runner, currentp->screen.top, sizeof (text_t));
 
-/* We want an array of characters that is maxX * maxY large.
- * if we cannot get that much we want at least to have
- * an array with lots of NL and ended with a NUL.
- */
-   genbuf= allocate(nofbytes, "editorCharacterGenerator");
+   /* We want an array of characters that is maxX * maxY large.
+    * if we cannot get that much we want at least to have
+    * an array with lots of NL and ended with a NUL.
+    */
+   genbuf = calloc(nofbytes, sizeof(char));
+   if (!genbuf) {
+      perror("Failed allocating new buffer");
+      exit(1);
+   }
 
    for (i = 0, v_pos = 0; v_pos < currentp->screen.maxY; v_pos ++)
    {
@@ -903,8 +907,12 @@ void search (buffer_t *currentp, char *pattern, int dir)
 int newFile (buffer_t *new, size_t size)
 {
   /* Allocate a data buffer */
-  new->core.buffer      = allocate (size + GAP_SIZE, "newFile()");
   new->core.buffer_size = size + GAP_SIZE;
+  new->core.buffer      = calloc(new->core.buffer_size, sizeof(char));
+  if (!new->core.buffer) {
+      perror("Failed allocating new buffer");
+      exit(1);
+  }
 
   /* Initial size and location of the gap */
   new->core.gap      = new->core.buffer;
@@ -1017,7 +1025,12 @@ void
 coreNewScreen (buffer_t *newBuffer)
 {
    /* BUFFER_GAP needs this copy for the virtual screen */
-   newBuffer->screen.top = allocate (sizeof (text_t), __FUNCTION__);
+   newBuffer->screen.top = calloc(sizeof(text_t), sizeof(char));
+   if (!newBuffer->screen.top) {
+      perror("Failed allocating new buffer");
+      exit(1);
+   }
+
    memcpy (newBuffer->screen.top, &newBuffer->core, sizeof (text_t));
 
    /* Invisible cursor that indicates top of screen */

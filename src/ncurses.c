@@ -7,10 +7,12 @@
  * 23/4 1999 - Crash <joachim.nilsson@mds.mdh.se>
  *
  */
+
 #include "config.h"
 #ifdef NCURSES_PLUGIN
 
 #include <ncurses.h>
+#include <stdlib.h>
 #include "plugin.h"
 
 /* Div. inställningar och sånt... */
@@ -110,13 +112,20 @@ keyboardPluginFinish (void)
 char *
 plugin_read_string (int x, int y)
 {
-  char *str = allocate (80, "readString");
+   char *str;
 
-  echo ();
-  mvgetnstr (y, x, str, 80);
-  noecho ();
 
-  return str;
+   str = calloc(80, sizeof(char));
+   if (!str) {
+      perror("Failed allocating new buffer");
+      exit(1);
+   }
+
+   echo ();
+   mvgetnstr (y, x, str, 80);
+   noecho ();
+
+   return str;
 }
 
 /**

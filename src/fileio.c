@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 #include "config.h"
 #include "editor.h"
@@ -41,7 +42,11 @@ buffer_t *loadFile(char *fileName)
    FILE *filePtr= NULL;
    struct stat statusBuffer;
 
-   newBuffer= allocate(sizeof(buffer_t), "loadFile()");
+   newBuffer = calloc(sizeof(buffer_t), sizeof(char));
+   if (!newBuffer) {
+      perror("Failed allocating new buffer");
+      exit(1);
+   }
 
    /* If there was a filename given on the commandline/prompt then save
       it for future use, even if the file does not exist now.

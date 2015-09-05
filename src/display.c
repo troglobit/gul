@@ -121,8 +121,11 @@ static void display_ruler (buffer_t *currentp)
 
    /* Rita direkt i framebuffern/virtuella skärmen ?! :) */
 
-   /* Varning för livsfarlig kod!!! */
-   ruler= allocate (currentp->screen.maxX, "displayStatus()");
+   ruler = calloc(currentp->screen.maxX, sizeof(char));
+   if (!ruler) {
+      perror("Failed allocating ruler");
+      exit(1);
+   }
 
    /* Trött, skiter i säkerhetsbältet :P */
    if (!filename)

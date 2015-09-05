@@ -1,100 +1,24 @@
-dnl Process this file with autoconf to produce a configure script.
-
-dnl Every other copy of the package version number gets its value from here
+# Use v2.61 for backwards compat with Ubuntu 12.04 LTS
+AC_PREREQ([2.61])
 AC_INIT([gul],[0.1.3-pre],[https://github.com/troglobit/gul/])
+AM_INIT_AUTOMAKE([])
+AM_SILENT_RULES([yes])
 
-AC_CONFIG_HEADERS([include/settings.h])
-AC_CONFIG_SRCDIR(configure.ac)
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_HEADER([include/settings.h])
+AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile man/Makefile])
 
 AC_PROG_CC
 AC_PROG_INSTALL
+
 AC_HEADER_STDC
-
 AC_CHECK_HEADERS(errno.h features.h netdb.h stdio.h syslog.h ncurses.h)
-AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h sys/mkdev.h sys/sysmacros.h string.h memory.h fcntl.h dirent.h sys/ndir.h ndir.h alloca.h locale.h )
+AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h string.h)
 
-dnl Add _GNU_SOURCE to enable features and activate legacy API.
 CFLAGS="${CFLAGS} -D_GNU_SOURCE"
 
-dnl Here is a check for GCC which sets all necessary flags, most notably
-dnl CFLAGS and CXXFLAGS. Checks for other compilers should do the same.
-if test "$GCC" = "yes" ; then
-    # set GCC compiler options that should work with all versions
-    CFLAGS="${CFLAGS} -Wall -pedantic -fpic -Wno-long-long"
-    SHAREDLIB_LDFLAGS="-shared ${SHAREDLIB_LDFLAGS}"
-    DEPEND_CCFLAGS="-MM"
-
-    # -std=c99 is only supported in later releases of GCC and causes
-    # Linux headers to go into strict ANSI mode, dropping non-ANSI functions
-    # so we have to fall back to -std=gnu99 if c99 doesn't work
-    save_CFLAGS="${CFLAGS}"
-    CFLAGS="${CFLAGS} -std=c99 -Werror-implicit-function-declaration"
-    AC_MSG_CHECKING([whether GNU cc -std=c99 option works])
-    AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[#include <string.h> char *a; a = strdup("foo");]])],
-	AC_MSG_RESULT([yes]) ; CFLAGS="$save_CFLAGS -std=c99",
-	AC_MSG_RESULT([no])
-	CFLAGS="$save_CFLAGS -std=gnu99 -Werror-implicit-function-declaration"
-	AC_MSG_CHECKING([whether GNU cc -std=gnu99 option works])
-	AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[#include <string.h> char *a; a = strdup("foo");]]) ],
-		AC_MSG_RESULT([yes]) ; CFLAGS="$save_CFLAGS -std=gnu99",
-		AC_MSG_RESULT([no]) ; CFLAGS="$save_CFLAGS"))
-
-    # Override autoconf default addition of -O2 and let the
-    # --enable-optimizer-flags decide whether to set it or not
-    OPTIMIZER_CFLAGS="-O2"
-    OPTIMIZER_CXXFLAGS="-O2"
-    CFLAGS=`echo ${CFLAGS} | sed 's/-O2//'`
-    CXXFLAGS=`echo ${CXXFLAGS} | sed 's/-O2//'`
-fi
-
-dnl Enable/disable stuff
-AC_ARG_ENABLE(debug,
-              AS_HELP_STRING([--enable-debug],[Enable debugging with GDB [default=no]]),[
-CFLAGS="$CFLAGS -g -DDEBUG=1"],[
-CFLAGS="$CFLAGS $OPTIMIZER_CFLAGS"
-LDFLAGS="-s"])
-
-AC_ARG_ENABLE(pedantic-compiler,
-              AS_HELP_STRING([--enable-pedantic-compiler],[Enable pedantic checks in GCC [default=no]]),
-              [CFLAGS="$CFLAGS -W -Wall -Wformat=2 -Wunreachable-code -Winline"])
-
-
-dnl Checks for documentation
-dnl Required for building the documentation
-AC_PATH_PROG([LATEX], [latex], no)
-if test "x$LATEX" = xno; then
-  missing_progs="$missing_progs latex"
-fi
-AC_PATH_PROG([DVIPS], [dvips], no)
-if test "x$DVIPS" = xno; then
-  missing_progs="$missing_progs dvips"
-fi
-AC_PATH_PROG([PS2PDF], [ps2pdf], no)
-if test "x$PS2PDF" = xno; then
-  missing_progs="$missing_progs ps2pdf"
-fi
-AC_PATH_PROG([FIG2DEV], [fig2dev], no)
-if test "x$FIG2DEV" = xno; then
-  if test "x$maintainer_mode" = xyes; then
-    missing_progs="missing_progs fig2dev"
-  fi
-fi
-
-
-dnl Checks for libraries.
 AC_ARG_WITH(slang, [  --with-slang[=DIR]         Use S-Lang instead of ncurses],
-        [AC_CACHE_CHECK([if this is a BSD system], gul_cv_bsdish,
-                [AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/param.h>
-
-main ()
-{
-#ifdef BSD
-        exit (0);
-#else
-        exit (1);
-#endif
-}]])],[gul_cv_bsdish=yes],[gul_cv_bsdish=no],[gul_cv_bsdish=no])])
+        [
 
 AC_MSG_CHECKING(for S-Lang)
 if test $withval = yes; then
@@ -128,9 +52,7 @@ else
         fi
 fi
 AC_MSG_RESULT($gul_cv_slang)
-if test $gul_cv_bsdish = yes; then
-        AC_CHECK_LIB(termlib, main)
-fi
+
 AC_DEFINE(USE_SLANG_CURSES,1,
         [ Define if you compile with SLang instead of curses/ncurses. ])
 AC_DEFINE(HAVE_COLOR,1,[ Define if your curses library supports color. ])
@@ -179,5 +101,4 @@ old_LIBS="$LIBS"
 LIBS="$LIBS $GULLIBS"
 ])
 
-AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile man/Makefile])
 AC_OUTPUT

@@ -28,10 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>          /* Needed by system.h */
-#if HAVE_LOCALE_H
-#include <locale.h>
-#endif
 
 #include "display.h"
 #include "editor.h"
@@ -40,7 +36,6 @@
 #include "memory.h"
 #include "misc.h"
 #include "plugin.h"
-#include "system.h"
 
 /* Liten fånig text för att retas med den som läser i binären... :) */
 char teaser[]="Nyfiken gul? (Which is swedish for: \"Curious yellow?\" ;-)";
@@ -217,14 +212,14 @@ decode_switches (int argc, char **argv)
 static void
 usage (int status)
 {
-  printf (_("%s - The one true GUL editor!\n"), program_name);
-  printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
-  printf (_("\
+  printf ("%s - The one true GUL editor!\n", program_name);
+  printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
+  printf ("\
 Options:\n\
   --verbose                  print more information\n\
   -h, --help                 display this help and exit\n\
   -V, --version              output version information and exit\n\
-"));
+");
 
   exit (status);
 }
