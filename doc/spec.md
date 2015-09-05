@@ -412,9 +412,10 @@ Delaktiga
 
 Delaktiga i detta projekt är följande tveksamma individer:
 
+| *Person*                          | *Email*                          | *Current employer* |
 | Anders "Boran" Bornäs             | <mailto:boran@telia.com>         | Ericsson Radar Systems AB |
 | Jakob  "Jakov af Wallby" Eriksson | <mailto:jakob@quicknet.se>       | Quicknet AB |
-| Joachim "Crash Override" Nilsson  | <mailto:joachim.nilsson@home.se> | ABB, urk.   |
+| Joachim "Crash Override" Nilsson  | <mailto:joachim.nilsson@home.se> | ABB AB   |
 
 
 Kommentarer
@@ -467,8 +468,8 @@ marking styles are used.
 
 **NOTEPAD.EXE style**
 
-hello all fri<cmd>ends, is this not a  
-cool editor or what, jag provar att</cmd> skriva  
+hello all fri<kbd>ends, is this not a  
+cool editor or what, jag provar att</kbd> skriva  
 lite på svenska också  
 hej.  
 
@@ -503,6 +504,7 @@ implemented at once.
 
 **Edit**
 
+| *Function*          | *Description* |
 | insert              | Used to insert a charater.  |
 | peek                | What is the current character?  |
 | delete              |  |
@@ -517,6 +519,7 @@ implemented at once.
 
 **Movement**
 
+| *Function*          | *Description* |
 | row-end             | [same as line-end  |
 | row-start           | [same as line-start  |
 | column-end          | [cool feature, similar to line-end and line-start  |
@@ -544,6 +547,7 @@ implemented at once.
 
 **Block marking movement**
 
+| *Function*          | *Description* |
 | BM_row-end          | [same as line-end  |
 | BM_row-start        | same as line-start  |
 | BM_column-end       | cool feature, similar to line-end and line-start  |
@@ -569,6 +573,8 @@ implemented at once.
 | BM_right-down       |  |
 
 **Notepad marking movement**
+
+| *Function*          | *Description* |
 | NM_row-end          | same as line-end  |
 | NM_row-start        | same as line-start  |
 | NM_column-end       | cool feature, similar to line-end and line-start  |
