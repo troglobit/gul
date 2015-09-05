@@ -467,22 +467,27 @@ text is displayed in upper case and unmarked text is displayed in lower
 case. In both examples the same commands are pressed, just different
 marking styles are used.
 
-#### NOTEPAD.EXE style
+**NOTEPAD.EXE style**
 
-hello all fri`ends, is this not a  
-cool editor or what, jag provar att` skriva  
+hello all fri<font style="color:white; background-color:black;">ends, is this not a  
+
+cool editor or what, jag provar att</font> skriva  
+
 lite på svenska också  
+
 hej.  
 
-#### COOL.EXE style
+**COOL.EXE style**
 
-hello all fri<kbd>ends, is this not a   </kbd>  
-cool editor o<kbd>r what, jag provar att</kbd> skriva  
-lite på svenska också.  
-hej.  
+                  ______________________
+    hello all fri|ends, is this not a   |
+	             |                      |
+	cool editor o|r what, jag provar att| skriva
+	             `----------------------'
+	lite på svenska också.
+	
+	hej.
 
-
-### Comments regarding the "styles"
 
 In both examples the user entered "mark mode" (or held shift or
 whatever) and pushed: one down, 21 right. In the NOTEPAD.EXE, this marks
