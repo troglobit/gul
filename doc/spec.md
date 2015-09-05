@@ -192,7 +192,7 @@ just "distributionen" om det här lilla hacket! ;)
 Implementationsbeskrivning
 --------------------------
 
-![Overview](overview.eps "Översikt av nuvarande design")
+![Overview](overview.png "Översikt av nuvarande design")
 
 ### Dubbellänkad lista av rader
 *Kort beskrivning:* Enl. den funktionella beskrivningen ovan så byggs
