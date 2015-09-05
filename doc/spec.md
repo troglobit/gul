@@ -413,7 +413,7 @@ Delaktiga
 Delaktiga i detta projekt är följande tveksamma individer:
 
 | *Person*                          | *Email*                          | *Current employer*        |
-|-----------------------------------|----------------------------------|---------------------------|
+|:----------------------------------|:---------------------------------|:--------------------------|
 | Anders "Boran" Bornäs             | <mailto:boran@telia.com>         | Ericsson Radar Systems AB |
 | Jakob  "Jakov af Wallby" Eriksson | <mailto:jakob@quicknet.se>       | Quicknet AB               |
 | Joachim "Crash Override" Nilsson  | <mailto:joachim.nilsson@home.se> | ABB AB                    |
@@ -467,21 +467,19 @@ text is displayed in upper case and unmarked text is displayed in lower
 case. In both examples the same commands are pressed, just different
 marking styles are used.
 
-**NOTEPAD.EXE style**
+#### NOTEPAD.EXE style
 
-hello all fri<kbd>ends, is this not a  
-cool editor or what, jag provar att</kbd> skriva  
+hello all fri`ends, is this not a  
+cool editor or what, jag provar att` skriva  
 lite på svenska också  
 hej.  
 
-**COOL.EXE style**
+#### COOL.EXE style
 
-                  ______________________
-    hello all fri|ends, is this not a   |
-	cool editor o|r what, jag provar att| skriva
-	             `----------------------'
-	lite på svenska också.
-	hej.
+hello all fri<kbd>ends, is this not a   </kbd>  
+cool editor o<kbd>r what, jag provar att</kbd> skriva  
+lite på svenska också.  
+hej.  
 
 
 ### Comments regarding the "styles"
@@ -506,7 +504,7 @@ implemented at once.
 **Edit**
 
 | *Function*          | *Description* |
-|---------------------|---------------|
+|:--------------------|:--------------|
 | insert              | Used to insert a charater.  |
 | peek                | What is the current character?  |
 | delete              |  |
@@ -522,22 +520,22 @@ implemented at once.
 **Movement**
 
 | *Function*          | *Description* |
-|---------------------|---------------|
-| row-end             | [same as line-end  |
-| row-start           | [same as line-start  |
-| column-end          | [cool feature, similar to line-end and line-start  |
-| column-start        | [Almost the same as page-start. (page-start sets X coord to 0)  |
+|:--------------------|:--------------|
+| row-end             | same as line-end  |
+| row-start           | same as line-start  |
+| column-end          | cool feature, similar to line-end and line-start  |
+| column-start        | Almost the same as page-start. (page-start sets X coord to 0)  |
 | word-end            |  |
 | word-start          |  |
-| column-word-end     | [same as word-end, but in a vertical fashion.  |
-| column-word-start   | [same as word-start, but in a vertical fashion.  |
+| column-word-end     | same as word-end, but in a vertical fashion.  |
+| column-word-start   | same as word-start, but in a vertical fashion.  |
 | |
 | file-end            |  |
 | file-start          |  |
 | page-end            |  |
 | page-start          |  |
-| block-end           | [block: a piece of text separated from any other  |
-| block-start         | [piece of text by two newlines  |
+| block-end           | block: a piece of text separated from any other  |
+| block-start         | piece of text by two newlines  |
 | |
 | up                  |  |
 | down                |  |
@@ -551,8 +549,8 @@ implemented at once.
 **Block marking movement**
 
 | *Function*          | *Description* |
-|---------------------|---------------|
-| BM_row-end          | [same as line-end  |
+|:--------------------|:--------------|
+| BM_row-end          | same as line-end  |
 | BM_row-start        | same as line-start  |
 | BM_column-end       | cool feature, similar to line-end and line-start  |
 | BM_column-start     | Almost the same as page-start. (page-start sets X coord to 0)  |
@@ -579,7 +577,7 @@ implemented at once.
 **Notepad marking movement**
 
 | *Function*          | *Description* |
-|---------------------|---------------|
+|:--------------------|:--------------|
 | NM_row-end          | same as line-end  |
 | NM_row-start        | same as line-start  |
 | NM_column-end       | cool feature, similar to line-end and line-start  |
