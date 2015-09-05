@@ -469,22 +469,24 @@ marking styles are used.
 
 **NOTEPAD.EXE style**
 
-hello all fri<div style="color:white; background-color:black;">ends, is this not a  
-cool editor or what, jag provar att</div> skriva  
-lite på svenska också  
-hej.  
+                  ____________________________
+     hello all fri|ends, is this not a        |
+     _____________|___________________________|
+    |cool editor or what, jag provar att| skriva
+    |___________________________________|
+     lite på svenska också
+	 hej.
 
 **COOL.EXE style**
 
                   ______________________
     hello all fri|ends, is this not a   |
-	             |                      |
-	cool editor o|r what, jag provar att| skriva
-	             `----------------------'
-	lite på svenska också.
-	
-	hej.
-
+                 |                      |
+    cool editor o|r what, jag provar att| skriva
+                 `----------------------'
+    lite på svenska också.
+    
+    hej.
 
 In both examples the user entered "mark mode" (or held shift or
 whatever) and pushed: one down, 21 right. In the NOTEPAD.EXE, this marks
