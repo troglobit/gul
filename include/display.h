@@ -3,16 +3,16 @@
 
 #include "editor.h"
 
-void display        (buffer_t *currentp);
-int  display_status (buffer_t *currentp, char *message);
-void popUp_OK (char *message);
+void display(buffer_t * currentp);
+int display_status(buffer_t * currentp, char *message);
+void popUp_OK(char *message);
 
-#endif /* __DISPLAY_H__ */
+#endif				/* __DISPLAY_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

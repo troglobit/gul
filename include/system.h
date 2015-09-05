@@ -21,7 +21,7 @@
 
 #if HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
+#endif				/* HAVE_CONFIG_H */
 
 /* Include sys/types.h before this file.  */
 
@@ -38,7 +38,7 @@
 #undef S_ISNWK
 #undef S_ISREG
 #undef S_ISSOCK
-#endif /* STAT_MACROS_BROKEN.  */
+#endif				/* STAT_MACROS_BROKEN.  */
 
 #ifndef S_IFMT
 #define S_IFMT 0170000
@@ -64,11 +64,11 @@
 #if !defined(S_ISSOCK) && defined(S_IFSOCK)
 #define S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK)
 #endif
-#if !defined(S_ISMPB) && defined(S_IFMPB) /* V7 */
+#if !defined(S_ISMPB) && defined(S_IFMPB)	/* V7 */
 #define S_ISMPB(m) (((m) & S_IFMT) == S_IFMPB)
 #define S_ISMPC(m) (((m) & S_IFMT) == S_IFMPC)
 #endif
-#if !defined(S_ISNWK) && defined(S_IFNWK) /* HP/UX */
+#if !defined(S_ISNWK) && defined(S_IFNWK)	/* HP/UX */
 #define S_ISNWK(m) (((m) & S_IFMT) == S_IFNWK)
 #endif
 
@@ -117,7 +117,7 @@
 
 /* FIXME: Don't use _POSIX_VERSION.  */
 #ifndef _POSIX_VERSION
-off_t lseek ();
+off_t lseek();
 #endif
 
 #ifdef TM_IN_SYS_TIME
@@ -153,10 +153,9 @@ off_t lseek ();
 /* Some systems (even some that do have <utime.h>) don't declare this
    structure anywhere.  */
 #ifndef HAVE_STRUCT_UTIMBUF
-struct utimbuf
-{
-  long actime;
-  long modtime;
+struct utimbuf {
+	long actime;
+	long modtime;
 };
 #endif
 
@@ -170,7 +169,7 @@ struct utimbuf
 # include <string.h>
 #else
 # include <strings.h>
-char *memchr ();
+char *memchr();
 #endif
 
 #include <errno.h>
@@ -182,9 +181,9 @@ extern int errno;
 #define getopt system_getopt
 #include <stdlib.h>
 #undef getopt
-#else /* not STDC_HEADERS */
-char *getenv ();
-#endif /* STDC_HEADERS */
+#else				/* not STDC_HEADERS */
+char *getenv();
+#endif				/* STDC_HEADERS */
 
 /* The following test is to work around the gross typo in
    systems like Sony NEWS-OS Release 4.0C, whereby EXIT_FAILURE
@@ -219,19 +218,19 @@ char *getenv ();
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>
 # define NLENGTH(direct) (strlen((direct)->d_name))
-#else /* not HAVE_DIRENT_H */
+#else				/* not HAVE_DIRENT_H */
 # define dirent direct
 # define NLENGTH(direct) ((direct)->d_namlen)
 # ifdef HAVE_SYS_NDIR_H
 #  include <sys/ndir.h>
-# endif /* HAVE_SYS_NDIR_H */
+# endif				/* HAVE_SYS_NDIR_H */
 # ifdef HAVE_SYS_DIR_H
 #  include <sys/dir.h>
-# endif /* HAVE_SYS_DIR_H */
+# endif				/* HAVE_SYS_DIR_H */
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
-# endif /* HAVE_NDIR_H */
-#endif /* HAVE_DIRENT_H */
+# endif				/* HAVE_NDIR_H */
+#endif				/* HAVE_DIRENT_H */
 
 #ifdef CLOSEDIR_VOID
 /* Fake a return value. */
@@ -245,10 +244,10 @@ char *getenv ();
 #ifndef DEV_BSIZE
 #ifdef BSIZE
 #define DEV_BSIZE BSIZE
-#else /* !BSIZE */
+#else				/* !BSIZE */
 #define DEV_BSIZE 4096
-#endif /* !BSIZE */
-#endif /* !DEV_BSIZE */
+#endif				/* !BSIZE */
+#endif				/* !DEV_BSIZE */
 
 /* Extract or fake data from a `struct stat'.
    ST_BLKSIZE: Optimal I/O blocksize for the file, in bytes.
@@ -256,12 +255,12 @@ char *getenv ();
    (including indirect blocks). */
 #ifndef HAVE_ST_BLOCKS
 # define ST_BLKSIZE(statbuf) DEV_BSIZE
-# if defined(_POSIX_SOURCE) || !defined(BSIZE) /* fileblocks.c uses BSIZE.  */
+# if defined(_POSIX_SOURCE) || !defined(BSIZE)	/* fileblocks.c uses BSIZE.  */
 #  define ST_NBLOCKS(statbuf) (((statbuf).st_size + 512 - 1) / 512)
-# else /* !_POSIX_SOURCE && BSIZE */
+# else				/* !_POSIX_SOURCE && BSIZE */
 #  define ST_NBLOCKS(statbuf) (st_blocks ((statbuf).st_size))
-# endif /* !_POSIX_SOURCE && BSIZE */
-#else /* HAVE_ST_BLOCKS */
+# endif				/* !_POSIX_SOURCE && BSIZE */
+#else				/* HAVE_ST_BLOCKS */
 /* Some systems, like Sequents, return st_blksize of 0 on pipes. */
 # define ST_BLKSIZE(statbuf) ((statbuf).st_blksize > 0 \
 			       ? (statbuf).st_blksize : DEV_BSIZE)
@@ -269,19 +268,19 @@ char *getenv ();
 /* HP-UX counts st_blocks in 1024-byte units.
    This loses when mixing HP-UX and BSD filesystems with NFS.  */
 #  define ST_NBLOCKS(statbuf) ((statbuf).st_blocks * 2)
-# else /* !hpux */
+# else				/* !hpux */
 #  if defined(_AIX) && defined(_I386)
 /* AIX PS/2 counts st_blocks in 4K units.  */
 #   define ST_NBLOCKS(statbuf) ((statbuf).st_blocks * 8)
-#  else /* not AIX PS/2 */
+#  else				/* not AIX PS/2 */
 #   if defined(_CRAY)
 #    define ST_NBLOCKS(statbuf) ((statbuf).st_blocks * ST_BLKSIZE(statbuf)/512)
-#   else /* not AIX PS/2 nor CRAY */
+#   else			/* not AIX PS/2 nor CRAY */
 #    define ST_NBLOCKS(statbuf) ((statbuf).st_blocks)
-#   endif /* not _CRAY */
-#  endif /* not AIX PS/2 */
-# endif /* !hpux */
-#endif /* HAVE_ST_BLOCKS */
+#   endif			/* not _CRAY */
+#  endif			/* not AIX PS/2 */
+# endif				/* !hpux */
+#endif				/* HAVE_ST_BLOCKS */
 
 /* Convert B 512-byte blocks to kilobytes if K is nonzero,
    otherwise return it unchanged. */
@@ -300,7 +299,7 @@ char *getenv ();
 # else
 #  ifndef _AIX
 /* AIX alloca decl has to be the first thing in the file, bletch! */
-char *alloca ();
+char *alloca();
 #  endif
 # endif
 #endif
@@ -369,8 +368,8 @@ char *alloca ();
 #define __P(args) args
 #else
 #define __P(args) ()
-#endif  /* GCC.  */
-#endif  /* Not __P.  */
+#endif				/* GCC.  */
+#endif				/* Not __P.  */
 
 /* Take care of NLS matters.  */
 
@@ -378,7 +377,7 @@ char *alloca ();
 # include <locale.h>
 #endif
 #if !HAVE_SETLOCALE
-# define setlocale(Category, Locale) /* empty */
+# define setlocale(Category, Locale)	/* empty */
 #endif
 
 #if ENABLE_NLS
@@ -386,9 +385,9 @@ char *alloca ();
 # define _(Text) gettext (Text)
 #else
 # undef bindtextdomain
-# define bindtextdomain(Domain, Directory) /* empty */
+# define bindtextdomain(Domain, Directory)	/* empty */
 # undef textdomain
-# define textdomain(Domain) /* empty */
+# define textdomain(Domain)	/* empty */
 # define _(Text) Text
 #endif
 

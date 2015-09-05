@@ -54,12 +54,12 @@
 #include "gul.h"
 
 
-#endif  /* __CONFIG_H__ */
+#endif				/* __CONFIG_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

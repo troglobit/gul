@@ -33,51 +33,48 @@ static virtualScreen currentScreen;
  */
 int createScreen(void)
 {
-  // Endast när det verkligen *är* en konstruktor... annars så segfault! :)
-  //  if (currentScreen.pixcharArray)
-  //    free (currentScreen.pixcharArray);
+	// Endast när det verkligen *är* en konstruktor... annars så segfault! :)
+	//  if (currentScreen.pixcharArray)
+	//    free (currentScreen.pixcharArray);
 
-  /* Initialize the keyboard and screen plugin */
-  initPlugin ();
+	/* Initialize the keyboard and screen plugin */
+	initPlugin();
 
-  /* OLD (?) init of plugin...
-   * screenPluginInit();
-   * keyboardPluginInit();
-   */
+	/* OLD (?) init of plugin...
+	 * screenPluginInit();
+	 * keyboardPluginInit();
+	 */
 
-  /* Check if the physical screen has been altered/resized. Some
-   * plugins need this to reallocate their own buffers and
-   * reinitialize them. Therefore we send pointers to the old
-   * size and hope the plugin does its own bit.
-   */
-  screenPluginGetMaxYX(&(currentScreen.maxY), &(currentScreen.maxX));
-  currentScreen.pixcharArray = calloc(currentScreen.maxX * currentScreen.maxY, sizeof(char));
-  if (!currentScreen.pixcharArray) {
-     perror("Failed allocating new buffer");
-     exit(1);
-  }
+	/* Check if the physical screen has been altered/resized. Some
+	 * plugins need this to reallocate their own buffers and
+	 * reinitialize them. Therefore we send pointers to the old
+	 * size and hope the plugin does its own bit.
+	 */
+	screenPluginGetMaxYX(&(currentScreen.maxY), &(currentScreen.maxX));
+	currentScreen.pixcharArray = calloc(currentScreen.maxX * currentScreen.maxY, sizeof(char));
+	if (!currentScreen.pixcharArray) {
+		perror("Failed allocating new buffer");
+		exit(1);
+	}
 
-  currentScreen.dirtyFlag= 0;
-  currentScreen.hpos= 0;
+	currentScreen.dirtyFlag = 0;
+	currentScreen.hpos = 0;
 
-  return 0;
+	return 0;
 }
 
 void getScreenMaxYX(int *maxy, int *maxx)
 {
-  if (maxy == NULL || maxx == NULL)
-    return;
+	if (maxy == NULL || maxx == NULL)
+		return;
 
-  if (!currentScreen.pixcharArray)
-    {
-      *maxx= 0;
-      *maxy= 0;
-    }
-  else
-    {
-      *maxx= currentScreen.maxX;
-      *maxy= currentScreen.maxY;
-    }
+	if (!currentScreen.pixcharArray) {
+		*maxx = 0;
+		*maxy = 0;
+	} else {
+		*maxx = currentScreen.maxX;
+		*maxy = currentScreen.maxY;
+	}
 }
 
 
@@ -88,45 +85,38 @@ void getScreenMaxYX(int *maxy, int *maxx)
  */
 static int resizeScreen(int newMaxX, int newMaxY)
 {
-  char *newPixcharArray;
-  int  x, y;
+	char *newPixcharArray;
+	int x, y;
 
-  newPixcharArray = calloc(newMaxX * newMaxY, sizeof(char));
-  if (!newPixcharArray) {
-     perror("Failed allocating new buffer");
-     exit(1);
-  }
+	newPixcharArray = calloc(newMaxX * newMaxY, sizeof(char));
+	if (!newPixcharArray) {
+		perror("Failed allocating new buffer");
+		exit(1);
+	}
 
-  /* Kopiera så mycket som möjligt till den nya arrayen */
-  for (y= 0;
-       y < (newMaxY > currentScreen.maxY ? currentScreen.maxY : newMaxY);
-       y++)
-    {
-      for (x= 0;
-           y < (newMaxX > currentScreen.maxX ? currentScreen.maxX : newMaxX);
-           x++)
-        {
-          newPixcharArray[y * currentScreen.maxX + x]=
-            currentScreen.pixcharArray[y * currentScreen.maxX + x];
-        }
-    }
-  /* Kritiskt område... :( */
-  free(currentScreen.pixcharArray);
-  currentScreen.pixcharArray= newPixcharArray;
-  currentScreen.maxX= newMaxX;
-  currentScreen.maxY= newMaxY;
+	/* Kopiera så mycket som möjligt till den nya arrayen */
+	for (y = 0; y < (newMaxY > currentScreen.maxY ? currentScreen.maxY : newMaxY); y++) {
+		for (x = 0; y < (newMaxX > currentScreen.maxX ? currentScreen.maxX : newMaxX); x++) {
+			newPixcharArray[y * currentScreen.maxX + x] = currentScreen.pixcharArray[y * currentScreen.maxX + x];
+		}
+	}
+	/* Kritiskt område... :( */
+	free(currentScreen.pixcharArray);
+	currentScreen.pixcharArray = newPixcharArray;
+	currentScreen.maxX = newMaxX;
+	currentScreen.maxY = newMaxY;
 
-  /* Nu ser ju förmodligen inte skärmen klok ut så man skulle behöva
-   * rita om den...
-   */
-  currentScreen.dirtyFlag= 1;
+	/* Nu ser ju förmodligen inte skärmen klok ut så man skulle behöva
+	 * rita om den...
+	 */
+	currentScreen.dirtyFlag = 1;
 
-  return 0;
+	return 0;
 }
 
 int screenIsDirty(void)
 {
-  return currentScreen.dirtyFlag;
+	return currentScreen.dirtyFlag;
 }
 
 
@@ -139,125 +129,113 @@ int screenIsDirty(void)
  */
 int screenIsChanged(void)
 {
-  int newMaxX, newMaxY;
+	int newMaxX, newMaxY;
 
-  /* Check if the physical screen has been altered/resized. Some
-   * plugins need this to reallocate their own buffers and
-   * reinitialize them. Therefore we send pointers to the old
-   * size and hope the plugin does its own bit.
-   */
-  screenPluginGetMaxYX(&newMaxY, &newMaxX);
+	/* Check if the physical screen has been altered/resized. Some
+	 * plugins need this to reallocate their own buffers and
+	 * reinitialize them. Therefore we send pointers to the old
+	 * size and hope the plugin does its own bit.
+	 */
+	screenPluginGetMaxYX(&newMaxY, &newMaxX);
 
-  if(newMaxX != currentScreen.maxX || newMaxY != currentScreen.maxY)
-    {
-      resizeScreen(newMaxX, newMaxY);
+	if (newMaxX != currentScreen.maxX || newMaxY != currentScreen.maxY) {
+		resizeScreen(newMaxX, newMaxY);
 
-      return 1;
-    }
+		return 1;
+	}
 
-  return 0;
+	return 0;
 }
 
 
 void screenUpdate(void)
 {
-  screenPluginUpdate();
+	screenPluginUpdate();
 }
 
 void screenPositionCursor(int x, int y)
 {
-  screenPluginPositionCursor(x, y);
+	screenPluginPositionCursor(x, y);
 }
 
 /* Scroll the view right ... */
 int panRight(int steps)
 {
-  currentScreen.hpos+= steps;
+	currentScreen.hpos += steps;
 
-  return currentScreen.hpos;
+	return currentScreen.hpos;
 }
 
 /* Scroll the view left ... */
 int panLeft(int steps)
 {
-  currentScreen.hpos-= steps;
-  if (currentScreen.hpos < 0)
-    {
-      currentScreen.hpos= 0;
-    }
+	currentScreen.hpos -= steps;
+	if (currentScreen.hpos < 0) {
+		currentScreen.hpos = 0;
+	}
 
-  return currentScreen.hpos;
+	return currentScreen.hpos;
 }
 
 /* Scroll the view to the leftmost position ... */
 void panHome(void)
 {
-  currentScreen.hpos= 0;
+	currentScreen.hpos = 0;
 }
 
 
 int putPixchar(int x, int y, char ch)
 {
-  if (!currentScreen.pixcharArray)
-    {
-      return 1;
-    }
+	if (!currentScreen.pixcharArray) {
+		return 1;
+	}
 
-  if (y < currentScreen.maxY)
-    {
-      if (x < currentScreen.maxX)
-        {
-          currentScreen.pixcharArray[y*currentScreen.maxX + x]= ch;
-          currentScreen.dirtyFlag= 1;
-        }
-    }
+	if (y < currentScreen.maxY) {
+		if (x < currentScreen.maxX) {
+			currentScreen.pixcharArray[y * currentScreen.maxX + x] = ch;
+			currentScreen.dirtyFlag = 1;
+		}
+	}
 
-  return 0;
+	return 0;
 }
 
 char getPixchar(int x, int y)
 {
-  if (!currentScreen.pixcharArray)
-    {
-      return 0;
-    }
+	if (!currentScreen.pixcharArray) {
+		return 0;
+	}
 
-  if (x >= currentScreen.maxX || y >= currentScreen.maxY)
-    {
-      return 0;
-    }
+	if (x >= currentScreen.maxX || y >= currentScreen.maxY) {
+		return 0;
+	}
 
-  return currentScreen.pixcharArray[y * currentScreen.maxX + x];
+	return currentScreen.pixcharArray[y * currentScreen.maxX + x];
 }
 
 void screenDebugDisplay(void)
 {
-  int x, y;
+	int x, y;
 
-  LOG("Debug display... [%d, %d]\n",
-          currentScreen.maxX,
-          currentScreen.maxY);
-  for (y= 0; y < currentScreen.maxY; y++)
-    {
-      for (x= 0; x < currentScreen.maxX; x++)
-        {
-          if ('\0' != getPixchar(x, y))
-            {
-              LOG("%c", getPixchar(x, y));
-            }
-        }
-      LOG("\n");
-    }
+	LOG("Debug display... [%d, %d]\n", currentScreen.maxX, currentScreen.maxY);
+	for (y = 0; y < currentScreen.maxY; y++) {
+		for (x = 0; x < currentScreen.maxX; x++) {
+			if ('\0' != getPixchar(x, y)) {
+				LOG("%c", getPixchar(x, y));
+			}
+		}
+		LOG("\n");
+	}
 }
 
 keyevent_t read_key(void)
 {
-  return plugin_read_key();
+	return plugin_read_key();
 }
 
-char *read_string (int x, int y)
+char *read_string(int x, int y)
 {
-  return plugin_read_string (x, y);
+	return plugin_read_string(x, y);
 }
 
 
@@ -266,7 +244,7 @@ char *read_string (int x, int y)
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

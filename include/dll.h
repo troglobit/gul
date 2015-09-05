@@ -6,18 +6,17 @@
  */
 #define MAX_LINE_LENGTH 3 * (2 * sizeof(struct dllSt *) + 2 * sizeof(int))
 
-typedef struct dllSt{
-   struct dllSt  *previous;
-   struct dllSt  *next;
-   int           begin;
-   int           end;
-   char          line[MAX_LINE_LENGTH];
+typedef struct dllSt {
+	struct dllSt *previous;
+	struct dllSt *next;
+	int begin;
+	int end;
+	char line[MAX_LINE_LENGTH];
 } dll_t;
 
-typedef struct _text
-{
-  dll_t  *stx;                 /* Start of TeXt and list. */
-  dll_t  *node;                /* Current, where the cursor is */
+typedef struct _text {
+	dll_t *stx;		/* Start of TeXt and list. */
+	dll_t *node;		/* Current, where the cursor is */
 } text_t;
 
 /* Proposed new text-type.
@@ -30,12 +29,12 @@ typedef struct _text
  * }text;
  */
 
-#endif /* __DLL_H__ */
+#endif				/* __DLL_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

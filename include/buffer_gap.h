@@ -12,12 +12,12 @@
  * @buffer_size == file size
  * @gap_size == how much more can be fed to @buffer before realloc.
  */
-typedef struct _text{
-  char        *buffer;
-  char        *gap;
-  char        *point, *mark;
-  unsigned int position;   /* byte position in file/buffer */
-  unsigned int buffer_size, gap_size;
+typedef struct _text {
+	char *buffer;
+	char *gap;
+	char *point, *mark;
+	unsigned int position;	/* byte position in file/buffer */
+	unsigned int buffer_size, gap_size;
 } text_t;
 
-#endif /* __BUFFER_GAP_H__ */
+#endif				/* __BUFFER_GAP_H__ */

@@ -45,12 +45,12 @@
 #define GUL_F12       SLANG2GUL(SL_KEY_F(12))
 
 
-#endif /* __SLANG_H__ */
+#endif				/* __SLANG_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

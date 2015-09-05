@@ -6,12 +6,12 @@ char *strDup(char *src);
 char *strCat(char *s1, char *s2);
 int strLen(char *string, int maxLen, char endChar);
 
-#endif /* __MISC_H__ */
+#endif				/* __MISC_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

@@ -14,17 +14,17 @@
 
 char *strnDup(char *src, int n)
 {
-   char oldchar = src[n];
-   char *dest;
+	char oldchar = src[n];
+	char *dest;
 
-   src[n] = '\0';
-   if(NULL == (dest = strdup(src))){
-      fprintf(stderr, "ERROR: strndup(), out of memory...\n");
-      exit(EXIT_FAILURE);
-   }
-   src[n] = oldchar;
+	src[n] = '\0';
+	if (NULL == (dest = strdup(src))) {
+		fprintf(stderr, "ERROR: strndup(), out of memory...\n");
+		exit(EXIT_FAILURE);
+	}
+	src[n] = oldchar;
 
-   return(dest);
+	return (dest);
 }
 
 /* Strängduplicerare, precis som strdup() men *med* felhantering s.a. den
@@ -32,19 +32,19 @@ char *strnDup(char *src, int n)
  */
 char *strDup(char *src)
 {
-   char *dest = NULL;
+	char *dest = NULL;
 
-   if(src != NULL){
-      if(NULL ==(dest = strdup(src))){
-         LOG("ERROR: strDup() out of memory, aborting.\n");
-         exit(EXIT_FAILURE);
-      }
-   }else{
-      LOG("ERROR: strDup() Couldn't find a string to duplicate. Aborting.\n");
-      exit(EXIT_FAILURE);
-   }
+	if (src != NULL) {
+		if (NULL == (dest = strdup(src))) {
+			LOG("ERROR: strDup() out of memory, aborting.\n");
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		LOG("ERROR: strDup() Couldn't find a string to duplicate. Aborting.\n");
+		exit(EXIT_FAILURE);
+	}
 
-   return(dest);
+	return (dest);
 }
 
 
@@ -54,28 +54,28 @@ char *strDup(char *src)
  */
 char *strCat(char *s1, char *s2)
 {
-   int  totalLength;
-   char *s;
+	int totalLength;
+	char *s;
 
-   if (NULL == s1)
-      return(strDup(s2));
-   else if (NULL == s2)
-      return(strDup(s1));
-   else{
-      totalLength= strlen(s1) + strlen(s2) + 2;
+	if (NULL == s1)
+		return (strDup(s2));
+	else if (NULL == s2)
+		return (strDup(s1));
+	else {
+		totalLength = strlen(s1) + strlen(s2) + 2;
 /*      if (NULL == (s= realloc(s1, totalLength))){
  *       LOG("ERROR: strCat() out of memory!\n       Aborting.\n");
  *       exit(EXIT_FAILURE);
  *    }
  *    return(strcat(s, s2));
  */
-      if (NULL == (s= malloc(totalLength))){
-         LOG("ERROR: strCat() out of memory!\n       Aborting.\n");
-         exit(EXIT_FAILURE);
-      }
-      sprintf(s, "%s%s", s1, s2);
-      return(s);
-   }
+		if (NULL == (s = malloc(totalLength))) {
+			LOG("ERROR: strCat() out of memory!\n       Aborting.\n");
+			exit(EXIT_FAILURE);
+		}
+		sprintf(s, "%s%s", s1, s2);
+		return (s);
+	}
 }
 
 
@@ -93,30 +93,29 @@ char *strCat(char *s1, char *s2)
  */
 int strLen(char *string, int maxLen, char endChar)
 {
-   int counter;
+	int counter;
 
-   if (maxLen){
-      for (counter= 0; counter < maxLen; counter++){
-         if (endChar == string[counter])
-            return counter;
-      }
-   }else{
-      for (counter= 0; 1; counter++){
-         if (endChar == string[counter] ||
-             '\0'    == string[counter])
-            return counter;
-      }
-   }
-
+	if (maxLen) {
+		for (counter = 0; counter < maxLen; counter++) {
+			if (endChar == string[counter])
+				return counter;
+		}
+	} else {
+		for (counter = 0; 1; counter++) {
+			if (endChar == string[counter] || '\0' == string[counter])
+				return counter;
+		}
+	}
 
 
-   return maxLen;
+
+	return maxLen;
 }
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

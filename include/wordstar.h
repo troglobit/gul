@@ -2,8 +2,7 @@
 #define __HELP_H__
 
 char help_filename[] = "**HELP BUFFER**";
-char help_buffer[]   =
-"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     \n\
+char help_buffer[] = "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     \n\
 ------------ The WordStar Cursor Diamond and Scrolling Square ------------          \n\
             .-------. .--------------.--------------.                               \n\
             | Quick*| | Line Up  _.-' `-._  Scrn Up |                               \n\
@@ -54,35 +53,34 @@ Funcs | Scr    Cursor    Scr  |               | Undo/          On-scrn  Print | 
   \"Block\" Funcs ....: Select, move, copy, save, quit, print, open....             \n\
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
 
-text_t help_core =
-{
-   help_buffer, help_buffer,
-   NULL, NULL, sizeof(help_buffer), 0
+text_t help_core = {
+	help_buffer, help_buffer,
+	NULL, NULL, sizeof(help_buffer), 0
 };
 
 
-buffer_t help =
-{
-   help_filename,
-   0, 0,
-   {0,0,0,0,0,0,
-    &help_core,
-    "", ""},
+buffer_t help = {
+	help_filename,
+	0, 0,
+	{0, 0, 0, 0, 0, 0,
+	 &help_core,
+	 "", ""}
+	,
 
-   {
-   help_buffer, help_buffer,
-   NULL, NULL, sizeof(help_buffer), 0
-},
+	{
+	 help_buffer, help_buffer,
+	 NULL, NULL, sizeof(help_buffer), 0}
+	,
 
-   NULL, NULL
+	NULL, NULL
 };
 
-#endif /* __HELP_H__ */
+#endif				/* __HELP_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

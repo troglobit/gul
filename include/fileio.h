@@ -5,16 +5,16 @@
 #include "editor.h"
 
 buffer_t *loadFile(char *fileName);
-int saveFile(buffer_t *currentp, char *filename);
+int saveFile(buffer_t * currentp, char *filename);
 void redirect(FILE *file_in, char *file_out);
 
 
-#endif /* __IO_H__ */
+#endif				/* __IO_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

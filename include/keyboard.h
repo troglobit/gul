@@ -10,6 +10,6 @@
  * See wordstar.c for an example.
  */
 
-int keyboard_loop (buffer_t *currentBuffer);
+int keyboard_loop(buffer_t * currentBuffer);
 
-#endif  /* __KEYBOARD_H__ */
+#endif				/* __KEYBOARD_H__ */

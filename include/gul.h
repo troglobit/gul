@@ -11,18 +11,18 @@ typedef int gulchar;
 typedef int gulchar;
 #else
 typedef unsigned char gulchar;
-#endif /* PLUGINS */
+#endif				/* PLUGINS */
 
-void trySave (buffer_t *buf);
-buffer_t *tryLoad (buffer_t *buf);
+void trySave(buffer_t * buf);
+buffer_t *tryLoad(buffer_t * buf);
 
 
-#endif /* __GUL_H__ */
+#endif				/* __GUL_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */

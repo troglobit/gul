@@ -7,7 +7,7 @@
 #include "wordstar.h"
 #elif defined (EMACS_KEYS)
 #include "emacs.h"
-#else  /* MINIMAL_KEYS */
+#else				/* MINIMAL_KEYS */
 
 char help_filename[] = "**HELP BUFFER**";
 char help_buffer[] = "\
@@ -25,40 +25,39 @@ F9 -                              | C-r - Reversed I-search                     
 F0 - Quit                         | C-g - Goto line                             \n\
 ================================================================================\n";
 
-text_t help_core =
-{
-   help_buffer, help_buffer,
-   NULL, NULL,
-   0,
-   sizeof(help_buffer), 0
+text_t help_core = {
+	help_buffer, help_buffer,
+	NULL, NULL,
+	0,
+	sizeof(help_buffer), 0
 };
 
 
-buffer_t help =
-{
-   help_filename,
-   0,
-   {0,0,0,0,0,0,
-    &help_core,
-    "", ""},
+buffer_t help = {
+	help_filename,
+	0,
+	{0, 0, 0, 0, 0, 0,
+	 &help_core,
+	 "", ""}
+	,
 
-   {
-   help_buffer, help_buffer,
-   NULL, NULL,
-   0,
-   sizeof(help_buffer), 0
-},
+	{
+	 help_buffer, help_buffer,
+	 NULL, NULL,
+	 0,
+	 sizeof(help_buffer), 0}
+	,
 
-   NULL, NULL
+	NULL, NULL
 };
 
-#endif  /* Key binding alternatives */
-#endif /* __HELP_H__ */
+#endif				/* Key binding alternatives */
+#endif				/* __HELP_H__ */
 
 
 /**
  * Local Variables:
- *  c-file-style: "ellemtel"
- *  indent-tabs-mode: nil
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
  * End:
  */
