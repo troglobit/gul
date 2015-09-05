@@ -34,29 +34,23 @@ int keyboard_loop(buffer_t *currentBuffer)
 		 * with vt100 - or perhaps leave this to the plugin to
 		 * deal with?
 		 */
-		do {
-			thisEvent = read_key();
-		} while (0);	/* <--- Maybe add GUL_NO_EVENT? */
+		thisEvent = read_key();
 
 		switch (thisEvent.event) {
-			/* Regular textual data to go into the file/buffer. */
-		case GUL_DATA:
-			/* I.e. "if NO keydata then ..." */
-			if (!thisEvent.keydata) ;
-			else {
+		case GUL_DATA: /* Regular textual data to go into the file/buffer. */
+			if (thisEvent.keydata) {
 				LOG("[%c]\n", (char)thisEvent.keydata);
-				/* Insert into buffer. */
 				insert(currentBuffer, thisEvent.keydata);
 			}
 			break;
 
-		case GUL_C_SPACE:	/* Set mark! */
+		case GUL_C_SPACE: /* Set mark! */
 			display_status(currentBuffer, "Mark set.");
 			LOG("Mark set\n");
 			set_mark(currentBuffer);
 			break;
 
-		case GUL_C_w:	/* copy */
+		case GUL_C_w: /* copy */
 			display_status(currentBuffer, "Cut text");
 			LOG("Cut text\n");
 			cut(currentBuffer);
@@ -133,32 +127,41 @@ int keyboard_loop(buffer_t *currentBuffer)
 			LOG("[F3]\n");
 			currentBuffer = tryLoad(currentBuffer);
 			break;
+
 		case GUL_F4:
 			LOG("[F4]\n");
 			break;
+
 		case GUL_F5:
 			LOG("[F5]\n");
 			break;
+
 		case GUL_F6:
 			LOG("[F6]\n");
 			break;
+
 		case GUL_F7:
 			LOG("[F7]\n");
 			do_search(currentBuffer);
 			break;
+
 		case GUL_F8:
 			LOG("[F8]\n");
 			break;
+
 		case GUL_F9:
 			LOG("[F9]\n");
 			break;
+
 		case GUL_F10:
 			LOG("[F10]\n");
 			quit = 1;
 			break;
+
 		case GUL_F11:
 			LOG("[F11]\n");
 			break;
+
 		case GUL_F12:
 			LOG("[F12]\n");
 			break;
@@ -167,25 +170,29 @@ int keyboard_loop(buffer_t *currentBuffer)
 			LOG("[HOME]\n");
 			beginning_of_line(currentBuffer);
 			break;
+
 		case GUL_END:
 			LOG("[END]\n");
 			end_of_line(currentBuffer);
 			break;
+
 		case GUL_PPAGE:
 			LOG("[PGUP]\n");
 			page_up(currentBuffer);
 			break;
+
 		case GUL_NPAGE:
 			LOG("[PGDN]\n");
 			page_down(currentBuffer);
 			break;
+
 		case GUL_INSERT:
 			LOG("[INS]\n");
 			break;
 
 		case GUL_C_l:
 			LOG("Refresh\n");
-/* XXX - Re-center on screen and then let display() */
+			/* XXX - Re-center on screen and then let display() */
 			break;
 
 		default:
@@ -195,7 +202,7 @@ int keyboard_loop(buffer_t *currentBuffer)
 	}
 	while (!closure);
 
-/* Tell main loop to quit/continue. */
+	/* Tell main loop to quit/continue. */
 	return quit;
 }
 
@@ -211,7 +218,6 @@ void do_search(buffer_t *currentp)
 	search(currentp, tmp, 0);
 	free(tmp);
 }
-
 
 /**
  * Local Variables:

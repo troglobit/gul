@@ -21,8 +21,14 @@
 
 /*** Debug messages to stderr? *****************************************/
 #ifdef DEBUG
-#define LOG(args...) \
-  fprintf (stderr, args)
+#define LOG(args...)				\
+ {						\
+	FILE *fp = fopen("gul.log", "a");	\
+	if (fp) {				\
+		fprintf(fp, args);		\
+		fclose(fp);			\
+	}					\
+ }
 #else
 #define LOG(args...)
 #endif

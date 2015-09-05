@@ -8,6 +8,14 @@ AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADER([include/settings.h])
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
 
+dnl Properly define at least some contents of CFLAGS before AC_PROG_CC
+dnl is called, otherwise it'll define CFLAGS="-g -O2".  We want *no*
+dnl optimizations when -g.  Also, set DEBUG=1 in debug mode, for LOG()
+CPPFLAGS+=" -D_GNU_SOURCE"
+AC_ARG_ENABLE([debug],
+    [  --enable-debug                 include symbol table, enable gul.log debug msgs],
+    [CFLAGS+=" -g -O0"; CPPFLAGS+=" -DDEBUG=1"], [CFLAGS+=" -O2"])
+
 AC_PROG_CC
 AC_PROG_INSTALL
 
@@ -15,9 +23,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(errno.h features.h netdb.h stdio.h syslog.h ncurses.h)
 AC_CHECK_HEADERS(unistd.h sys/param.h sys/time.h time.h string.h)
 
-CFLAGS="${CFLAGS} -D_GNU_SOURCE"
-
-AC_ARG_WITH(slang, [  --with-slang[=DIR]         Use S-Lang instead of ncurses],
+AC_ARG_WITH(slang, [  --with-slang[=DIR]        use S-Lang instead of ncurses],
         [
 
 AC_MSG_CHECKING(for S-Lang)
@@ -67,7 +73,7 @@ AC_CHECK_LIB(slang, SLtt_get_terminfo,
 ],
 
 [gul_cv_curses=/usr
-AC_ARG_WITH(curses, [  --with-curses=DIR          Where ncurses is installed ],
+AC_ARG_WITH(curses, [  --with-curses=DIR       path to where ncurses is installed],
         [if test $withval != yes; then
                 gul_cv_curses=$withval
         fi
@@ -94,7 +100,7 @@ AC_CHECK_LIB($cf_ncurses, initscr,
 		AC_CHECK_HEADERS(ncurses.h,[cf_cv_ncurses_header="ncurses.h"])
 	fi],
 
-        [CF_CURSES_LIBS])
+        )
 	])
 
 old_LIBS="$LIBS"
