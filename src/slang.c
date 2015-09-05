@@ -1,7 +1,7 @@
 /* slang.c                                       vim:set ts=3 sw=3 ruler:
  *
  * S-Lang plugin for the Gul Editor.
- * initPlugin() is the central starting point of any control plugin.
+ * plugin_init() is the central starting point of any control plugin.
  *
  * 6/9 1999 - Joachim Nilsson <crash@vmlinux.org>
  *
@@ -12,55 +12,55 @@
 #include <slang.h>
 #include "plugin.h"
 
-#define SCREEN_RESIZED(maxY, maxX)                                      \
-   (((maxY) != SLtt_Screen_Rows || (maxX) != SLtt_Screen_Cols) ? 1 : 0)
+#define SCREEN_RESIZED(max_row, max_col)                                      \
+   (((max_row) != SLtt_Screen_Rows || (max_col) != SLtt_Screen_Cols) ? 1 : 0)
 
 /**
- * screenPluginInit():
+ * screen_plugin_init():
  *
  * Initiates the screen and the various SLang variables.
  */
-void screenPluginInit(void)
+void screen_plugin_init(void)
 {
 	if (SLsmg_init_smg() == -1) {
 		LOG("S-Lang could not properly allocate the screen.\
 Sorry, exiting!\n");
 		exit(-1);
 	} else {
-		LOG("screenPluginInit() - S-Lang succeeded.\n");
+		LOG("screen_plugin_init() - S-Lang succeeded.\n");
 	}
 }
 
 /**
- * screenPluginFinish():
+ * screen_plugin_exit():
  *
  * Call this when quitting from the editor.
  */
-void screenPluginFinish(void)
+void screen_plugin_exit(void)
 {
 	SLsmg_reset_smg();
 }
 
 /**
- * screenPluginGetMaxYX():
- * @maxY: Pointer to return maximum no. of columns in.
- * @maxX: Pointer to return maximum no. or rows in.
+ * screen_plugin_get_dim():
+ * @max_row: Pointer to return maximum no. of columns in.
+ * @max_col: Pointer to return maximum no. or rows in.
  *
  * Returns the physical screen size.
  */
-void screenPluginGetMaxYX(int *maxY, int *maxX)
+void screen_plugin_get_dim(int *max_row, int *max_col)
 {
 	static int init = 1;
 
 	if (init) {
-		*maxY = SLtt_Screen_Rows;
-		*maxX = SLtt_Screen_Cols;
+		*max_row = SLtt_Screen_Rows;
+		*max_col = SLtt_Screen_Cols;
 		init = 0;
 	} else {
-		*maxY = SLtt_Screen_Rows;
-		*maxX = SLtt_Screen_Cols;
+		*max_row = SLtt_Screen_Rows;
+		*max_col = SLtt_Screen_Cols;
 
-		if (SCREEN_RESIZED(*maxY, *maxX)) {
+		if (SCREEN_RESIZED(*max_row, *max_col)) {
 			/* Need to readjust the SLang screen */
 			SLsmg_reset_smg();
 			if (SLsmg_init_smg() == -1) {
@@ -73,38 +73,38 @@ void screenPluginGetMaxYX(int *maxY, int *maxX)
 
 
 /**
- * screenPluginPositionCursor():
+ * screen_plugin_set_cursor():
  * @x: Column
  * @y: Row
  *
  * Positions the cursor
  */
-void screenPluginPositionCursor(int x, int y)
+void screen_plugin_set_cursor(int x, int y)
 {
 	/* Move to [row, col] */
 	SLsmg_gotorc(y, x);
-	LOG("screenPluginPositionCursor (%d,%d)\n", y, x);
+	LOG("screen_plugin_set_cursor (%d,%d)\n", y, x);
 	SLsmg_refresh();
 }
 
 
 /**
- * screenPluginUpdate() - 
+ * screen_plugin_update() - 
  *
  * Reads from the frame-buffer/virtual-screen and updates the physical
  * screen accordingly.
  */
-void screenPluginUpdate(void)
+void screen_plugin_update(void)
 {
 	int virtualXmax, virtualYmax;
 //  int stdscrXmax, stdscrYmax;
 	int x, y;
 	char ch;
 
-	LOG("screenPluginUpdate()");
+	LOG("screen_plugin_update()");
 
 	/* Just in case, check that there have not been any resize events. */
-	getScreenMaxYX(&virtualYmax, &virtualXmax);
+	screen_get_dim(&virtualYmax, &virtualXmax);
 
 	LOG(" - [%d, %d]\n", virtualXmax, virtualYmax);
 	LOG("Done row: ");
@@ -112,7 +112,7 @@ void screenPluginUpdate(void)
 	for (y = 0; y < virtualYmax; y++) {
 		SLsmg_gotorc(y, 0);
 		for (x = 0; x < virtualXmax; x++) {
-			ch = getPixchar(x, y);
+			ch = screen_get_pixchar(x, y);
 
 			if (0 == ch)
 				SLsmg_write_char(' ');
@@ -128,11 +128,11 @@ void screenPluginUpdate(void)
 
 
 /**
- * keyboardPluginInit():
+ * keyboard_plugin_init():
  *
  * Initiates the keyboard.
  */
-void keyboardPluginInit(void)
+void keyboard_plugin_init(void)
 {
 	SLtt_get_terminfo();
 
@@ -155,10 +155,10 @@ void keyboardPluginInit(void)
 }
 
 /**
- * keyboardPluginFinish ()
+ * keyboard_plugin_exit ()
  * Reset all special keyboard handling back to that previous.
  */
-void keyboardPluginFinish(void)
+void keyboard_plugin_exit(void)
 {
 	SLang_reset_tty();
 }
@@ -212,26 +212,26 @@ keyevent_t plugin_read_key(void)
 }
 
 /**
- * initPlugin():
+ * plugin_init():
  *
  * Initates the control.
  */
-void initPlugin(void)
+void plugin_init(void)
 {
-	keyboardPluginInit();
-	screenPluginInit();
+	keyboard_plugin_init();
+	screen_plugin_init();
 }
 
 
 /**
- * pluginFinish ():
+ * plugin_exit ():
  *
  * Releases all memory and resets the screen and keyboard back to normal.
  */
-void pluginFinish(void)
+void plugin_exit(void)
 {
-	keyboardPluginFinish();
-	screenPluginFinish();
+	keyboard_plugin_exit();
+	screen_plugin_exit();
 }
 
 

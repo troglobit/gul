@@ -34,7 +34,7 @@ int keyboard_loop(buffer_t *currentBuffer)
 		 * with vt100 - or perhaps leave this to the plugin to
 		 * deal with?
 		 */
-		thisEvent = read_key();
+		thisEvent = keyboard_event();
 
 		switch (thisEvent.event) {
 		case GUL_DATA: /* Regular textual data to go into the file/buffer. */
@@ -69,7 +69,7 @@ int keyboard_loop(buffer_t *currentBuffer)
 				char *tmp;
 
 				y = display_status(currentBuffer, "Goto line: ");
-				tmp = read_string(11, y);
+				tmp = keyboard_gets(11, y);
 				sscanf(tmp, "%d", &line);
 				free(tmp);
 				goto_line(currentBuffer, line);
@@ -115,17 +115,17 @@ int keyboard_loop(buffer_t *currentBuffer)
 		case GUL_F1:
 			LOG("[F1]\n");
 			display(&help);
-			read_key();
+			keyboard_event();
 			break;
 
 		case GUL_F2:
 			LOG("[F2]\n");
-			trySave(currentBuffer);
+			try_save(currentBuffer);
 			break;
 
 		case GUL_F3:
 			LOG("[F3]\n");
-			currentBuffer = tryLoad(currentBuffer);
+			currentBuffer = try_load(currentBuffer);
 			break;
 
 		case GUL_F4:
@@ -214,7 +214,7 @@ void do_search(buffer_t *currentp)
 	char *tmp;
 
 	y = display_status(currentp, "i-search: ");
-	tmp = read_string(10, y);
+	tmp = keyboard_gets(10, y);
 	search(currentp, tmp, 0);
 	free(tmp);
 }

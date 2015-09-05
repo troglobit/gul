@@ -22,10 +22,10 @@ static void display_text(buffer_t *currentp);
 
 void display(buffer_t *currentp)
 {
-	getScreenMaxYX(&(currentp->screen.maxY), &(currentp->screen.maxX));
+	screen_get_dim(&(currentp->screen.max_row), &(currentp->screen.max_col));
 /* Reservera sista raden som statusrad... */
-	currentp->screen.maxY -= 3;	/* Kolla först om noll!! */
-	currentp->screen.maxX -= 0;
+	currentp->screen.max_row -= 3;	/* Kolla först om noll!! */
+	currentp->screen.max_col -= 0;
 
 	display_text(currentp);
 	display_ruler(currentp);
@@ -37,16 +37,16 @@ void display(buffer_t *currentp)
 	 * Vet om var markören är så den kan ritas dit sist av allt!
 	 */
 	/* Nuvarande kladdiga röra */
-	screenUpdate();
+	screen_update();
 	display_cursor(currentp);
 }
 
 
 static void display_cursor(buffer_t *currentp)
 {
-	screenPositionCursor(currentp->screen.x - currentp->screen.hpos, currentp->screen.y - currentp->screen.vpos);
+	screen_set_cursor(currentp->screen.x - currentp->screen.hpos, currentp->screen.y - currentp->screen.vpos);
 
-/*  screenPositionCursor(currentp->screen.x, currentp->screen.y);
+/*  screen_set_cursor(currentp->screen.x, currentp->screen.y);
  */
 }
 
@@ -57,13 +57,13 @@ static void display_text(buffer_t *currentp)
 	char ch = ' ';
 	char *genbuf;
 
-	genbuf = editorCharacterGenerator(currentp);
+	genbuf = editor_chargen(currentp);
 
-//   LOG("currentp->screen.maxY= %d, currentp->screen.maxX= %d\n", currentp->screen.maxY, currentp->screen.maxX);
+//   LOG("currentp->screen.max_row= %d, currentp->screen.max_col= %d\n", currentp->screen.max_row, currentp->screen.max_col);
 //   LOG("%s\displayText() - nSlut på genbuf.\n", genbuf);
 
-	ymax = currentp->screen.maxY;
-	xmax = currentp->screen.maxX + currentp->screen.hpos;
+	ymax = currentp->screen.max_row;
+	xmax = currentp->screen.max_col + currentp->screen.hpos;
 
 	for (y = 0; y < ymax; y++) {
 		for (x = 0; x < xmax; x++) {
@@ -74,9 +74,9 @@ static void display_text(buffer_t *currentp)
 /* EOL? Fill out with zeros. */
 			if ('\n' == ch) {
 				while (x < xmax)
-					putPixchar(x++, y, 0);
+					screen_put_pixchar(x++, y, 0);
 			} else {
-				putPixchar(x, y, ch);
+				screen_put_pixchar(x, y, ch);
 			}
 		}
 // HAr vi redan detekterad newline? Eller finns det "skräp" kvar till nyrad?
@@ -86,17 +86,17 @@ static void display_text(buffer_t *currentp)
 
 	free(genbuf);
 /*
-  for (y= 0; y < currentp->screen.maxY; y++)
+  for (y= 0; y < currentp->screen.max_row; y++)
   {
-  for (x= 0; x < currentp->screen.maxX; x++)
+  for (x= 0; x < currentp->screen.max_col; x++)
   {
-  LOG("%c", getPixchar(x, y));
+  LOG("%c", screen_get_pixchar(x, y));
   }
   LOG("\n");
   }
 */
 #if DEBUG == 1
-	screenDebugDisplay();
+	screen_debug();
 #endif
 }
 
@@ -108,7 +108,7 @@ void popUp_OK(char *message)
 
 static char *noname = "<noname>";
 
-/* OBS måste ta hänsyn till maxX && klara resize! */
+/* OBS måste ta hänsyn till max_col && klara resize! */
 static void display_ruler(buffer_t *currentp)
 {
 	int i;
@@ -116,7 +116,7 @@ static void display_ruler(buffer_t *currentp)
 
 	/* Rita direkt i framebuffern/virtuella skärmen ?! :) */
 
-	ruler = calloc(currentp->screen.maxX, sizeof(char));
+	ruler = calloc(currentp->screen.max_col, sizeof(char));
 	if (!ruler) {
 		perror("Failed allocating ruler");
 		exit(1);
@@ -129,11 +129,11 @@ static void display_ruler(buffer_t *currentp)
 	sprintf(ruler, "-GUL--%s-- %s --L%d-C%d-O%d",
 		(currentp->dirty ? "**" : "--"), filename, currentp->screen.y, currentp->screen.x, currentp->core.position);
 
-	for (i = strlen(ruler); i < currentp->screen.maxX; i++)
+	for (i = strlen(ruler); i < currentp->screen.max_col; i++)
 		ruler[i] = '-';
 
-	for (i = 0; i < currentp->screen.maxX; i++)
-		putPixchar(i, currentp->screen.maxY + 1, ruler[i]);
+	for (i = 0; i < currentp->screen.max_col; i++)
+		screen_put_pixchar(i, currentp->screen.max_row + 1, ruler[i]);
 
 	free(ruler);
 }
@@ -151,16 +151,16 @@ static void display_toolbar(buffer_t *currentp)
 		if (' ' == toolbar[i])
 			empty++;
 	}
-	extra = (currentp->screen.maxX - len) / empty;
+	extra = (currentp->screen.max_col - len) / empty;
 
-	for (x = 0, i = 0; x < currentp->screen.maxX && i < len; i++) {
+	for (x = 0, i = 0; x < currentp->screen.max_col && i < len; i++) {
 		if (' ' == toolbar[i]) {
 			empty = extra;
 			while (empty--)
-				putPixchar(x++, currentp->screen.maxY + 2, ' ');
+				screen_put_pixchar(x++, currentp->screen.max_row + 2, ' ');
 		}
 
-		putPixchar(x++, currentp->screen.maxY + 2, toolbar[i]);
+		screen_put_pixchar(x++, currentp->screen.max_row + 2, toolbar[i]);
 	}
 }
 
@@ -169,19 +169,19 @@ static void display_toolbar(buffer_t *currentp)
 int display_status(buffer_t *currentp, char *message)
 {
 	int i;
-	int status_y = currentp->screen.maxY + 2;
+	int status_y = currentp->screen.max_row + 2;
 
 	memset(currentp->screen.status_field, (int)' ', STATUS_WIDTH);
 	strncpy(currentp->screen.status_field, message, STATUS_WIDTH);
 
-	for (i = 0; i < currentp->screen.maxX; i++) {
+	for (i = 0; i < currentp->screen.max_col; i++) {
 		if (i < STATUS_WIDTH)
-			putPixchar(i, status_y, currentp->screen.status_field[i]);
+			screen_put_pixchar(i, status_y, currentp->screen.status_field[i]);
 		else
-			putPixchar(i, status_y, ' ');
+			screen_put_pixchar(i, status_y, ' ');
 	}
 
-	screenUpdate();
+	screen_update();
 	display_cursor(currentp);
 
 	return status_y;

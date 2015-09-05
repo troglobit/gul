@@ -27,7 +27,7 @@
 extern int errno;
 
 
-/*** loadFile() *********************************************************
+/*** file_open() *********************************************************
  * Tries to load the given file.
  *
  *** Error **************************************************************
@@ -35,15 +35,15 @@ extern int errno;
  *
  ************************************************************************
  */
-buffer_t *loadFile(char *fileName)
+buffer_t *file_open(char *filename)
 {
-	buffer_t *newBuffer;
-	char tempString[1024];
-	FILE *filePtr = NULL;
+	buffer_t *buf;
+	char tmp[256];
+	FILE *fp = NULL;
 	struct stat statusBuffer;
 
-	newBuffer = calloc(sizeof(buffer_t), sizeof(char));
-	if (!newBuffer) {
+	buf = calloc(sizeof(buffer_t), sizeof(char));
+	if (!buf) {
 		perror("Failed allocating new buffer");
 		exit(1);
 	}
@@ -51,21 +51,21 @@ buffer_t *loadFile(char *fileName)
 	/* If there was a filename given on the commandline/prompt then save
 	   it for future use, even if the file does not exist now.
 	 */
-	if (fileName) {
+	if (filename) {
 		/* Get filespecific information, size, nodes etc.
 		 * AND ... does the file exist??
 		 */
-		if (-1 == stat(fileName, &statusBuffer)) {
-			sprintf(tempString, "%s\nCould not open the file %s\n", strerror(errno), fileName);
-			popUp_OK(tempString);
+		if (-1 == stat(filename, &statusBuffer)) {
+			sprintf(tmp, "%s\nCould not open the file %s\n", strerror(errno), filename);
+			popUp_OK(tmp);
 		} else {
-			filePtr = fopen(fileName, "r");
-			if (NULL == filePtr) {
+			fp = fopen(filename, "r");
+			if (!fp) {
 				/* Couldn't open the file anyway ... even though stat
 				 * returned ok.  Start up with an empty file.
 				 */
-				sprintf(tempString, "Unknown error!\nCould not open the file %s\n", fileName);
-				popUp_OK(tempString);
+				sprintf(tmp, "Unknown error!\nCould not open the file %s\n", filename);
+				popUp_OK(tmp);
 			}
 		}
 
@@ -76,26 +76,25 @@ buffer_t *loadFile(char *fileName)
 		 *    => No pathinfo specified, equivalence.
 		 */
 		/*
-		   if (NULL != (pos= strrchr(fileName, '/'))){
+		   if (NULL != (pos= strrchr(filename, '/'))){
 		   *pos= '\0';
-		   newBuffer->filename= strDup(pos + 1);
+		   buf->filename= strDup(pos + 1);
 		   }else{
-		   newBuffer->filename= fileName;
+		   buf->filename= filename;
 		   }
 		 */
-		newBuffer->filename = fileName;
+		buf->filename = filename;
 	}
 
 	/* If the file could not be opened, return the empty buffer. */
-	if (!filePtr) {
-		newFile(newBuffer, 0);
-	} else {
-		readFile(filePtr, newBuffer);
-	}
+	if (!fp)
+		file_new(buf, 0);
+	else
+		file_read(buf, fp);
 
-	coreNewScreen(newBuffer);
+	screen_new(buf);
 
-	return newBuffer;
+	return buf;
 }
 
 

@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include "editor.h"
 
-buffer_t *loadFile(char *fileName);
-int       saveFile(buffer_t *currentp, char *filename);
+buffer_t *file_open(char *filename);
+int       file_save(buffer_t *buf, char *filename);
 void      redirect(FILE *file_in, char *file_out);
 
 #endif /* FILEIO_H_ */

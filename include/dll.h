@@ -14,7 +14,7 @@ typedef struct dllSt {
 	char line[MAX_LINE_LENGTH];
 } dll_t;
 
-typedef struct _text {
+typedef struct {
 	dll_t *stx;		/* Start of TeXt and list. */
 	dll_t *node;		/* Current, where the cursor is */
 } text_t;

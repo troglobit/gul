@@ -16,7 +16,7 @@
 #include "plugin.h"
 
 /* Div. inställningar och sånt... */
-void screenPluginInit(void)
+void screen_plugin_init(void)
 {
 	initscr();
 	nonl();
@@ -29,40 +29,40 @@ void screenPluginInit(void)
 }
 
 /* Call this when quitting from editor. */
-void screenPluginFinish(void)
+void screen_plugin_exit(void)
 {
 	endwin();
 }
 
 /* Returnera skärmens storlek i just det ögonblicket. */
-void screenPluginGetMaxYX(int *maxY, int *maxX)
+void screen_plugin_get_dim(int *max_row, int *max_col)
 {
 	/* Sjuka getmaxyx är et MACRO! sjukt sjukt sjukt sjukt sjukt sjukt sjukt sjukt sjukt sjukt !!! */
-	getmaxyx(stdscr, (*maxY), (*maxX));
+	getmaxyx(stdscr, (*max_row), (*max_col));
 }
 
 
 /* Positions the cursor */
-void screenPluginPositionCursor(int x, int y)
+void screen_plugin_set_cursor(int x, int y)
 {
 	move(y, x);
 }
 
 
 /* Läser ur framebuffern/virtuella skärmen och skriver ut på skärmen */
-void screenPluginUpdate(void)
+void screen_plugin_update(void)
 {
 	int virtualXmax, virtualYmax;
 	int stdscrXmax, stdscrYmax;
 	int x, y;
 	char ch;
 
-	LOG("screenPluginUpdate()\n");
+	LOG("screen_plugin_update()\n");
 
 	/* Bara för "säkerhets" skull så kollar jag att fönstret inte resize:ats. */
-	getScreenMaxYX(&virtualYmax, &virtualXmax);
+	screen_get_dim(&virtualYmax, &virtualXmax);
 //   getmaxyx(stdscr, stdscrYmax, stdscrXmax);
-//   LOG("screenPluginUpdate() - virtualXmax= %d, virtualYmax= %d\n", virtualXmax, virtualYmax);
+//   LOG("screen_plugin_update() - virtualXmax= %d, virtualYmax= %d\n", virtualXmax, virtualYmax);
 
 	/* Kanske är det onödigt, men vaddå ... :P */
 //   for (y= 0; y < (virtualYmax > stdscrYmax ? stdscrYmax : virtualYmax); y++){
@@ -70,7 +70,7 @@ void screenPluginUpdate(void)
 	move(0, 0);
 	for (y = 0; y < virtualYmax; y++) {
 		for (x = 0; x < virtualXmax; x++) {
-			ch = getPixchar(x, y);
+			ch = screen_get_pixchar(x, y);
 
 			if (0 == ch)
 				addch(' ');
@@ -86,7 +86,7 @@ void screenPluginUpdate(void)
 
 
 /* Initierar tangentbordspluginet */
-void keyboardPluginInit(void)
+void keyboard_plugin_init(void)
 {
 	keypad(stdscr, TRUE);	/* Enable keypad/movement-keys */
 	meta(stdscr, TRUE);	/* eight bit input */
@@ -98,17 +98,17 @@ void keyboardPluginInit(void)
 }
 
 /*
- * keyboardPluginFinish ()
+ * keyboard_plugin_exit ()
  * Reset all special keyboard handling back to that previous.
  */
-void keyboardPluginFinish(void)
+void keyboard_plugin_exit(void)
 {
 	/* XXX - Need to clear up this because otherwise C-z and friends stop
 	 * working after exiting from GUL
 	 */
 }
 
-char *plugin_read_string(int x, int y)
+char *plugin_read_str(int x, int y)
 {
 	char *str;
 
@@ -162,21 +162,21 @@ keyevent_t plugin_read_key(void)
 /* Ganska viktig ty görs inte den ena eller den andra så kajkar det ur
  * rätt fint ...
  */
-void initPlugin(void)
+void plugin_init(void)
 {
-	screenPluginInit();
-	keyboardPluginInit();
+	screen_plugin_init();
+	keyboard_plugin_init();
 }
 
 /**
- * pluginFinish:
+ * plugin_exit:
  *
  * Releases all memory and resets the screen and keyboard back to normal.
  */
-void pluginFinish(void)
+void plugin_exit(void)
 {
-	keyboardPluginFinish();
-	screenPluginFinish();
+	keyboard_plugin_exit();
+	screen_plugin_exit();
 }
 
 #endif				/* NCURSES_PLUGIN */

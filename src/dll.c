@@ -39,104 +39,105 @@
 
 /*** Prototypes *********************************************************
  */
-static text *insertNode(buffer_t *currentp);
-int calculateXposition(text * thisp, int i);
-text *splitNode(buffer_t *currentp);
-text *deleteRightNode(buffer_t *currentp);
-void insertCommand(buffer_t *currentp, int command);
-buffer_t *backupBufferInfo(buffer_t *currentp);
-void restoreBufferInfo(buffer_t *backup_info, buffer_t *currentp);
-int getNextNode(buffer_t *currentp);
-int getPrevNode(buffer_t *currentp);
-int movetoNextChar(buffer_t *currentp);
-int movetoPrevChar(buffer_t *currentp);
-int atSTX(buffer_t *currentp);
-char getCurrentChar(buffer_t *currentp);
-int getCurrentColumn(buffer_t *currentp);
-int movetoEOL(buffer_t *currentp);
-int movetoBOL(buffer_t *currentp);
-int movetoSTX(buffer_t *currentp);
-int movetoCol(buffer_t *currentp, int col);
+static text_t *split_node(buffer_t *buf);
+static text_t *delete_node(buffer_t *buf);
+static text_t *insert_node(buffer_t *buf);
+
+static int  get_next_node(buffer_t *buf);
+static int  get_prev_node(buffer_t *buf);
+
+static buffer_t *backup_buffer_pos (buffer_t *buf);
+static void      restore_buffer_pos(buffer_t *buf, buffer_t *backup);
+
+static int  move_to_eol      (buffer_t *buf);
+static int  move_to_bol      (buffer_t *buf);
+static int  move_to_stx      (buffer_t *buf);
+static int  move_to_col      (buffer_t *buf, int col);
+
+static void insert_char      (buffer_t *buf, int command);
+static int  move_to_next_char(buffer_t *buf);
+static int  move_to_prev_char(buffer_t *buf);
+
+static int  at_stx           (buffer_t *buf);
+
+static char get_current_char (buffer_t *buf);
+static int  get_current_col  (buffer_t *buf);
 
 
-void left(buffer_t *currentp)
+void left(buffer_t *buf)
 {
-	if (movetoPrevChar(currentp)) {
-		if ('\n' == getCurrentChar(currentp)) {
-			currentp->scr.y--;
-			currentp->scr.x = getCurrentColumn(currentp);
+	if (move_to_prev_char(buf)) {
+		if ('\n' == get_current_char(buf)) {
+			buf->scr.y--;
+			buf->scr.x = get_current_col(buf);
 		} else {
-			currentp->scr.x--;
+			buf->scr.x--;
 		}
 	} else {
 //      beep(); /* Finns bara i curses!! */
 	}
 }
 
-void right(buffer_t *currentp)
+void right(buffer_t *buf)
 {
 	char previousChar;
 
-	previousChar = getCurrentChar(currentp);
+	previousChar = get_current_char(buf);
 
-	if (movetoNextChar(currentp)) {
+	if (move_to_next_char(buf)) {
 		if ('\n' == previousChar) {
-			currentp->scr.y++;
-			currentp->scr.x = 0;
+			buf->scr.y++;
+			buf->scr.x = 0;
 		} else {
-			currentp->scr.x++;
+			buf->scr.x++;
 		}
 	} else {
 //      beep(); /* Finns bara i curses!! */
 	}
 }
 
-void up(buffer_t *currentp)
+void up(buffer_t *buf)
 {
-	buffer_t *safe_state;
+	buffer_t *backup = backup_buffer_pos(buf);
 
-	safe_state = backupBufferInfo(currentp);
-
-	movetoBOL(currentp);	/* Det _ska_ inte kunna bli fel! */
-	if (!movetoPrevChar(currentp)) {
+	move_to_bol(buf);	/* Det _ska_ inte kunna bli fel! */
+	if (!move_to_prev_char(buf)) {
 //      beep(); /* Finns bara i curses!! */
-		restoreBufferInfo(safe_state, currentp);
+		restore_buffer_pos(buf, backup);
 	} else {
 		free(safe_state);
-		movetoBOL(currentp);	/* Precis samma här... */
-		currentp->scr.y--;
-		currentp->scr.x = movetoCol(currentp, currentp->scr.x);
+		move_to_bol(buf);	/* Precis samma här... */
+		buf->scr.y--;
+		buf->scr.x = move_to_col(buf, buf->scr.x);
 	}
 }
 
-void down(buffer_t *currentp)
+void down(buffer_t *buf)
 {
-	buffer_t *safe_state;
+	buffer_t *backup = backup_buffer_pos(buf);
 
-	safe_state = backupBufferInfo(currentp);
-
-	movetoEOL(currentp);
-	if (!movetoNextChar(currentp)) {
+	move_to_eol(buf);
+	if (!move_to_next_char(buf)) {
 //      beep(); /* Finns bara i curses!! */
-		restoreBufferInfo(safe_state, currentp);
+		restore_buffer_pos(buf, backup);
 	} else {
 		free(safe_state);
-		currentp->scr.y++;
-		currentp->scr.x = movetoCol(currentp, currentp->scr.x);
+		buf->scr.y++;
+		buf->scr.x = move_to_col(buf, buf->scr.x);
 	}
 }
 
-void insert(buffer_t *currentp, int thisCommand)
+void insert(buffer_t *buf, int ch)
 {
 	/* Skriv in tecknet i strukturen ... mycket jox... */
-	if (13 == (char)thisCommand) {
-		insertCommand(currentp, (int)10);
-		currentp->scr.y++;
-		currentp->scr.x = 0;
+	if (13 == (char)ch) {
+		insert_char(buf, (int)10);
+		buf->scr.y++;
+		buf->scr.x = 0;
 	} else {
-		if (isprint(thisCommand)) {
-			insertCommand(currentp, thisCommand);
-			currentp->scr.x++;
+		if (isprint(ch)) {
+			insert_char(buf, ch);
+			buf->scr.x++;
 		} else {
 //         beep(); /* Finns bara i curses!! */
 		}
@@ -144,48 +145,26 @@ void insert(buffer_t *currentp, int thisCommand)
 }
 
 
-void delete(buffer_t *currentp)
+void delete(buffer_t *buf)
 {
-	if (currentp->pos + 1 == currentp->core.node->end) {
-		currentp->core.node->end--;
-		getNextNode(currentp);
+	if (buf->pos + 1 == buf->core.node->end) {
+		buf->core.node->end--;
+		get_next_node(buf);
 	} else {
-		if (currentp->pos > currentp->core.node->begin) {
-			splitNode(currentp);
+		if (buf->pos > buf->core.node->begin) {
+			split_node(buf);
 
 			LOG("[node splitted]");
 		}
-		if (currentp->core.node->begin < currentp->core.node->end)
-			(currentp->core.node->begin)++;
+		if (buf->core.node->begin < buf->core.node->end)
+			(buf->core.node->begin)++;
 
-		currentp->pos = currentp->core.node->begin;
+		buf->pos = buf->core.node->begin;
 	}
 
-	if (currentp->core.node->begin == currentp->core.node->end)
-		if (!deleteRightNode(currentp))
-			currentp->pos = currentp->core.node->begin;
-}
-
-
-
-int calculateXposition(text * thisp, int i)
-{
-	int counter = 0;
-
-	if (thisp) {
-		for (counter = 0; '\n' == thisp->line[i]; counter++, i--) {
-			if (i == thisp->begin) {
-				if (thisp->previous) {
-					thisp = thisp->previous;
-					i = thisp->end;
-				} else {
-					break;
-				}
-			}
-		}
-	}
-
-	return (counter);
+	if (buf->core.node->begin == buf->core.node->end)
+		if (!delete_node(buf))
+			buf->pos = buf->core.node->begin;
 }
 
 /* Simple prototype for a generator/fread-function alike thingy.
@@ -193,7 +172,7 @@ int calculateXposition(text * thisp, int i)
  * This needs another implementation and interface. Something more
  * like the fread()-function...
  */
-char *editorCharacterGenerator(buffer_t *currentp)
+char *editor_chargen(buffer_t *buf)
 {
 	int i, j;
 	text *thisText;
@@ -202,12 +181,12 @@ char *editorCharacterGenerator(buffer_t *currentp)
 	/* Lite kinkit det här att allokera minne, raderna kan ju vara
 	 * väldigt olika långa.
 	 */
-	int nofbytes = (currentp->scr.maxX) * (currentp->scr.maxY);
+	int nofbytes = (buf->scr.max_col) * (buf->scr.max_row);
 
-	genbuf = allocate(nofbytes, "editorCharacterGenerator");
+	genbuf = allocate(nofbytes, "editor_chargen");
 
 	j = 0;
-	thisText = currentp->screen.top;
+	thisText = buf->screen.top;
 	while (thisText != NULL && j < nofbytes) {
 		i = thisText->begin;
 		while (i < thisText->end && j < nofbytes) {
@@ -222,48 +201,48 @@ char *editorCharacterGenerator(buffer_t *currentp)
 
 
 
-/*** splitNode() ********************************************************
+/*** split_node() ********************************************************
  * Tar en nod och splittar den i två vid 'i'. Länkar in de två nya i
  * "baklänges" ordning.
  * Returnerar pekaren till den högra av de två.
  ************************************************************************
  */
-text *splitNode(buffer_t *currentp)
+text_t *split_node(buffer_t *buf)
 {
-	text *left, *right;
-	text *thisp = currentp->core.node;
+	text_t *left, *right;
+	text_t *text = buf->core.node;
 
 	/* Snabbkoll om vi står på antingen begin eller end */
-	if (currentp->pos == currentp->core.node->begin)
-		return currentp->core.node;	/* Delat och klart!! :-) */
-	else if (currentp->pos == currentp->core.node->end)
-		if (getNextNode(currentp))
-			return currentp->core.node;	/* Oxå färdig... ;) */
+	if (buf->pos == buf->core.node->begin)
+		return buf->core.node;	/* Delat och klart!! :-) */
+	else if (buf->pos == buf->core.node->end)
+		if (get_next_node(buf))
+			return buf->core.node;	/* Oxå färdig... ;) */
 
 	/* Kan man optimera det här tro? Tidsmässigt/kodmässigt? */
-	right = allocate(sizeof(text), "splitNode()");
-	left = allocate(sizeof(text), "splitNode()");
-	memcpy(right, thisp, sizeof(text));
-	memcpy(left, thisp, sizeof(text));
+	right = allocate(sizeof(text), "split_node()");
+	left = allocate(sizeof(text), "split_node()");
+	memcpy(right, text, sizeof(text));
+	memcpy(left, text, sizeof(text));
 
 	/* Vi pekar på varandra */
 	left->next = right;
 	right->previous = left;
 
 	/* Efterföljande nods previous-pekarare ska peka på den högra. */
-	if (thisp->next)
-		(thisp->next)->previous = right;
+	if (text->next)
+		(text->next)->previous = right;
 
 	/* Finns det nån föregående ska den peka på den vänstra... */
-	if (thisp->previous)
-		(thisp->previous)->next = left;
+	if (text->previous)
+		(text->previous)->next = left;
 	/* Annars så var det första noden ... */
 	else
-		currentp->core.stx = left;
+		buf->core.stx = left;
 
 	/* är det här samma nod som displayText() vill läsa? */
-	if (currentp->screen.top == thisp)
-		currentp->screen.top = left;
+	if (buf->screen.top == text)
+		buf->screen.top = left;
 
 	/* Nuschkavischehäär.... *fullogo* */
 	/* Vänster nod ska ha allt som var till vänster om i utom i självt.
@@ -278,30 +257,30 @@ text *splitNode(buffer_t *currentp)
 	   Frågan är vad det är jag gjort nedan... *fullständigt nollställd!*
 	 */
 /*
-   if (currentp->pos > thisp->begin){
-      left->end= currentp->pos;
-      right->begin= currentp->pos;
+   if (buf->pos > text->begin){
+      left->end= buf->pos;
+      right->begin= buf->pos;
    }else{
-      left->end= thisp->begin;
-      right->begin= currentp->pos;
+      left->end= text->begin;
+      right->begin= buf->pos;
    }
 */
 /* kliipper in det som verkar vettigast... */
-	left->end = currentp->pos;
-	right->begin = currentp->pos;
+	left->end = buf->pos;
+	right->begin = buf->pos;
 
 	/* Vi själva ställer oss i den högra noden på begin. */
-	currentp->core.node = right;
-	currentp->pos = right->begin;
+	buf->core.node = right;
+	buf->pos = right->begin;
 
 	/* Glömde nästan att ta bort den gamla... */
-	free(thisp);
+	free(text);
 
-	return (right);
+	return right;
 }
 
 
-/*** deleteRightNode() **************************************************
+/*** delete_node() **************************************************
  * Tar bort nuvarande nod, men inte om det är den enda kvar. Givetvis
  * tas noden bara bort omm den är tom!
  * Funktionen kan bara "fallera" när den nuvarande noden är helt ensam.
@@ -309,188 +288,176 @@ text *splitNode(buffer_t *currentp)
  * om NULL returneras... För då har ingenting gjorts.
  ************************************************************************
  */
-text *deleteRightNode(buffer_t *currentp)
+text *delete_node(buffer_t *buf)
 {
-	text *thisp = currentp->core.node;
+	text *text = buf->core.node;
 
-	if (thisp->begin < thisp->end)
-		return (NULL);
+	if (text->begin < text->end)
+		return NULL;
 
-	if (!thisp->next) {
-		if (thisp->previous) {
-			(thisp->previous)->next = thisp->next;
+	if (!text->next) {
+		if (text->previous) {
+			(text->previous)->next = text->next;
 
-			currentp->core.node = thisp->previous;
-			currentp->pos = thisp->previous->end;
+			buf->core.node = text->previous;
+			buf->pos = text->previous->end;
 
-			if (currentp->screen.top == thisp)
-				currentp->screen.top = thisp->previous;
+			if (buf->screen.top == text)
+				buf->screen.top = text->previous;
 
-			free(thisp);
-			return (currentp->core.node);
+			free(text);
+			return buf->core.node;
 		}
 	} else {
-		if (thisp->previous)
-			(thisp->previous)->next = thisp->next;
+		if (text->previous)
+			(text->previous)->next = text->next;
 		else
-			currentp->core.stx = thisp->next;
+			buf->core.stx = text->next;
 
-		if (currentp->screen.top == thisp)
-			currentp->screen.top = thisp->next;
+		if (buf->screen.top == text)
+			buf->screen.top = text->next;
 
-		currentp->core.node = thisp->next;
-		currentp->pos = thisp->next->begin;
+		buf->core.node = text->next;
+		buf->pos = text->next->begin;
 
-		free(thisp);
+		free(text);
 
-		return (currentp->core.node);
+		return buf->core.node;
 	}
 
-	return (NULL);
+	return NULL;
 }
 
 
 
-/*** insertNode(text *thisp, int i) *************************************
+/*** insert_node(text *text, int i) *************************************
  * Infogar en ny nod vid 'pos'.
  *
  * Returnerar pekaren till den nya fräsha noden.
  ************************************************************************
  */
-static text *insertNode(buffer_t *currentp)
+static text_t *insert_node(buffer_t *buf)
 {
-	text *newNode;
+	text_t *newNode;
 
-	newNode = splitNode(currentp);
-	if (currentp->core.node->begin == currentp->core.node->end) {
-		currentp->core.node->begin = 0;
-		currentp->core.node->end = 0;
-		currentp->pos = 0;
+	newNode = split_node(buf);
+	if (buf->core.node->begin == buf->core.node->end) {
+		buf->core.node->begin = 0;
+		buf->core.node->end = 0;
+		buf->pos = 0;
 	} else {
-		newNode = allocate(sizeof(text), "insertNode()");
-		newNode->next = currentp->core.node;
-		newNode->previous = currentp->core.node->previous;
-		if (currentp->core.node->previous)
-			(currentp->core.node->previous)->next = newNode;
+		newNode = allocate(sizeof(text), "insert_node()");
+		newNode->next = buf->core.node;
+		newNode->previous = buf->core.node->previous;
+		if (buf->core.node->previous)
+			(buf->core.node->previous)->next = newNode;
 		else
-			currentp->core.stx = newNode;
-		currentp->core.node->previous = newNode;
+			buf->core.stx = newNode;
+		buf->core.node->previous = newNode;
 
-		if (currentp->screen.top == currentp->core.node)
-			currentp->screen.top = newNode;
+		if (buf->screen.top == buf->core.node)
+			buf->screen.top = newNode;
 
-		currentp->core.node = newNode;
-		currentp->pos = newNode->begin;
+		buf->core.node = newNode;
+		buf->pos = newNode->begin;
 	}
 
-	return (newNode);
+	return newNode;
 }
 
-
-/*** insertCommand() ****************************************************
- * OBS!! Den här rackaren tar iofs. emot thisp & i men den är inte så
- * oberoende för det. På ett par ställen tilldelas nämligen current.pos
- * istf. tex (*i) så den går för tillfället bara att använda till att
- * infoga tecken vid markören ...
- ************************************************************************
- */
-void insertCommand(buffer_t *currentp, int command)
-{
-	/* Är detta en tom nod? Mindre troligt faktiskt eftersom alla såna
-	 * brukar tas bort direkt av delete...
-	 */
-	if (currentp->core.node->begin == currentp->core.node->end) {
-		currentp->core.node->begin = 0;
-		currentp->core.node->line[0] = (char)command;
-		currentp->core.node->end = 1;
-		currentp->pos = 1;
-	} else {
-		/* Står vi i slutet på en icketom nod? */
-		if ((currentp->pos == currentp->core.node->end) && (currentp->pos < (MAX_LINE_LENGTH - 1))) {
-			currentp->core.node->line[currentp->pos] = (char)command;
-			currentp->pos++;
-			currentp->core.node->end++;
-		} else {
-			insertNode(currentp);
-			currentp->core.node->line[0] = (char)command;
-			currentp->core.node->end = 1;
-			currentp->pos = 1;
-		}
-	}
-}
-
-/************************************************************************
- * Revolutionary new ideas!! :-D
- ************************************************************************
- */
-
-/*** backupBufferInfo() *************************************************
- * Backup
- */
-buffer_t *backupBufferInfo(buffer_t *currentp)
-{
-	buffer_t *backup_info;
-
-	backup_info = allocate(sizeof(buffer_t), "backupBufferInfo()");
-	memcpy(backup_info, currentp, sizeof(buffer_t));
-
-	return backup_info;
-}
-
-/*** restoreBufferInfo() ************************************************
- * Restore
- */
-void restoreBufferInfo(buffer_t *backup_info, buffer_t *currentp)
-{
-	memcpy(currentp, backup_info, sizeof(buffer_t));
-
-	free(backup_info);
-}
-
-
-/*** getNextNode() ******************************************************
- * Bör nog, precis som sin syster, heta något annat. movetoNextNode()
- * kanske?
+/*** get_next_node() ******************************************************
  * Markören flyttas till början på nästa nod, om det finns någon.
  * Funktionen misslyckas vid slutet på filen.
  ************************************************************************
  */
-int getNextNode(buffer_t *currentp)
+int get_next_node(buffer_t *buf)
 {
-	if (currentp->core.node->next) {
-		currentp->core.node = currentp->core.node->next;
-		currentp->pos = currentp->core.node->begin;
+	if (buf->core.node->next) {
+		buf->core.node = buf->core.node->next;
+		buf->pos = buf->core.node->begin;
 		return 1;
 	}
 
 	return 0;
 }
 
-/*** getPrevNode() ******************************************************
- * Borde kanske eg. heta nåt i stil med movetoPrevNode() ...
+/*** get_prev_node() ******************************************************
  * Så länge det finns en föregående nod flyttas kontext/markören till
  * slutet på denna.
  * Stod man redan innan på första noden så kommer funktionen att
  * misslyckas.
  ************************************************************************
  */
-int getPrevNode(buffer_t *currentp)
+int get_prev_node(buffer_t *buf)
 {
-	if (!((currentp->core.node)->previous)) {
+	if (!(buf->core.node)->previous)
 		return 0;
-	}
-	currentp->core.node = currentp->core.node->previous;
-	currentp->pos = currentp->core.node->end;
 
-	if (currentp->pos == currentp->core.node->begin)
-		if (!getPrevNode(currentp))
+	buf->core.node = buf->core.node->previous;
+	buf->pos = buf->core.node->end;
+
+	if (buf->pos == buf->core.node->begin)
+		if (!get_prev_node(buf))
 			return 0;
 
 	return 1;
 }
 
+/*** insert_char() ****************************************************
+ * OBS!! Den här rackaren tar iofs. emot text & i men den är inte så
+ * oberoende för det. På ett par ställen tilldelas nämligen current.pos
+ * istf. tex (*i) så den går för tillfället bara att använda till att
+ * infoga tecken vid markören ...
+ ************************************************************************
+ */
+static void insert_char(buffer_t *buf, int command)
+{
+	/* Är detta en tom nod? Mindre troligt faktiskt eftersom alla såna
+	 * brukar tas bort direkt av delete...
+	 */
+	if (buf->core.node->begin == buf->core.node->end) {
+		buf->core.node->begin = 0;
+		buf->core.node->line[0] = (char)command;
+		buf->core.node->end = 1;
+		buf->pos = 1;
+	} else {
+		/* Står vi i slutet på en icketom nod? */
+		if ((buf->pos == buf->core.node->end) && (buf->pos < (MAX_LINE_LENGTH - 1))) {
+			buf->core.node->line[buf->pos] = (char)command;
+			buf->pos++;
+			buf->core.node->end++;
+		} else {
+			insert_node(buf);
+			buf->core.node->line[0] = (char)command;
+			buf->core.node->end = 1;
+			buf->pos = 1;
+		}
+	}
+}
 
-/*** movetoNextChar() ***************************************************
+/*** backup_buffer_pos() *************************************************
+ * Backup
+ */
+buffer_t *backup_buffer_pos(buffer_t *buf)
+{
+	buffer_t *backup;
+
+	backup = allocate(sizeof(buffer_t), "backup_buffer_pos()");
+	memcpy(backup, buf, sizeof(buffer_t));
+
+	return backup;
+}
+
+/*** restore_buffer_pos() ************************************************
+ * Restore
+ */
+static void restore_buffer_pos(buffer_t *buf, buffer_t *backup)
+{
+	memcpy(buf, backup, sizeof(buffer_t));
+	free(backup_info);
+}
+
+/*** move_to_next_char() ***************************************************
  * Flytta markören till nästa tecken, oberoende om det finns i nästa nod
  * eller på nästa rad.
  *
@@ -499,20 +466,19 @@ int getPrevNode(buffer_t *currentp)
  * misslyckas.
  ************************************************************************
  */
-int movetoNextChar(buffer_t *currentp)
+int move_to_next_char(buffer_t *buf)
 {
-	while (currentp->pos == currentp->core.node->end) {
-		if (!getNextNode(currentp)) {
+	while (buf->pos == buf->core.node->end) {
+		if (!get_next_node(buf)) {
 			return 0;
 		}
 	}
-	currentp->pos++;
+	buf->pos++;
 
 	return 1;
 }
 
-
-/*** movetoPrevChar() ***************************************************
+/*** move_to_prev_char() ***************************************************
  * Flyttar markören till föregående tecken, oberoende av om detta ligger
  * i en annan (föregående) nof eller på raden innan...
  *
@@ -521,202 +487,204 @@ int movetoNextChar(buffer_t *currentp)
  * nuvarande nod är ekvivalent med början på densamma.
  ************************************************************************
  */
-int movetoPrevChar(buffer_t *currentp)
+int move_to_prev_char(buffer_t *buf)
 {
-	currentp->pos--;
-	if (currentp->pos < currentp->core.node->begin) {
-		if (!getPrevNode(currentp)) {
-			(currentp->pos)++;
+	buf->pos--;
+	if (buf->pos < buf->core.node->begin) {
+		if (!get_prev_node(buf)) {
+			(buf->pos)++;
 			return 0;
 		}
-		currentp->pos--;
+		buf->pos--;
 	}
 
 	return 1;
 }
 
 
-/*** atSTX() ************************************************************
+/*** at_stx() ************************************************************
  * Står vi i början på filen?
  ************************************************************************
  */
-int atSTX(buffer_t *currentp)
+static int at_stx(buffer_t *buf)
 {
-	if (!currentp->core.node->previous && currentp->pos == currentp->core.node->begin)
+	if (!buf->core.node->previous && buf->pos == buf->core.node->begin)
 		return 1;
 
 	return 0;
 }
 
 
-char getCurrentChar(buffer_t *currentp)
+char get_current_char(buffer_t *buf)
 {
-	return currentp->core.node->line[currentp->pos];
+	return buf->core.node->line[buf->pos];
 }
 
 
-int getCurrentColumn(buffer_t *currentp)
+int get_current_col(buffer_t *buf)
 {
 	int counter = 0;
 	buffer_t *prev_state;
 
-	prev_state = backupBufferInfo(currentp);
+	prev_state = backup_buffer_pos(buf);
 
-	if (movetoBOL(currentp)) {
-		while (movetoNextChar(currentp)) {
+	if (move_to_bol(buf)) {
+		while (move_to_next_char(buf)) {
 			counter++;
-			if (prev_state->pos == currentp->pos)
+			if (prev_state->pos == buf->pos)
 				break;
 		}
 	}
-	restoreBufferInfo(prev_state, currentp);
+	restore_buffer_pos(prev_state, buf);
 
 	return counter;
 }
 
 
-/*** movetoEOL() ********************************************************
+/*** move_to_eol() ********************************************************
  * Tries to move the insertpoint to EOL.
  *
  * 1) We're already at EOL -> OK
- * 2) While not at EOL movetoNextChar (if that's possible)
+ * 2) While not at EOL move_to_next_char (if that's possible)
  *
  * This function is ALWAYS successful...
  *
  ************************************************************************
  */
-int movetoEOL(buffer_t *currentp)
+int move_to_eol(buffer_t *buf)
 {
 	do {
-//      if ('\n' == getCurrentChar(currentp))
-		if (10 == getCurrentChar(currentp))
+//      if ('\n' == get_current_char(buf))
+		if (10 == get_current_char(buf))
 			return 1;
-	} while (movetoNextChar(currentp));
+	} while (move_to_next_char(buf));
 
 	return 1;
 }
 
 
-/*** movetoBOL() ********************************************************
+/*** move_to_bol() ********************************************************
  * Puts the cursor at the first column of the current line.
  *
  * There is really only one problem and that is when you are at the
  * beginning of the file. No previous nodes or previous newlines...
  * But none of these are really no problem since you always can find the
- * beginning of a line as well as the sister function movetoEOL()!
+ * beginning of a line as well as the sister function move_to_eol()!
  ************************************************************************
  */
-int movetoBOL(buffer_t *currentp)
+int move_to_bol(buffer_t *buf)
 {
-	while (movetoPrevChar(currentp)) {
-//      if ('\n' == getCurrentChar(currentp)){
-		if (10 == getCurrentChar(currentp)) {
-			movetoNextChar(currentp);	/* This should NEVER fail!! */
+	while (move_to_prev_char(buf)) {
+//      if ('\n' == get_current_char(buf)){
+		if (10 == get_current_char(buf)) {
+			move_to_next_char(buf);	/* This should NEVER fail!! */
 			return 1;
 		}
 	}
-	if (atSTX(currentp))
+
+	if (at_stx(buf))
 		return 1;
 
 	/* We would really never get here... */
-	LOG("movetoBOL() - FAILED!!\n");
+	LOG("move_to_bol() - FAILED!!\n");
 	return 0;
 }
 
-/*** movetoSTX() ********************************************************
+/*** move_to_stx() ********************************************************
  *
  ************************************************************************
  */
-int movetoSTX(buffer_t *currentp)
+int move_to_stx(buffer_t *buf)
 {
-	currentp->core.node = currentp->core.stx;
-	currentp->pos = currentp->core.stx->begin;
+	buf->core.node = buf->core.stx;
+	buf->pos = buf->core.stx->begin;
 
 	return 1;
 }
 
 
-/*** movetoCol() ********************************************************
+/*** move_to_col() ********************************************************
  *
  ************************************************************************
  */
-int movetoCol(buffer_t *currentp, int col)
+int move_to_col(buffer_t *buf, int col)
 {
 	int counter = 0;
 
-	if (!movetoBOL(currentp))
+	if (!move_to_bol(buf))
 		return counter;	/* This should NEVER happen!! Semantically that is ... :/ */
 
-//   for (counter= 0; counter < col && '\n' != getCurrentChar(currentp);counter++)
-	for (counter = 0; (counter < col) && (10 != getCurrentChar(currentp)); counter++)
-		movetoNextChar(currentp);
+//   for (counter= 0; counter < col && '\n' != get_current_char(buf);counter++)
+	for (counter = 0; (counter < col) && (10 != get_current_char(buf)); counter++)
+		move_to_next_char(buf);
 
 	return counter;
 }
 
 
-text_t newFile(text_t * core)
+text_t file_new(buffer_t *buf, size_t len)
 {
 }
 
 
-text_t *readFile(FILE *filep, text_t * core)
+text_t *file_read(buffer_t *buf, FILE *fp)
 {
-	text *headp = NULL, *currentp = NULL, *previousp = NULL;
+	text_t *headp = NULL, *buf = NULL, *previousp = NULL;
 	size_t bytesRead;
 
 	do {
 		/* XXX - not refactored yet! */
-		//    currentp->line = allocate(MAX_LINE_LENGTH, "readFile()");
-		bytesRead = fread(currentp->line, sizeof(char), MAX_LINE_LENGTH, filep);
-		currentp->begin = 0;
-		currentp->end = bytesRead;
+		//    buf->line = allocate(MAX_LINE_LENGTH, "file_read()");
+		bytesRead = fread(buf->line, sizeof(char), MAX_LINE_LENGTH, fp);
+		buf->begin = 0;
+		buf->end = bytesRead;
 
 		if (headp == NULL)
-			headp = currentp;
+			headp = buf;
 		else
-			previousp->next = currentp;
+			previousp->next = buf;
 
-		currentp->previous = previousp;
-		previousp = currentp;
+		buf->previous = previousp;
+		previousp = buf;
 	} while (MAX_LINE_LENGTH == bytesRead);
 
-	return (headp);
+	return headp;
 }
 
 
-/*** saveFile(text *start, char *filename) ******************************
+/*** file_save(text *start, char *filename) ******************************
  * Sparar på ett väldigt simpelt sätt hela klabbet i en fil.
  * Börjar spara från start till slutet... borde kanske göras om s.a. den
  * klarar att spara markerad text från valfria pos. och annat jox.
  ************************************************************************
  */
-int saveFile(buffer_t *currentp, char *filename)
+int file_save(buffer_t *buf, char *filename)
 {
-	text *thisp;
+	text *text;
 	size_t bytesWritten;
-	FILE *filep;
+	FILE *fp;
 
-	if (NULL == (filep = fopen(filename, "w"))) {
+	fp = fopen(filename, "w");
+	if (!fp) {
 		LOG("Could not open %s for saving.\n", filename);
 		return 0;
 	}
-	for (thisp = currentp->stx; thisp != NULL; thisp = thisp->next) {
-		bytesWritten = fwrite(&(thisp->line[thisp->begin]), sizeof(char), thisp->end - thisp->begin, filep);
-		if (bytesWritten != (thisp->end - thisp->begin)) {
+
+	for (text = buf->stx; text != NULL; text = text->next) {
+		bytesWritten = fwrite(&(text->line[text->begin]), sizeof(char), text->end - text->begin, fp);
+		if (bytesWritten != (text->end - text->begin)) {
 			LOG("Oups, difference between bytes in node and bytes written to %s...\n", filename);
 		}
 	}
 
-	fclose(filep);
+	fclose(fp);
 
-	currentp->dirty = 0;
+	buf->dirty = 0;
 
 	return 1;
 }
 
-
-#endif				/* DLL_MODE */
+#endif /* DLL_MODE */
 
 
 /**

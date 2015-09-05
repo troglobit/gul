@@ -24,7 +24,7 @@
 #endif
 
 typedef struct screenSt {
-	int maxX, maxY;		/* Screen dimensions */
+	int max_col, max_row;	/* Screen dimensions */
 	int x, y;		/* Cursor pos. */
 
 	/* Virtual placement */
@@ -59,35 +59,35 @@ typedef struct currentSt {
 } buffer_t;
 
 
-char *editorCharacterGenerator(buffer_t *currentp);
+char *editor_chargen  (buffer_t *buf);
 
-void left(buffer_t *currentp);
-void right(buffer_t *currentp);
-void up(buffer_t *currentp);
-void down(buffer_t *currentp);
-void end_of_line(buffer_t *currentp);
-void beginning_of_line(buffer_t *currentp);
-void page_up(buffer_t *currentp);
-void page_down(buffer_t *currentp);
-void insert(buffer_t *currentp, int thisCommand);
-void delete(buffer_t *currentp);
+void left             (buffer_t *buf);
+void right            (buffer_t *buf);
+void up               (buffer_t *buf);
+void down             (buffer_t *buf);
+void end_of_line      (buffer_t *buf);
+void beginning_of_line(buffer_t *buf);
+void page_up          (buffer_t *buf);
+void page_down        (buffer_t *buf);
+void insert           (buffer_t *buf, int ch);
+void delete           (buffer_t *buf);
 
-int goto_line(buffer_t *currentp, int line);
+void goto_line        (buffer_t *buf, int line);
 
 /* Marking, copying and deleting text */
-void set_mark(buffer_t *currentp);
-void set_point(buffer_t *currentp);
-void cut(buffer_t *currentp);
-void copy(buffer_t *currentp);
-void paste(buffer_t *currentp);
+void set_mark         (buffer_t *buf);
+void set_point        (buffer_t *buf);
+void cut              (buffer_t *buf);
+void copy             (buffer_t *buf);
+void paste            (buffer_t *buf);
 
-void search(buffer_t *currentp, char *pattern, int dir);
+void search           (buffer_t *buf, char *pattern, int dir);
 
-int newFile(buffer_t *new, size_t size);
-int readFile(FILE *filep, buffer_t *new);
-int saveFile(buffer_t *currentp, char *filename);
-void coreNewScreen(buffer_t *newBuffer);
-void freeBuffer(buffer_t *buf);
+int  file_new         (buffer_t *buf, size_t len);
+int  file_read        (buffer_t *buf, FILE *fp);
+int  file_save        (buffer_t *buf, char *filename);
+void screen_new       (buffer_t *buf);
+void buffer_free      (buffer_t *buf);
 
 #endif /* EDITOR_H_ */
 

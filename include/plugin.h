@@ -29,50 +29,50 @@
 #endif
 
 /* The virtual screen definition */
-typedef struct _virtualScreen {
+typedef struct {
 	/* Flaggor */
-	int dirtyFlag;
-	int needsRedraw;
-	int maxX, maxY;
-	int currentX, currentY;
+	int dirty;
+	int refresh;
+	int max_col, max_row;
+	int curr_col, curr_row;
 	int hpos;
-	char *pixcharArray;
-} virtualScreen;
+	char *pixchar;
+} screen_virt_t;
 
 /* Createscreen creates a screeen. Spectravideo equivalent: initialize to
    proper screenmode, ie SCREEN 0 */
-int createScreen(void);
+int screen_create(void);
 
 
 /* Spectravideo equiv: macro that defines maxy and maxx to 24 and 40, respectively. */
-void getScreenMaxYX(int *maxy, int *maxx);
+void screen_get_dim(int *maxy, int *maxx);
 
 /* We need it to know when to call the SCREEN provided redraw() function. */
 /* The redraw() function links against our must-be-provided "text-generator"-
  * function.
  */
-int isScreenChanged(void);
+int screen_changed(void);
 
-void screenUpdate(void);
-void screenPositionCursor(int x, int y);
+void screen_update(void);
+void screen_set_cursor(int x, int y);
 
-int  panRight (int steps);
-int  panLeft  (int steps);
-void panHome  (void);
+int  screen_pan_right (int steps);
+int  screen_pan_left  (int steps);
+void screen_pan_home  (void);
 
-int  putPixchar(int x, int y, char ch /*, int depth ?? */ );
-char getPixchar(int x, int y);
+int  screen_put_pixchar(int x, int y, char ch /*, int depth ?? */ );
+char screen_get_pixchar(int x, int y);
 
-void screenDebugDisplay(void);
+void screen_debug(void);
 
 typedef struct keyevent_str {
 	gulchar event;
 	gulchar keydata;
 } keyevent_t;
 
-void        keyboardInit (void);
-keyevent_t  read_key     (void);
-char       *read_string  (int x, int y);
+void        keyboard_init (void);
+keyevent_t  keyboard_event(void);
+char       *keyboard_gets (int x, int y);
 
 
 
@@ -84,12 +84,12 @@ char       *read_string  (int x, int y);
  * important when using the NCurses plugin since the initialization
  * order IS important! /Crash
  */
-void initPlugin(void);
+void plugin_init(void);
 
 /* This plugin supplied function is used to clean up afterwards when
  * exiting the application.
  */
-void pluginFinish(void);
+void plugin_exit(void);
 
 /* Do NOT use these old plugin init routines ... they are evil!
  * They are only left here as a warning and for "backwards incompatibility"
@@ -97,21 +97,21 @@ void pluginFinish(void);
  * XXX - Clear this shit out!
  */
 /* Div. inställningar och sånt... */
-void screenPluginInit(void);
-void keyboardPluginInit(void);
+void screen_plugin_init(void);
+void keyboard_plugin_init(void);
 
 /* Call this when quitting from editor. */
-void screenPluginFinish(void);
-void keyboardPluginFinish(void);
+void screen_plugin_exit(void);
+void keyboard_plugin_exit(void);
 
 /* Positions the cursor */
-void screenPluginPositionCursor(int x, int y);
+void screen_plugin_set_cursor(int x, int y);
 
 /* Ska returnera skärmens storlek i just det ögonblicket. För ev. resize */
-void screenPluginGetMaxYX(int *maxY, int *maxX);
+void screen_plugin_get_dim(int *max_row, int *max_col);
 
 /* Läser ur framebuffern/virtuella skärmen och skriver ut på skärmen */
-void screenPluginUpdate(void);
+void screen_plugin_update(void);
 
 
 /***********************************************************************
@@ -122,8 +122,8 @@ void screenPluginUpdate(void);
 /* Initierar tangentbordspluginet */
 
 /* Returnerar GUL_* när det finns ett event att hantera. */
-keyevent_t  plugin_read_key   (void);
-char       *plugin_read_string(int x, int y);
+keyevent_t  plugin_read_key(void);
+char       *plugin_read_str(int x, int y);
 
 #endif /* PLUGIN_H_ */
 

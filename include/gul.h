@@ -12,8 +12,8 @@ typedef int gulchar;
 typedef unsigned char gulchar;
 #endif
 
-void      trySave(buffer_t *buf);
-buffer_t *tryLoad(buffer_t *buf);
+void      try_save(buffer_t *buf);
+buffer_t *try_load(buffer_t *buf);
 
 #endif /* GUL_H_ */
 

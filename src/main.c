@@ -50,7 +50,7 @@ static void ignore(int sig)
 
 static void finish(int sig)
 {
-	pluginFinish();
+	plugin_exit();
 	exit(0);
 }
 
@@ -70,9 +70,9 @@ static int usage(int status)
 int main(int argc, char *argv[])
 {
 	int c, quit = 0;
-	buffer_t *currentBuffer;
-	char *fileName = NULL;
-	keyevent_t thisEvent;
+	buffer_t *current;
+	char *filename = NULL;
+	keyevent_t ev;
         struct option long_options[] = {
            {"verbose", no_argument, 0, 'V'},
            {"help",    no_argument, 0, 'h'},
@@ -99,66 +99,66 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, finish);
 
 	if (argv[optind])
-		fileName = strDup(argv[optind]);
+		filename = strDup(argv[optind]);
 
-	currentBuffer = loadFile(fileName);
+	current = file_open(filename);
 
 	/* Main screen turn on ... */
-	createScreen();
+	screen_create();
 
 	/* Debugging sent to /dev/null or stderr ... */
 #if DEBUG == 0
 	redirect(stderr, "/dev/null");
 #endif
 
-	LOG("main() - display(currentBuffer);\n");
-	display(currentBuffer);
+	LOG("main() - display(current);\n");
+	display(current);
 
 	/* Main editor loop. */
 	while (!quit) {
-		quit = keyboard_loop(currentBuffer);
-		display(currentBuffer);
+		quit = keyboard_loop(current);
+		display(current);
 	}
 
 	/* Try saving if dirty */
-	if (currentBuffer->dirty) {
-		display_status(currentBuffer, "Discard changes (Y/n)?");
+	if (current->dirty) {
+		display_status(current, "Discard changes (Y/n)?");
 		do {
-			thisEvent = read_key();
-		} while (GUL_NO_EVENT == thisEvent.event);
+			ev = keyboard_event();
+		} while (GUL_NO_EVENT == ev.event);
 
-		if ('Y' != thisEvent.keydata && 'y' != thisEvent.keydata)
-			trySave(currentBuffer);
+		if ('Y' != ev.keydata && 'y' != ev.keydata)
+			try_save(current);
 	}
 
 	/* XXX - free whole chain of active buffers as well... */
-	freeBuffer(currentBuffer);
-	pluginFinish();
+	buffer_free(current);
+	plugin_exit();
 
 	return 0;
 }
 
-void trySave(buffer_t *buf)
+void try_save(buffer_t *buf)
 {
 	if (!buf->filename) {
 		int y;
 		y = display_status(buf, "Save As: ");
-		buf->filename = read_string(9, y);
+		buf->filename = keyboard_gets(9, y);
 	}
 
-	saveFile(buf, buf->filename);
+	file_save(buf, buf->filename);
 }
 
-buffer_t *tryLoad(buffer_t *buf)
+buffer_t *try_load(buffer_t *buf)
 {
 	int y;
-	char *fileName;
+	char *filename;
 
 	y = display_status(buf, "Load file: ");
-	fileName = read_string(11, y);
+	filename = keyboard_gets(11, y);
 
-	freeBuffer(buf);
-	return loadFile(fileName);
+	buffer_free(buf);
+	return file_open(filename);
 }
 
 /**

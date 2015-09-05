@@ -45,7 +45,7 @@ void command(char *str)
 }
 
 char virtual[80][24];
-void screenPluginInit(void)
+void screen_plugin_init(void)
 {
 	int x, y;
 
@@ -59,22 +59,22 @@ void screenPluginInit(void)
 }
 
 /* Call this when quitting from editor. */
-void screenPluginFinish(void)
+void screen_plugin_exit(void)
 {
 	return;
 }
 
 /* Returns screen size at a given moment. */
-void screenPluginGetMaxYX(int *maxY, int *maxX)
+void screen_plugin_get_dim(int *max_row, int *max_col)
 {
-	*maxY = 24;
-	*maxX = 80;
+	*max_row = 24;
+	*max_col = 80;
 }
 
 
 int vt100x, vt100y;
 /* Position the cursor */
-void screenPluginPositionCursor(int x, int y)
+void screen_plugin_set_cursor(int x, int y)
 {
 	char str[10];
 
@@ -92,7 +92,7 @@ void gotoxy(int x, int y)
 
 
 /* Reads from framebuffer/virtual screen and prints to CRT. */
-void screenPluginUpdate(void)
+void screen_plugin_update(void)
 {
 	int x, y;
 	char ch;
@@ -100,7 +100,7 @@ void screenPluginUpdate(void)
 	command("[1;1H");
 	for (y = 0; y < 24; y++) {
 		for (x = 0; x < 80; x++) {
-			ch = getPixchar(x, y);
+			ch = screen_get_pixchar(x, y);
 			if (virtual[x][y] != ch) {
 				virtual[x][y] = ch;
 				gotoxy(x, y);
@@ -135,12 +135,12 @@ void keyboardNoEcho(void)
 	return;
 }
 
-void keyboardPluginInit(void)
+void keyboard_plugin_init(void)
 {
 	keyboardNoEcho();
 }
 
-void keyboardPluginFinish(void)
+void keyboard_plugin_exit(void)
 {
 	tcsetattr(0, TCSANOW, &oldmode);
 

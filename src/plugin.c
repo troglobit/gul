@@ -25,24 +25,24 @@
  * features on the virtual screen before smackin' it all on to the real screen.
  * Try to imagine a syntax highlighting type thingy for instance... :-)
  */
-static virtualScreen currentScreen;
+static screen_virt_t screen;
 
-/*** createScreen() *****************************************************
+/*** screen_create() *****************************************************
  * Your basic contructor type thingy... :)
  ************************************************************************
  */
-int createScreen(void)
+int screen_create(void)
 {
 	// Endast när det verkligen *är* en konstruktor... annars så segfault! :)
-	//  if (currentScreen.pixcharArray)
-	//    free (currentScreen.pixcharArray);
+	//  if (screen.pixchar)
+	//    free (screen.pixchar);
 
 	/* Initialize the keyboard and screen plugin */
-	initPlugin();
+	plugin_init();
 
 	/* OLD (?) init of plugin...
-	 * screenPluginInit();
-	 * keyboardPluginInit();
+	 * screen_plugin_init();
+	 * keyboard_plugin_init();
 	 */
 
 	/* Check if the physical screen has been altered/resized. Some
@@ -50,96 +50,90 @@ int createScreen(void)
 	 * reinitialize them. Therefore we send pointers to the old
 	 * size and hope the plugin does its own bit.
 	 */
-	screenPluginGetMaxYX(&(currentScreen.maxY), &(currentScreen.maxX));
-	currentScreen.pixcharArray = calloc(currentScreen.maxX * currentScreen.maxY, sizeof(char));
-	if (!currentScreen.pixcharArray) {
+	screen_plugin_get_dim(&screen.max_row, &screen.max_col);
+	screen.pixchar = calloc(screen.max_col * screen.max_row, sizeof(char));
+	if (!screen.pixchar) {
 		perror("Failed allocating new buffer");
 		exit(1);
 	}
 
-	currentScreen.dirtyFlag = 0;
-	currentScreen.hpos = 0;
+	screen.dirty = 0;
+	screen.hpos = 0;
 
 	return 0;
 }
 
-void getScreenMaxYX(int *maxy, int *maxx)
+void screen_get_dim(int *maxy, int *maxx)
 {
 	if (maxy == NULL || maxx == NULL)
 		return;
 
-	if (!currentScreen.pixcharArray) {
+	if (!screen.pixchar) {
 		*maxx = 0;
 		*maxy = 0;
 	} else {
-		*maxx = currentScreen.maxX;
-		*maxy = currentScreen.maxY;
+		*maxx = screen.max_col;
+		*maxy = screen.max_row;
 	}
 }
 
 
-/*** resizeScreen() *****************************************************
+/*** screen_resize() *****************************************************
  * Skapar ny virtuell skärm med samma storlek som den fysiska skärmen och
  * kopierar över all synlig text till den nya.
  ************************************************************************
  */
-static int resizeScreen(int newMaxX, int newMaxY)
+static int screen_resize(int col, int row)
 {
 	char *newPixcharArray;
 	int x, y;
 
-	newPixcharArray = calloc(newMaxX * newMaxY, sizeof(char));
+	newPixcharArray = calloc(col * row, sizeof(char));
 	if (!newPixcharArray) {
 		perror("Failed allocating new buffer");
 		exit(1);
 	}
 
 	/* Kopiera så mycket som möjligt till den nya arrayen */
-	for (y = 0; y < (newMaxY > currentScreen.maxY ? currentScreen.maxY : newMaxY); y++) {
-		for (x = 0; y < (newMaxX > currentScreen.maxX ? currentScreen.maxX : newMaxX); x++) {
-			newPixcharArray[y * currentScreen.maxX + x] = currentScreen.pixcharArray[y * currentScreen.maxX + x];
-		}
+	for (y = 0; y < (row > screen.max_row ? screen.max_row : row); y++) {
+		for (x = 0; y < (col > screen.max_col ? screen.max_col : col); x++)
+			newPixcharArray[y * screen.max_col + x] = screen.pixchar[y * screen.max_col + x];
 	}
-	/* Kritiskt område... :( */
-	free(currentScreen.pixcharArray);
-	currentScreen.pixcharArray = newPixcharArray;
-	currentScreen.maxX = newMaxX;
-	currentScreen.maxY = newMaxY;
 
-	/* Nu ser ju förmodligen inte skärmen klok ut så man skulle behöva
+	/* Kritiskt område... :( */
+	free(screen.pixchar);
+	screen.pixchar = newPixcharArray;
+	screen.max_col = col;
+	screen.max_row = row;
+
+	/*
+	 * Nu ser ju förmodligen inte skärmen klok ut så man skulle behöva
 	 * rita om den...
 	 */
-	currentScreen.dirtyFlag = 1;
+	screen.dirty = 1;
 
 	return 0;
 }
 
-int screenIsDirty(void)
+int screen_is_dirty(void)
 {
-	return currentScreen.dirtyFlag;
+	return screen.dirty;
 }
 
 
-/*** isChanged() ********************************************************
- * Den här är tom jag emot upplägget i, men jag gjorde så här som ett
- * första test. resizeScreen() kanske inte eg. borde ligga här eftersom
- * funktionen nog bara borde svara på frågan och inte GÖRA något...
- * ... men men. :)
- ************************************************************************
- */
-int screenIsChanged(void)
+int screen_changed(void)
 {
-	int newMaxX, newMaxY;
+	int col, row;
 
 	/* Check if the physical screen has been altered/resized. Some
 	 * plugins need this to reallocate their own buffers and
 	 * reinitialize them. Therefore we send pointers to the old
 	 * size and hope the plugin does its own bit.
 	 */
-	screenPluginGetMaxYX(&newMaxY, &newMaxX);
+	screen_plugin_get_dim(&row, &col);
 
-	if (newMaxX != currentScreen.maxX || newMaxY != currentScreen.maxY) {
-		resizeScreen(newMaxX, newMaxY);
+	if (col != screen.max_col || row != screen.max_row) {
+		screen_resize(col, row);
 
 		return 1;
 	}
@@ -148,94 +142,94 @@ int screenIsChanged(void)
 }
 
 
-void screenUpdate(void)
+void screen_update(void)
 {
-	screenPluginUpdate();
+	screen_plugin_update();
 }
 
-void screenPositionCursor(int x, int y)
+void screen_set_cursor(int x, int y)
 {
-	screenPluginPositionCursor(x, y);
+	screen_plugin_set_cursor(x, y);
 }
 
 /* Scroll the view right ... */
-int panRight(int steps)
+int screen_pan_right(int steps)
 {
-	currentScreen.hpos += steps;
+	screen.hpos += steps;
 
-	return currentScreen.hpos;
+	return screen.hpos;
 }
 
 /* Scroll the view left ... */
-int panLeft(int steps)
+int screen_pan_left(int steps)
 {
-	currentScreen.hpos -= steps;
-	if (currentScreen.hpos < 0) {
-		currentScreen.hpos = 0;
+	screen.hpos -= steps;
+	if (screen.hpos < 0) {
+		screen.hpos = 0;
 	}
 
-	return currentScreen.hpos;
+	return screen.hpos;
 }
 
 /* Scroll the view to the leftmost position ... */
-void panHome(void)
+void screen_pan_home(void)
 {
-	currentScreen.hpos = 0;
+	screen.hpos = 0;
 }
 
 
-int putPixchar(int x, int y, char ch)
+int screen_put_pixchar(int x, int y, char ch)
 {
-	if (!currentScreen.pixcharArray) {
+	if (!screen.pixchar) {
 		return 1;
 	}
 
-	if (y < currentScreen.maxY) {
-		if (x < currentScreen.maxX) {
-			currentScreen.pixcharArray[y * currentScreen.maxX + x] = ch;
-			currentScreen.dirtyFlag = 1;
+	if (y < screen.max_row) {
+		if (x < screen.max_col) {
+			screen.pixchar[y * screen.max_col + x] = ch;
+			screen.dirty = 1;
 		}
 	}
 
 	return 0;
 }
 
-char getPixchar(int x, int y)
+char screen_get_pixchar(int x, int y)
 {
-	if (!currentScreen.pixcharArray) {
+	if (!screen.pixchar) {
 		return 0;
 	}
 
-	if (x >= currentScreen.maxX || y >= currentScreen.maxY) {
+	if (x >= screen.max_col || y >= screen.max_row) {
 		return 0;
 	}
 
-	return currentScreen.pixcharArray[y * currentScreen.maxX + x];
+	return screen.pixchar[y * screen.max_col + x];
 }
 
-void screenDebugDisplay(void)
+void screen_debug(void)
 {
 	int x, y;
 
-	LOG("Debug display... [%d, %d]\n", currentScreen.maxX, currentScreen.maxY);
-	for (y = 0; y < currentScreen.maxY; y++) {
-		for (x = 0; x < currentScreen.maxX; x++) {
-			if ('\0' != getPixchar(x, y)) {
-				LOG("%c", getPixchar(x, y));
+	LOG("Debug display... [%d, %d]\n", screen.max_col, screen.max_row);
+	for (y = 0; y < screen.max_row; y++) {
+		for (x = 0; x < screen.max_col; x++) {
+			if ('\0' != screen_get_pixchar(x, y)) {
+				LOG("%c", screen_get_pixchar(x, y));
 			}
 		}
 		LOG("\n");
 	}
 }
 
-keyevent_t read_key(void)
+keyevent_t keyboard_event(void)
 {
 	return plugin_read_key();
 }
 
-char *read_string(int x, int y)
+char *keyboard_gets(int x, int y)
 {
-	return plugin_read_string(x, y);
+	return plugin_read_str(x, y);
 }
 
 
