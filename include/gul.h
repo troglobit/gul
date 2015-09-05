@@ -1,9 +1,8 @@
-#ifndef __GUL_H__
-#define __GUL_H__
+#ifndef GUL_H_
+#define GUL_H_
 
 #include "config.h"
 #include "editor.h"
-
 
 #if   defined NCURSES_PLUGIN
 typedef int gulchar;
@@ -11,14 +10,12 @@ typedef int gulchar;
 typedef int gulchar;
 #else
 typedef unsigned char gulchar;
-#endif				/* PLUGINS */
+#endif
 
-void trySave(buffer_t * buf);
-buffer_t *tryLoad(buffer_t * buf);
+void      trySave(buffer_t *buf);
+buffer_t *tryLoad(buffer_t *buf);
 
-
-#endif				/* __GUL_H__ */
-
+#endif /* GUL_H_ */
 
 /**
  * Local Variables:

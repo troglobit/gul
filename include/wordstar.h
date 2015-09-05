@@ -1,5 +1,5 @@
-#ifndef __HELP_H__
-#define __HELP_H__
+#ifndef WORDSTAR_H_
+#define WORDSTAR_H_
 
 char help_filename[] = "**HELP BUFFER**";
 char help_buffer[] = "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     \n\
@@ -58,7 +58,6 @@ text_t help_core = {
 	NULL, NULL, sizeof(help_buffer), 0
 };
 
-
 buffer_t help = {
 	help_filename,
 	0, 0,
@@ -75,8 +74,7 @@ buffer_t help = {
 	NULL, NULL
 };
 
-#endif				/* __HELP_H__ */
-
+#endif /* WORDSTAR_H_ */
 
 /**
  * Local Variables:

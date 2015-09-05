@@ -1,13 +1,12 @@
-#ifndef __MISC_H__
-#define __MISC_H__
+#ifndef MISC_H_
+#define MISC_H_
 
 char *strnDup(char *src, int n);
-char *strDup(char *src);
-char *strCat(char *s1, char *s2);
-int strLen(char *string, int maxLen, char endChar);
+char *strDup (char *src);
+char *strCat (char *s1, char *s2);
+int   strLen (char *string, int maxLen, char endChar);
 
-#endif				/* __MISC_H__ */
-
+#endif /* MISC_H_ */
 
 /**
  * Local Variables:

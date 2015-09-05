@@ -1,13 +1,13 @@
-#ifndef __HELP_H__
-#define __HELP_H__
+#ifndef HELP_H_
+#define HELP_H_
 
 #include "config.h"
 
-#if defined (WORDSTAR_KEYS)
+#if   defined (WORDSTAR_KEYS)
 #include "wordstar.h"
 #elif defined (EMACS_KEYS)
 #include "emacs.h"
-#else				/* MINIMAL_KEYS */
+#else       /* MINIMAL_KEYS */
 
 char help_filename[] = "**HELP BUFFER**";
 char help_buffer[] = "\
@@ -51,9 +51,8 @@ buffer_t help = {
 	NULL, NULL
 };
 
-#endif				/* Key binding alternatives */
-#endif				/* __HELP_H__ */
-
+#endif /* MINIMAL_KEYS */
+#endif /* HELP_H_ */
 
 /**
  * Local Variables:

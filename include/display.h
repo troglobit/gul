@@ -1,14 +1,13 @@
-#ifndef __DISPLAY_H__
-#define __DISPLAY_H__
+#ifndef DISPLAY_H_
+#define DISPLAY_H_
 
 #include "editor.h"
 
-void display(buffer_t * currentp);
-int display_status(buffer_t * currentp, char *message);
-void popUp_OK(char *message);
+void display        (buffer_t *currentp);
+int  display_status (buffer_t *currentp, char *message);
+void popUp_OK       (char *message);
 
-#endif				/* __DISPLAY_H__ */
-
+#endif /* DISPLAY_H_ */
 
 /**
  * Local Variables:

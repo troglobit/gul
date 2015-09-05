@@ -8,8 +8,8 @@
  *
  * Translations made from my first plugin draft. /Crash
  */
-#ifndef __PLUGIN_H__
-#define __PLUGIN_H__
+#ifndef PLUGIN_H_
+#define PLUGIN_H_
 
 #include "config.h"
 
@@ -56,11 +56,13 @@ int isScreenChanged(void);
 void screenUpdate(void);
 void screenPositionCursor(int x, int y);
 
-int panRight(int steps);
-int panLeft(int steps);
-void panHome(void);
-int putPixchar(int x, int y, char ch /*, int depth ?? */ );
+int  panRight (int steps);
+int  panLeft  (int steps);
+void panHome  (void);
+
+int  putPixchar(int x, int y, char ch /*, int depth ?? */ );
 char getPixchar(int x, int y);
+
 void screenDebugDisplay(void);
 
 typedef struct keyevent_str {
@@ -68,9 +70,9 @@ typedef struct keyevent_str {
 	gulchar keydata;
 } keyevent_t;
 
-void keyboardInit(void);
-keyevent_t read_key(void);
-char *read_string(int x, int y);
+void        keyboardInit (void);
+keyevent_t  read_key     (void);
+char       *read_string  (int x, int y);
 
 
 
@@ -120,11 +122,10 @@ void screenPluginUpdate(void);
 /* Initierar tangentbordspluginet */
 
 /* Returnerar GUL_* när det finns ett event att hantera. */
-keyevent_t plugin_read_key(void);
-char *plugin_read_string(int x, int y);
+keyevent_t  plugin_read_key   (void);
+char       *plugin_read_string(int x, int y);
 
-#endif				/* __PLUGIN_H__ */
-
+#endif /* PLUGIN_H_ */
 
 /**
  * Local Variables:

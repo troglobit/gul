@@ -4,8 +4,8 @@
  * 2006-12-22  Joachim Nilsson <joachim.nilsson@vmlinux.org>
  */
 
-#ifndef __SLANG_H__
-#define __SLANG_H__
+#ifndef GUL_SLANG_H_
+#define GUL_SLANG_H_
 
 #include <slang.h>
 
@@ -44,9 +44,7 @@
 #define GUL_F11       SLANG2GUL(SL_KEY_F(11))
 #define GUL_F12       SLANG2GUL(SL_KEY_F(12))
 
-
-#endif				/* __SLANG_H__ */
-
+#endif /* GUL_SLANG_H_ */
 
 /**
  * Local Variables:

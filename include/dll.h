@@ -1,5 +1,5 @@
-#ifndef __DLL_H__
-#define __DLL_H__
+#ifndef DLL_H_
+#define DLL_H_
 
 /* Well, a "line" in this essence isn't really a line in the sense
  * that we're all perhaps used to, but the maximum size of a node ... :)
@@ -29,8 +29,7 @@ typedef struct _text {
  * }text;
  */
 
-#endif				/* __DLL_H__ */
-
+#endif /* DLL_H_ */
 
 /**
  * Local Variables:

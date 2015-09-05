@@ -5,8 +5,8 @@
  * 23/4 1999 Crash <joachim.nilsson@mds.mdh.se>
  *
  */
-#ifndef __NCURSES_H__
-#define __NCURSES_H__
+#ifndef GUL_NCURSES_H_
+#define GUL_NCURSES_H_
 
 #include <curses.h>
 
@@ -78,8 +78,7 @@
 #define GUL_C__       31	/* US - Undo? */
 #define GUL_C_8       KEY_BACKSPACE
 
-#endif				/* __NCURSES_H__ */
-
+#endif /* GUL_NCURSES_H_ */
 
 /**
  * Local Variables:

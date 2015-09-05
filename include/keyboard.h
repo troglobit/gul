@@ -1,5 +1,5 @@
-#ifndef __KEYBOARD_H__
-#define __KEYBOARD_H__
+#ifndef KEYBOARD_H_
+#define KEYBOARD_H_
 
 #include "config.h"
 #include "editor.h"
@@ -10,6 +10,6 @@
  * See wordstar.c for an example.
  */
 
-int keyboard_loop(buffer_t * currentBuffer);
+int keyboard_loop(buffer_t *currentBuffer);
 
-#endif				/* __KEYBOARD_H__ */
+#endif /* KEYBOARD_H_ */

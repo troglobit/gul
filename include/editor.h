@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef __EDITOR_H__
-#define __EDITOR_H__
+#ifndef EDITOR_H_
+#define EDITOR_H_
 
 #include "config.h"
 
@@ -59,37 +59,37 @@ typedef struct currentSt {
 } buffer_t;
 
 
-char *editorCharacterGenerator(buffer_t * currentp);
+char *editorCharacterGenerator(buffer_t *currentp);
 
-void left(buffer_t * currentp);
-void right(buffer_t * currentp);
-void up(buffer_t * currentp);
-void down(buffer_t * currentp);
-void end_of_line(buffer_t * currentp);
-void beginning_of_line(buffer_t * currentp);
-void page_up(buffer_t * currentp);
-void page_down(buffer_t * currentp);
-void insert(buffer_t * currentp, int thisCommand);
-void delete(buffer_t * currentp);
+void left(buffer_t *currentp);
+void right(buffer_t *currentp);
+void up(buffer_t *currentp);
+void down(buffer_t *currentp);
+void end_of_line(buffer_t *currentp);
+void beginning_of_line(buffer_t *currentp);
+void page_up(buffer_t *currentp);
+void page_down(buffer_t *currentp);
+void insert(buffer_t *currentp, int thisCommand);
+void delete(buffer_t *currentp);
 
-int goto_line(buffer_t * currentp, int line);
+int goto_line(buffer_t *currentp, int line);
 
 /* Marking, copying and deleting text */
-void set_mark(buffer_t * currentp);
-void set_point(buffer_t * currentp);
-void cut(buffer_t * currentp);
-void copy(buffer_t * currentp);
-void paste(buffer_t * currentp);
+void set_mark(buffer_t *currentp);
+void set_point(buffer_t *currentp);
+void cut(buffer_t *currentp);
+void copy(buffer_t *currentp);
+void paste(buffer_t *currentp);
 
-void search(buffer_t * currentp, char *pattern, int dir);
+void search(buffer_t *currentp, char *pattern, int dir);
 
-int newFile(buffer_t * new, size_t size);
-int readFile(FILE *filep, buffer_t * new);
-int saveFile(buffer_t * currentp, char *filename);
-void coreNewScreen(buffer_t * newBuffer);
-void freeBuffer(buffer_t * buf);
+int newFile(buffer_t *new, size_t size);
+int readFile(FILE *filep, buffer_t *new);
+int saveFile(buffer_t *currentp, char *filename);
+void coreNewScreen(buffer_t *newBuffer);
+void freeBuffer(buffer_t *buf);
 
-#endif				/* __EDITOR_H__ */
+#endif /* EDITOR_H_ */
 
 
 /**

@@ -1,6 +1,6 @@
 /* config.h - Handles all program setup */
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
 /* Include configure settings */
 #include "settings.h"
@@ -53,9 +53,7 @@
 
 #include "gul.h"
 
-
-#endif				/* __CONFIG_H__ */
-
+#endif /* CONFIG_H_ */
 
 /**
  * Local Variables:

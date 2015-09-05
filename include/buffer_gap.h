@@ -1,7 +1,7 @@
 #include "config.h"
 
-#ifndef __BUFFER_GAP_H__
-#define __BUFFER_GAP_H__
+#ifndef BUFFER_GAP_H_
+#define BUFFER_GAP_H_
 
 #define GAP_SIZE 1024
 
@@ -12,7 +12,7 @@
  * @buffer_size == file size
  * @gap_size == how much more can be fed to @buffer before realloc.
  */
-typedef struct _text {
+typedef struct {
 	char *buffer;
 	char *gap;
 	char *point, *mark;
@@ -20,4 +20,11 @@ typedef struct _text {
 	unsigned int buffer_size, gap_size;
 } text_t;
 
-#endif				/* __BUFFER_GAP_H__ */
+#endif /* BUFFER_GAP_H_ */
+
+/**
+ * Local Variables:
+ *  c-file-style: "linux"
+ *  indent-tabs-mode: t
+ * End:
+ */

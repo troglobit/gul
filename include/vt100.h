@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef __VT100_H__
-#define __VT100_H__
+#ifndef VT100_H_
+#define VT100_H_
 
 /*
                 Vt52    ANSI and Cursor Key modes
@@ -54,8 +54,7 @@ We will care for "Esc 0 a"
 #define GUL_F11            23
 #define GUL_F12            24
 
-#endif				/* __VT100_H__ */
-
+#endif /* VT100_H_ */
 
 /**
  * Local Variables:
