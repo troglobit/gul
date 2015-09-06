@@ -1,13 +1,28 @@
-/*
- * editor.h
+/* editor.h - Common data types and internal plugin API
  *
- * As made out in the design specification (spec.tex) we decided to use JAkovs
- * standard command definitions for edit/movement/block & notepad marking.
+ * Copyright (c) 2004-2015  Joachim Nilsson <troglobit@gmail.com>
+ * Copyright (c) 1998-2000  Joachim Nilsson, Jakob Eriksson, Anders Bornäs
  *
- * These functions should be supplied by any editor-core that is used!
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ *** Description ********************************************************
+ * As laid out in the design specification (spec.md) we decided early on
+ * to use JAkov's standard command definitions for edit/movement/block &
+ * notepad marking.
+ *
+ * These functions should be provided by any editor-core that is used!
  *
  * 23/4 1999 Crash <joachim.nilsson@mds.mdh.se>
- *
  */
 
 #ifndef EDITOR_H_

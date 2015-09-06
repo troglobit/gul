@@ -1,7 +1,7 @@
 # Use v2.61 for backwards compat with Ubuntu 12.04 LTS
 AC_PREREQ([2.61])
-AC_INIT([gul],[0.1.3-pre],[https://github.com/troglobit/gul/])
-AM_INIT_AUTOMAKE([])
+AC_INIT([gul],[0.2.0-pre],[https://github.com/troglobit/gul/issues])
+AM_INIT_AUTOMAKE([foreign])
 AM_SILENT_RULES([yes])
 
 AC_CONFIG_SRCDIR([src/main.c])
