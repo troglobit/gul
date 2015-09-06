@@ -6,7 +6,7 @@ AM_SILENT_RULES([yes])
 
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADER([include/settings.h])
-AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 dnl Properly define at least some contents of CFLAGS before AC_PROG_CC
 dnl is called, otherwise it'll define CFLAGS="-g -O2".  We want *no*

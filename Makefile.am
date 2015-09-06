@@ -1,3 +1,4 @@
-SUBDIRS    = src
-man_MANS   = gul.1
-EXTRA_DIST = $(man_MANS) README.md LICENSE AUTHORS
+SUBDIRS        = src
+dist_man1_MANS = gul.1
+doc_DATA       = README.md LICENSE
+EXTRA_DIST     = configure $(dist_man1_MANS) $(doc_DATA) AUTHORS
