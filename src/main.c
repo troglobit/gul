@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 			ev = keyboard_event();
 		} while (GUL_NO_EVENT == ev.event);
 
-		if ('Y' != ev.keydata && 'y' != ev.keydata)
+		if ('Y' != ev.keydata && 'y' != ev.keydata && '\n' != ev.keydata)
 			try_save(current);
 	}
 
