@@ -123,7 +123,7 @@ void popUp_OK(char *message)
 	LOG("%s", message);
 }
 
-static char *noname = "<noname>";
+static char *noname = "*scratch*";
 
 /* OBS måste ta hänsyn till max_col && klara resize! */
 static void display_ruler(buffer_t *currentp)
@@ -143,8 +143,8 @@ static void display_ruler(buffer_t *currentp)
 	if (!filename)
 		filename = noname;
 
-	sprintf(ruler, "-GUL--%s-- %s --L%d-C%d-O%d",
-		(currentp->dirty ? "**" : "--"), filename, currentp->screen.y, currentp->screen.x, currentp->core.position);
+	sprintf(ruler, "-%s-- %s --(%d,%d)", currentp->dirty ? "**" : "--",
+		filename, currentp->screen.y, currentp->screen.x);
 
 	for (i = strlen(ruler); i < currentp->screen.max_col; i++)
 		ruler[i] = '-';
@@ -160,7 +160,7 @@ static void display_ruler(buffer_t *currentp)
 static void display_toolbar(buffer_t *currentp)
 {
 	int x, i, empty, len, extra;
-	char toolbar[] = "1/Help 2/Save 3/Open 4/Unused 5/Unused 6/Unused 7/Find 8/Unused 9/Unused 0/Quit";
+	char toolbar[] = "1:Help 2:Save 3:Open 4:Unused 5:Unused 6:Unused 7:Find 8:Unused 9:Unused 0:Quit";
 
 	len = strlen(toolbar);
 	empty = 0;
