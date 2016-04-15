@@ -1,17 +1,17 @@
 gul - The one true GUL editor!
 ==============================
 
-A first attempt at writing an editor.  A small useful gul (Swedish for
-yellow) thing that can run on Spectravideo, Atari ST, Amiga 500 as well
-as regular PC's, bisarre workstations, or embedded devices.
+First attempt at writing an editor.  Small useful and gul (Swedish for
+yellow).  Something that can run on Spectravideo, Atari ST, Amiga 500 as
+well as regular PC's, bizarre workstations, or embedded devices.
 
 First steps made back in 1998 on HP-UX 10.20 from a Windows NT 4.0
 Workstation using Exceed and XDM-login on one of the HP PA-RISC servers
 at work (ABB).
 
 Development continued at home in Red Hat GNU/Linux on a simple old
-PentiumOverdrive wich later got upgraded into a Cyrix 6x86 166 MHz.
-Which in turn now only works as server to the Laptop PII @300MHz.  Still
+PentiumOverdrive which later got upgraded to a Cyrix 6x86 166 MHz, which
+in turn now only works as server to my PII @300MHz Laptop.  Still using
 Red Hat though ...
 
 Parallell testing done in Solaris at the student body, SdU, using a wide
