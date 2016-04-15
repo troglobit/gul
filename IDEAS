@@ -1,6 +1,8 @@
+Rough Design Ideas [SWEDISH]
+============================
 
-Vi måste få till nåt slags stuk på det här med olika versioner och plattformar
-snart. Vad sägs om nåt sånt här;
+Vi måste få till nåt slags stuk på det här med olika versioner och
+plattformar snart.  Vad sägs om nåt sånt här;
 
 editor/
     +--- doc/
