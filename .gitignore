@@ -1,3 +1,6 @@
+*~
+.bzr/
+legacy/
 Makefile.in
 Makefile
 aclocal.m4
@@ -5,6 +8,8 @@ autom4te.cache
 compile
 configure
 config.log
+config.sub
+config.guess
 config.status
 depcomp
 install-sh
