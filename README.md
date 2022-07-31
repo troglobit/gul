@@ -47,11 +47,11 @@ To debug, `configure --enabled-debug` and a trace will be written to
 Files
 -----
 
-- `IDEAS`: Random thoughts
-- `TIPS`: Some hints on what to do when the going gets tough
-- `TODO`: A list of things that needs attention.
-- `README`: This short intro.
-- `ChangLog`: A list of things that already have been done.
+- `doc/README.md`: Random thoughts
+- `doc/TIPS`: Some hints on what to do when the going gets tough
+- `doc/TODO`: A list of things that needs attention.
+- `doc/ChangLog`: A list of things that already have been done.
+- `README.md`: This short intro.
 
 
 License
