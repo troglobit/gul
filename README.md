@@ -1,5 +1,6 @@
 gul - The one true GUL editor!
 ==============================
+<img align="right" src="doc/gul.png" title="Gul in action">
 
 First attempt at writing an editor.  Small useful and gul (Swedish for
 yellow).  Something that can run on Spectravideo, Atari ST, Amiga 500 as
