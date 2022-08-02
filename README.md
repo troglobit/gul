@@ -1,10 +1,20 @@
 gul - The one true GUL editor!
 ==============================
-<img align="right" src="doc/gul.png" title="Gul in action">
 
 First attempt at writing an editor.  Small useful and gul (Swedish for
 yellow).  Something that can run on Spectravideo, Atari ST, Amiga 500 as
 well as regular PC's, bizarre workstations, or embedded devices.
+
+
+Screenshot
+----------
+
+<img align="center" src="doc/gul.png" title="Gul in action"><br />
+*Fig. 1: Gul in action*
+
+
+History
+-------
 
 First steps made back in 1998 on HP-UX 10.20 from a Windows NT 4.0
 Workstation using Exceed and XDM-login on one of the HP PA-RISC servers
